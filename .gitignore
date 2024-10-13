@@ -1,0 +1,67 @@
+# Python related
+**/__pycache__/
+**/*.py[cod]
+**/*.pyo
+**/*.pyd
+**/.env
+**/.venv
+**/env/
+**/venv/
+**/ENV/
+**/VENV/
+**/*.egg
+**/*.egg-info/
+**/dist/
+**/build/
+**/pip-wheel-metadata/
+**/*.log
+
+# MongoDB
+**/data/
+**/*.json
+
+# IntelliJ
+**/.idea/
+**/*.iml
+**/*.iws
+**/*.ipr
+**/out/
+
+# FastAPI / Starlette
+**/instance/
+**/.cache/
+**/*.sqlite
+**/*.sqlite3
+**/*.db
+**/*.db-journal
+
+# Flutter/Dart specific
+**/build/
+**/.dart_tool/
+**/.pub/
+**/packages
+
+# Generated files by Flutter/Dart
+**/pubspec.lock
+**/pubspec.yaml
+**/pubspec_overrides.yaml
+**/flutter_export_environment.sh
+**/flutter_export_environment.bat
+**/ios/Flutter/Flutter.podspec
+
+# macOS
+**/.DS_Store
+
+# Windows
+**/Thumbs.db
+**/*.lnk
+
+# VS Code
+**/.vscode/
+
+# Logs and temp files
+**/*.log
+**/*.temp
+**/tmp/
+**/temp/
+
