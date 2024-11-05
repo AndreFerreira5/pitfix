@@ -52,7 +52,8 @@ with open("config/private_key.pem", "rb") as private_key_file:
 
 # load public key from the disk
 with open("config/public_key.pem", "rb") as public_key_file:
-    public_key = Key.new(4, "public", public_key_file.read())
+    public_key_pem = public_key_file.read()
+    public_key = Key.new(4, "public", public_key_pem)
 
 router = APIRouter()
 
@@ -205,5 +206,9 @@ async def refresh(request: RefreshRequest):
 
 
 @router.get("/public-key")
-async def public_key():
-    return {"public-key": public_key}, 200
+async def get_public_key():
+    try:
+        return {"public-key": public_key_pem.decode("utf-8")}, 200
+    except Exception as e:
+        logging.error(f"Failed to encode public key: {e}")
+        raise HTTPException(status_code=500, detail="Unable to retrieve public key")
