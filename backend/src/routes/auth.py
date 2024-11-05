@@ -129,10 +129,10 @@ async def register(request: RegisterRequest):
 
     # if there was no user with the same username, return 201 code
     if user_insertion_result["status"] == "success":
-        return {'message': "User created successfully."}, 201
-    # if there was a user with the same username, return fail code
+        return {'message': user_insertion_result["message"]}, 201
+    # if there was a user with the same username or email, return fail code
     elif user_insertion_result["status"] == "fail":
-        raise HTTPException(status_code=409, detail="Username already exists")
+        raise HTTPException(status_code=409, detail=user_insertion_result["message"])
     # if there was an error, return a 500 message
     elif user_insertion_result["status"] == "error":
         raise HTTPException(status_code=500, detail="Internal Server Error")

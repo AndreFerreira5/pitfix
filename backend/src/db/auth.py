@@ -19,12 +19,21 @@ async def get_user_by_id(id: str):
     return await db.user.find_one({"_id": ObjectId(id)})
 
 
+async def get_user_by_email(email: str):
+    db = await get_db()
+    return await db.user.find_one({"email": email})
+
+
 async def insert_user(username: str, password: str, email: str):
     db = await get_db()
 
     existing_user = await get_user_by_username(username)
     if existing_user:
         return {"status": "fail", "message": "Username already exists."}
+
+    existing_user = await get_user_by_email(email)
+    if existing_user:
+        return {"status": "fail", "message": "Email already registered."}
 
     try:
         hashed_password = password_hasher.hash(password)
