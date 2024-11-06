@@ -36,7 +36,6 @@
 **/*.db-journal
 
 # Flutter/Dart specific
-**/build/
 **/.dart_tool/
 **/.pub/
 **/packages
@@ -65,3 +64,6 @@
 **/tmp/
 **/temp/
 
+**/ephemeral/
+
+**/private_key.pem
