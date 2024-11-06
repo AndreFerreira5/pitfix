@@ -42,7 +42,6 @@
 
 # Generated files by Flutter/Dart
 **/pubspec.lock
-**/pubspec.yaml
 **/pubspec_overrides.yaml
 **/flutter_export_environment.sh
 **/flutter_export_environment.bat
@@ -67,3 +66,4 @@
 **/ephemeral/
 
 **/private_key.pem
+
