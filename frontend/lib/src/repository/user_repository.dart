@@ -1,5 +1,4 @@
 import '../utils/api_client.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 class UserRepository {
   final ApiClient apiClient;
