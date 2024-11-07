@@ -21,6 +21,7 @@ class RegisterRequest(BaseModel):
     username: str
     password: str
     email: str
+    role: str
 
 
 class RefreshRequest(BaseModel):
@@ -80,6 +81,7 @@ async def generate_access_token(user, nonce: str) -> bytes:
     payload_dict = {
         "exp": token_expiration_time.isoformat() + 'Z',
         "user_id": str(user["_id"]),
+        "user_role": str(user.get("role", "")),
         "nonce": nonce
     }
     return pyseto.encode(
@@ -125,7 +127,7 @@ async def login(request: LoginRequest):
 async def register(request: RegisterRequest):
     # TODO user and password should never be the same
     # TODO password should be secure and longer than 8 characters
-    user_insertion_result = await insert_user(request.username, request.password, request.email)
+    user_insertion_result = await insert_user(request.username, request.password, request.email, request.role)
 
     # if there was no user with the same username, return 201 code
     if user_insertion_result["status"] == "success":
