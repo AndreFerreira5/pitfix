@@ -8,25 +8,9 @@ from cryptography.hazmat.backends import default_backend
 import json
 from datetime import datetime, timedelta, timezone
 from db.auth import get_user_by_username, get_user_by_id, insert_user, verify_password, update_user_session_nonce
-from pydantic import BaseModel
+from models.auth import LoginRequest, RegisterRequest, RefreshRequest
+from utils.auth import generate_refresh_token, generate_access_token, generate_tokens_nonce
 import logging
-
-
-class LoginRequest(BaseModel):
-    username: str
-    password: str
-
-
-class RegisterRequest(BaseModel):
-    username: str
-    password: str
-    email: str
-    role: str
-
-
-class RefreshRequest(BaseModel):
-    access_token: str
-    refresh_token: str
 
 
 load_dotenv()
@@ -56,42 +40,8 @@ with open("config/public_key.pem", "rb") as public_key_file:
     public_key_pem = public_key_file.read()
     public_key = Key.new(4, "public", public_key_pem)
 
+
 router = APIRouter()
-
-
-#########
-# UTILS #
-#########
-
-async def generate_refresh_token(user, nonce: str) -> bytes:
-    token_expiration_time = datetime.now() + timedelta(days=30)
-    payload_dict = {
-        "exp": token_expiration_time.isoformat() + 'Z',
-        "user_id": str(user["_id"]),
-        "nonce": nonce
-    }
-    return pyseto.encode(
-        private_key,
-        json.dumps(payload_dict).encode('utf-8')
-    )
-
-
-async def generate_access_token(user, nonce: str) -> bytes:
-    token_expiration_time = datetime.now() + timedelta(minutes=15)
-    payload_dict = {
-        "exp": token_expiration_time.isoformat() + 'Z',
-        "user_id": str(user["_id"]),
-        "user_role": str(user.get("role", "")),
-        "nonce": nonce
-    }
-    return pyseto.encode(
-        private_key,
-        json.dumps(payload_dict).encode('utf-8')
-    )
-
-
-async def generate_tokens_nonce() -> str:
-    return os.urandom(32).hex()
 
 
 @router.post("/login")
@@ -106,8 +56,8 @@ async def login(request: LoginRequest):
     # if there was a match, generate and return a token 200
     if password_matching_result["status"] == "success":
         tokens_nonce = await generate_tokens_nonce()
-        access_token = await generate_access_token(existing_user, tokens_nonce)
-        refresh_token = await generate_refresh_token(existing_user, tokens_nonce)
+        access_token = await generate_access_token(private_key, existing_user, tokens_nonce)
+        refresh_token = await generate_refresh_token(private_key, existing_user, tokens_nonce)
         nonce_update_result = await update_user_session_nonce(existing_user["_id"], tokens_nonce)
         if nonce_update_result["status"] == "fail":
             raise HTTPException(status_code=500, detail="Error updating user")
@@ -192,8 +142,8 @@ async def refresh(request: RefreshRequest):
     # generate new tokens
     try:
         tokens_nonce = await generate_tokens_nonce()
-        access_token = await generate_access_token(user, tokens_nonce)
-        refresh_token = await generate_refresh_token(user, tokens_nonce)
+        access_token = await generate_access_token(private_key, user, tokens_nonce)
+        refresh_token = await generate_refresh_token(private_key, user, tokens_nonce)
         nonce_update_result = await update_user_session_nonce(user["_id"], tokens_nonce)
         if nonce_update_result["status"] == "fail":
             raise HTTPException(status_code=500, detail="Error updating user")

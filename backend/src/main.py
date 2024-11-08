@@ -1,5 +1,5 @@
 from fastapi import FastAPI, Depends
-from routes import auth
+from routes import auth, workshop
 from db.connection import db_connect, db_disconnect
 import uvicorn
 from contextlib import asynccontextmanager
@@ -19,6 +19,7 @@ async def lifespan(app: FastAPI):
 app = FastAPI(lifespan=lifespan)
 
 app.include_router(auth.router, prefix="/auth", tags=["auth"])
+app.include_router(workshop.router, prefix="/workshop", tags=["workshop"])
 
 
 @app.get("/ping")
