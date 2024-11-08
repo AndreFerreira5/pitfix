@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:iconsax/iconsax.dart';
 import 'package:get/get.dart';
+import 'workshops.dart';
 
 class NavigationMenu extends StatelessWidget {
   final String userRole; // hold the user role
@@ -13,7 +14,7 @@ class NavigationMenu extends StatelessWidget {
     switch (role) {
       case 'admin':
         return [
-          Center(child: Text('Workshops Page')),
+          Workshops(),
           Center(child: Text('Requests Page')),
           Center(child: Text('Profile Page')),
           Center(child: Text('Settings Page')),
