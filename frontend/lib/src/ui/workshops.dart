@@ -5,7 +5,7 @@ import 'add_workshop.dart';
 import '../models/workshop.dart';
 
 class Workshops extends StatefulWidget {
-  Workshops({super.key});
+  const Workshops({super.key});
 
   @override
   _WorkshopsState createState() => _WorkshopsState();
@@ -15,7 +15,7 @@ class Workshops extends StatefulWidget {
 class _WorkshopsState extends State<Workshops> {
   late WorkshopRepository _workshopRepository;
   late Future<List<Workshop>> _workshopsFuture;
-  bool isAdmin = true; // set up this way for now, for demonstrational purposes
+  bool isAdmin = true; // set up this way for now, for demonstration purposes
 
   @override
   void initState() {
@@ -37,7 +37,8 @@ class _WorkshopsState extends State<Workshops> {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
           } else if (snapshot.hasError) {
-            return Center(child: Text('Error: ${snapshot.error}'));
+            return const Center(child: Text('No workshops available.'));
+            //return Center(child: Text('Error: ${snapshot.error}')); // TODO simply display "no workshops available" or display the error?
           } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
             return const Center(child: Text('No workshops available.'));
           }
@@ -56,7 +57,7 @@ class _WorkshopsState extends State<Workshops> {
       ),
       floatingActionButton: isAdmin
           ? Padding(
-        padding: const EdgeInsets.only(bottom: 80.0), // Adjust the bottom padding as needed
+        padding: const EdgeInsets.only(bottom: 80.0),
         child: FloatingActionButton(
           onPressed: () {
             Navigator.push(
@@ -64,8 +65,8 @@ class _WorkshopsState extends State<Workshops> {
               MaterialPageRoute(builder: (context) => AddWorkshopPage()),
             );
           },
-          child: const Icon(Icons.add),
           tooltip: "Add Workshop",
+          child: const Icon(Icons.add),
         ),
       )
 
@@ -75,7 +76,7 @@ class _WorkshopsState extends State<Workshops> {
 }
 
 
-// Widget to display each workshop as a card
+// widget to display each workshop as a card
 class WorkshopCard extends StatelessWidget {
   final Workshop workshop;
 

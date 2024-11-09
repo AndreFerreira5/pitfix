@@ -27,16 +27,16 @@ class _AddWorkshopPageState extends State<AddWorkshopPage> {
         imageUrl: _imageUrlController.text,
       );
 
-      // Add the workshop using the repository
+      // add the workshop using the repository
       final result = await _workshopRepository.addWorkshop(newWorkshop);
 
       if (result != null) {
-        // Successfully added, navigate back with success result
+        // success, go back to the workshops page
         Navigator.pop(context, true);
       } else {
-        // Handle failure (optional)
+        // handle failure by displaying a message
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to add workshop')),
+          const SnackBar(content: Text('Failed to add workshop')),
         );
       }
     }
@@ -54,7 +54,7 @@ class _AddWorkshopPageState extends State<AddWorkshopPage> {
           key: _formKey,
           child: ListView(
             children: [
-              // Title for better visual separation
+              // Title
               const Padding(
                 padding: EdgeInsets.symmetric(vertical: 16),
                 child: Text(
@@ -133,7 +133,7 @@ class _AddWorkshopPageState extends State<AddWorkshopPage> {
     );
   }
 
-  // Widget to build rounded text fields
+  // widget to build rounded text fields
   Widget _buildRoundedTextField({
     required TextEditingController controller,
     required String label,

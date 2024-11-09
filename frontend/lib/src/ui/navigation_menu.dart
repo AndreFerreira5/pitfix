@@ -15,31 +15,31 @@ class NavigationMenu extends StatelessWidget {
       case 'admin':
         return [
           Workshops(),
-          Center(child: Text('Requests Page')),
-          Center(child: Text('Profile Page')),
-          Center(child: Text('Settings Page')),
+          const Center(child: Text('Requests Page')),
+          const Center(child: Text('Profile Page')),
+          const Center(child: Text('Settings Page')),
         ];
       case 'manager':
         return [
-          Center(child: Text('My Workshop Page')),
-          Center(child: Text('Profile Page')),
-          Center(child: Text('Settings Page')),
+          const Center(child: Text('My Workshop Page')),
+          const Center(child: Text('Profile Page')),
+          const Center(child: Text('Settings Page')),
         ];
       case 'worker':
         return [
-          Center(child: Text('Requests Page')),
-          Center(child: Text('Profile Page')),
-          Center(child: Text('Settings Page')),
+          const Center(child: Text('Requests Page')),
+          const Center(child: Text('Profile Page')),
+          const Center(child: Text('Settings Page')),
         ];
       case 'client':
         return [
-          Center(child: Text('Workshops Page')),
-          Center(child: Text('My Requests Page')),
-          Center(child: Text('Profile Page')),
-          Center(child: Text('Settings Page')),
+          const Center(child: Text('Workshops Page')),
+          const Center(child: Text('My Requests Page')),
+          const Center(child: Text('Profile Page')),
+          const Center(child: Text('Settings Page')),
         ];
       default:
-        return [Center(child: Text('No content available'))];
+        return [const Center(child: Text('No content available'))];
     }
   }
 
@@ -79,17 +79,17 @@ class NavigationMenu extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final pages = _getPages(userRole); // Get pages based on role
-    final destinations = _getDestinations(userRole); // Get destinations based on role
+    final pages = _getPages(userRole); // get pages based on role
+    final destinations = _getDestinations(userRole); // get destinations based on role
 
     return Scaffold(
       body: Stack(
         children: [
-          // Reactive page content based on selected index
+          // reactive page content based on selected index
           Obx(() => Positioned.fill(
             child: pages[navController.selectedIndex.value],
           )),
-          // Floating Navigation Bar
+          // floating navigation bar
           Positioned(
             left: 20,
             right: 20,
@@ -101,11 +101,11 @@ class NavigationMenu extends StatelessWidget {
               ),
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(24),
-                child: Obx(() => NavigationBar( // Wrap NavigationBar in Obx to reactively update
+                child: Obx(() => NavigationBar( // wrap NavigationBar in Obx to reactively update
                   destinations: destinations,
                   height: 60,
-                  selectedIndex: navController.selectedIndex.value, // Bind to controller
-                  onDestinationSelected: navController.changePage, // Update index on tap
+                  selectedIndex: navController.selectedIndex.value, // bind to controller
+                  onDestinationSelected: navController.changePage, // update index on tap
                 )),
               ),
             ),
@@ -117,10 +117,10 @@ class NavigationMenu extends StatelessWidget {
 }
 
 class NavigationController extends GetxController {
-  // Observable for the selected index
+  // observable for the selected index
   var selectedIndex = 0.obs;
 
-  // Method to update the selected index
+  // method to update the selected index
   void changePage(int index) {
     selectedIndex.value = index;
   }
