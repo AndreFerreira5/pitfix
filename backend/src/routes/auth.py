@@ -3,19 +3,18 @@ from pyseto import Key
 import os
 from dotenv import load_dotenv
 from fastapi import APIRouter, HTTPException
-from cryptography.hazmat.primitives import serialization
-from cryptography.hazmat.backends import default_backend
 import json
 from datetime import datetime, timedelta, timezone
 from db.auth import get_user_by_username, get_user_by_id, insert_user, verify_password, update_user_session_nonce
 from models.auth import LoginRequest, RegisterRequest, RefreshRequest
-from utils.auth import generate_refresh_token, generate_access_token, generate_tokens_nonce
+from utils.auth import generate_refresh_token, generate_access_token, generate_tokens_nonce, load_private_key
 import logging
 
 
 load_dotenv()
 passphrase = os.getenv("PRIVATE_KEY_PASSPHRASE").encode()
 
+'''
 # load encrypted private key from the disk
 with open("config/private_key.pem", "rb") as private_key_file:
     # decrypt private key with configured passphrase
@@ -34,6 +33,9 @@ with open("config/private_key.pem", "rb") as private_key_file:
 
     # get paseto private key
     private_key = Key.new(4, "public", private_key_bytes)
+'''
+
+private_key = load_private_key(passphrase)
 
 # load public key from the disk
 with open("config/public_key.pem", "rb") as public_key_file:
