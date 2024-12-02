@@ -9,6 +9,9 @@ from pathlib import Path
 import logging
 
 
+logger = logging.getLogger(__name__)
+
+
 async def generate_refresh_token(private_key, user, nonce: str) -> bytes:
     token_expiration_time = datetime.now() + timedelta(days=30)
     payload_dict = {
@@ -51,9 +54,9 @@ def load_private_key(passphrase: bytes):
         try:
             with primary_path.open("rb") as pk_file:
                 pem_content = pk_file.read()
-            logging.info(f"Loaded private key from {primary_path}")
+            logger.info(f"Loaded private key from {primary_path}")
         except Exception as e:
-            logging.error(f"Failed to load private key from {primary_path}: {e}")
+            logger.error(f"Failed to load private key from {primary_path}: {e}")
             pem_content = None
 
     # attempt secondary path
@@ -61,9 +64,9 @@ def load_private_key(passphrase: bytes):
         try:
             with secondary_path.open("rb") as pk_file:
                 pem_content = pk_file.read()
-            logging.info(f"Loaded private key from {secondary_path}")
+            logger.info(f"Loaded private key from {secondary_path}")
         except Exception as e:
-            logging.error(f"Failed to load private key from {secondary_path}: {e}")
+            logger.error(f"Failed to load private key from {secondary_path}: {e}")
             pem_content = None
 
     # attempt environment variable
@@ -86,12 +89,12 @@ def load_private_key(passphrase: bytes):
                 )
 
                 pem_content = private_key_bytes
-                logging.info("Loaded private key from environment variable.")
+                logger.info("Loaded private key from environment variable.")
             except Exception as e:
-                logging.error(f"Failed to load private key from environment variable: {e}")
+                logger.error(f"Failed to load private key from environment variable: {e}")
                 raise ValueError("Failed to load private key from environment variable.") from e
         else:
-            logging.error("PRIVATE_KEY_PEM environment variable not set.")
+            logger.error("PRIVATE_KEY_PEM environment variable not set.")
             raise FileNotFoundError("Private key not found in file paths or environment variables.")
 
     # process the PEM content
@@ -109,8 +112,58 @@ def load_private_key(passphrase: bytes):
         )
 
         private_key = Key.new(4, "public", private_key_bytes)
-        logging.info("Private key processed successfully.")
+        logger.info("Private key processed successfully.")
         return private_key
     except Exception as e:
-        logging.error(f"Error processing private key: {e}")
+        logger.error(f"Error processing private key: {e}")
         raise ValueError("Failed to process the private key.") from e
+
+
+def load_public_key():
+    primary_path = Path("config/public_key.pem")
+    secondary_path = Path("public_key.pem")
+
+    pem_content = None
+
+    # attempt primary path
+    if primary_path.is_file():
+        try:
+            with primary_path.open("rb") as pk_file:
+                pem_content = pk_file.read()
+            logger.info(f"Loaded public key from {primary_path}")
+        except Exception as e:
+            logger.error(f"Failed to load public key from {primary_path}: {e}")
+            pem_content = None
+
+    # attempt secondary path
+    if pem_content is None and secondary_path.is_file():
+        try:
+            with secondary_path.open("rb") as pk_file:
+                pem_content = pk_file.read()
+            logger.info(f"Loaded public key from {secondary_path}")
+        except Exception as e:
+            logger.error(f"Failed to load public key from {secondary_path}: {e}")
+            pem_content = None
+
+    # attempt environment variable
+    if pem_content is None:
+        pem_env = os.getenv("PUBLIC_KEY_PEM")
+        if pem_env:
+            try:
+                pem_content = pem_env.encode('utf-8')
+                logger.info("Loaded public key from environment variable.")
+            except Exception as e:
+                logger.error(f"Failed to load public key from environment variable: {e}")
+                raise ValueError("Failed to load public key from environment variable.") from e
+        else:
+            logger.error("PUBLIC_KEY_PEM environment variable not set.")
+            raise FileNotFoundError("Public key not found in file paths or environment variables.")
+
+    # process the PEM content
+    try:
+        public_key = Key.new(4, "public", pem_content)
+        logger.info("Public key processed successfully.")
+        return pem_content, public_key
+    except Exception as e:
+        logger.error(f"Error processing public key: {e}")
+        raise ValueError("Failed to process the public key.") from e

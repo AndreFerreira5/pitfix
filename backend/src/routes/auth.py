@@ -7,41 +7,16 @@ import json
 from datetime import datetime, timedelta, timezone
 from db.auth import get_user_by_username, get_user_by_id, insert_user, verify_password, update_user_session_nonce
 from models.auth import LoginRequest, RegisterRequest, RefreshRequest
-from utils.auth import generate_refresh_token, generate_access_token, generate_tokens_nonce, load_private_key
+from utils.auth import generate_refresh_token, generate_access_token, generate_tokens_nonce, load_private_key, load_public_key
 import logging
 
 
 load_dotenv()
 passphrase = os.getenv("PRIVATE_KEY_PASSPHRASE").encode()
-
-'''
-# load encrypted private key from the disk
-with open("config/private_key.pem", "rb") as private_key_file:
-    # decrypt private key with configured passphrase
-    private_key_decrypted = serialization.load_pem_private_key(
-        private_key_file.read(),
-        password=passphrase,
-        backend=default_backend()
-    )
-
-    # convert decrypted private key to bytes
-    private_key_bytes = private_key_decrypted.private_bytes(
-        encoding=serialization.Encoding.PEM,
-        format=serialization.PrivateFormat.PKCS8,
-        encryption_algorithm=serialization.NoEncryption()
-    )
-
-    # get paseto private key
-    private_key = Key.new(4, "public", private_key_bytes)
-'''
+logger = logging.getLogger(__name__)
 
 private_key = load_private_key(passphrase)
-
-# load public key from the disk
-with open("config/public_key.pem", "rb") as public_key_file:
-    public_key_pem = public_key_file.read()
-    public_key = Key.new(4, "public", public_key_pem)
-
+public_key_pem, public_key = load_public_key()
 
 router = APIRouter()
 
@@ -99,7 +74,7 @@ async def refresh(request: RefreshRequest):
         decoded_access_token = pyseto.decode(public_key, request.access_token)
         decoded_refresh_token = pyseto.decode(public_key, request.refresh_token)
     except Exception as e:
-        logging.error(f"Token decoding failed: {e}")
+        logger.error(f"Token decoding failed: {e}")
         raise HTTPException(status_code=400, detail="Invalid token")
 
     # get payload from each token
@@ -107,17 +82,17 @@ async def refresh(request: RefreshRequest):
         decoded_access_token_payload = json.loads(decoded_access_token.payload.decode('utf-8'))
         decoded_refresh_token_payload = json.loads(decoded_refresh_token.payload.decode('utf-8'))
     except (json.JSONDecodeError, UnicodeDecodeError) as e:
-        logging.error(f"Payload decoding failed: {e}")
+        logger.error(f"Payload decoding failed: {e}")
         raise HTTPException(status_code=400, detail="Invalid token payload")
 
     # ensure user_id in both tokens match
     if decoded_access_token_payload.get("user_id") != decoded_refresh_token_payload.get("user_id"):
-        logging.warning("Token mismatch: User ID in access and refresh tokens do not match")
+        logger.warning("Token mismatch: User ID in access and refresh tokens do not match")
         raise HTTPException(status_code=401, detail="Tokens mismatch")
 
     # ensure both tokens nonce match
     if decoded_access_token_payload.get("nonce") != decoded_refresh_token_payload.get("nonce"):
-        logging.warning("Token mismatch: session nonce does not match")
+        logger.warning("Token mismatch: session nonce does not match")
         raise HTTPException(status_code=401, detail="Tokens mismatch")
 
     # validate refresh token expiration date
@@ -125,11 +100,11 @@ async def refresh(request: RefreshRequest):
         refresh_token_expiration_date = datetime.fromisoformat(
             decoded_refresh_token_payload["exp"].replace("Z", "+00:00"))
     except ValueError as e:
-        logging.error(f"Invalid expiration date format: {e}")
+        logger.error(f"Invalid expiration date format: {e}")
         raise HTTPException(status_code=400, detail="Invalid expiration date format")
 
     if refresh_token_expiration_date < datetime.now().replace(tzinfo=timezone.utc):
-        logging.warning("Refresh token expired")
+        logger.warning("Refresh token expired")
         raise HTTPException(status_code=401, detail="Refresh token expired")
 
     # fetch the user from the database using the user_id
@@ -138,7 +113,7 @@ async def refresh(request: RefreshRequest):
         raise HTTPException(status_code=404, detail="User not found")
 
     if user["session_nonce"] != decoded_access_token_payload.get("nonce"):
-        logging.warning("Nonce mismatch: The provided nonce doesn't match with the one in the user's document")
+        logger.warning("Nonce mismatch: The provided nonce doesn't match with the one in the user's document")
         raise HTTPException(status_code=401, detail="Tokens mismatch")
 
     # generate new tokens
@@ -153,7 +128,7 @@ async def refresh(request: RefreshRequest):
             raise HTTPException(status_code=500, detail="Internal Server Error")
 
     except Exception as e:
-        logging.error(f"Token generation failed: {e}")
+        logger.error(f"Token generation failed: {e}")
         raise HTTPException(status_code=500, detail="Token generation failed")
 
     return {"access_token": access_token, "refresh_token": refresh_token}
@@ -164,5 +139,5 @@ async def get_public_key():
     try:
         return {"public-key": public_key_pem.decode("utf-8")}, 200
     except Exception as e:
-        logging.error(f"Failed to encode public key: {e}")
+        logger.error(f"Failed to encode public key: {e}")
         raise HTTPException(status_code=500, detail="Unable to retrieve public key")
