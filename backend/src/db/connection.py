@@ -16,12 +16,19 @@ class MongoDB:
     async def connect(self):
         if self._client is None:
             try:
-                mongo_uri = os.getenv('MONGO_URI')
-                mongo_uri = mongo_uri.replace("{username}", os.getenv('MONGO_USERNAME'))
-                mongo_uri = mongo_uri.replace("{password}", os.getenv('MONGO_PASSWORD'))
-                mongo_uri = mongo_uri.replace("{host}", os.getenv('MONGO_HOST'))
-                mongo_uri = mongo_uri.replace("{port}", os.getenv('MONGO_PORT'))
-                mongo_uri = mongo_uri.replace("{db_name}", os.getenv('MONGO_DB_NAME'))
+                mongo_uri = None
+
+                is_env_dev = os.getenv('IS_ENV_DEV')
+                if is_env_dev is not None:
+                    mongo_uri = os.getenv('MONGO_URI')
+                    mongo_uri = mongo_uri.replace("{username}", os.getenv('MONGO_USERNAME'))
+                    mongo_uri = mongo_uri.replace("{password}", os.getenv('MONGO_PASSWORD'))
+                    mongo_uri = mongo_uri.replace("{host}", os.getenv('MONGO_HOST'))
+                    mongo_uri = mongo_uri.replace("{port}", os.getenv('MONGO_PORT'))
+                    mongo_uri = mongo_uri.replace("{db_name}", os.getenv('MONGO_DB_NAME'))
+
+                else:
+                    mongo_uri = os.getenv('MONGO_PROD_URI')
 
                 self._client = AsyncIOMotorClient(mongo_uri)
                 self._db = self._client[os.getenv('MONGO_DB_NAME')]
