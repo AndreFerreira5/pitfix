@@ -19,7 +19,7 @@ class MongoDB:
                 mongo_uri = None
 
                 is_env_dev = os.getenv('IS_ENV_DEV')
-                if is_env_dev is not None:
+                if is_env_dev is not None and is_env_dev == 'true':
                     mongo_uri = os.getenv('MONGO_URI')
                     mongo_uri = mongo_uri.replace("{username}", os.getenv('MONGO_USERNAME'))
                     mongo_uri = mongo_uri.replace("{password}", os.getenv('MONGO_PASSWORD'))
