@@ -41,7 +41,11 @@ async def login(request: LoginRequest):
         elif nonce_update_result["status"] == "error":
             raise HTTPException(status_code=500, detail="Internal Server Error")
 
-        return {'access_token': access_token, "refresh_token": refresh_token}, 200
+        return {
+            'access_token': access_token,
+            'refresh_token': refresh_token,
+            'user_role': existing_user.get("role", "")
+        }, 200
     # if there was no match, return invalid login message 401
     elif password_matching_result["status"] == "fail":
         raise HTTPException(status_code=401, detail="Invalid username or password")
