@@ -1,9 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'src/controllers/auth_controller.dart';
+import 'src/ui/login.dart';
 import 'src/ui/navigation_menu.dart';
 import 'src/bindings/repository_binding.dart';
-import 'package:get/get.dart';
 
 void main() {
+  // Initialize AuthController before the app starts
+  Get.put(AuthController());
+
   runApp(const MyApp());
 }
 
@@ -19,7 +24,13 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
         useMaterial3: true,
       ),
-      home: NavigationMenu(userRole: "admin",), // TODO change this to the login page object and get the user info from the backend response in the form of the authentication token and extract the info from the user from there and pass it to the safe storage using flutter to always be accessible in all the codebase (the user role for exampl, to display the app based on the role)
+      home: Obx(() {
+        if (AuthController.to.isAuthenticated.value) {
+          return NavigationMenu(userRole: AuthController.to.userRole.value);
+        } else {
+          return LoginPage();
+        }
+      }),
     );
   }
 }
