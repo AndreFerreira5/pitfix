@@ -49,24 +49,21 @@ class UserRepository {
     }
   }
 
-  // Updated register method to include 'role'
   Future<bool> register({
     required String username,
-    required String address, // Optional: Include if backend handles it
     required String email,
     required String password,
-    required String role, // New parameter for role
+    required String role,
   }) async {
     try {
       final response = await apiClient.post('/auth/register', body: {
-        'username': username, // Ensure backend expects 'username'
+        'username': username,
         'password': password,
         'email': email,
         'role': role, // Include role in the request
-        'address': address, // Optional: Include if backend handles it
       });
 
-      if (response.statusCode == 201) { // Assuming 201 Created is returned on success
+      if (response.statusCode == 201) { // 201 Created is returned on success
         return true;
       }
       return false;
