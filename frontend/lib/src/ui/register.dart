@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import '../repository/user_repository.dart';
 import '../utils/api_client.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
@@ -14,15 +15,27 @@ class _RegisterPageState extends State<RegisterPage> {
   final UserRepository userRepository = UserRepository(apiClient: ApiClient(baseUrl: '127.0.0.1:8000'));
   final FlutterSecureStorage storage = FlutterSecureStorage();
 
-  String _name = '';
+  String _username = '';
   String _address = '';
   String _email = '';
   String _password = '';
+  String? _selectedRole; // New state variable for role
   bool _isPasswordVisible = false;
   bool _isLoading = false;
 
+  // Define the list of roles
+  final List<String> _roles = ['client', 'manager', 'worker', 'admin'];
+
   Future<void> _register() async {
     if (_formKey.currentState?.validate() ?? false) {
+      if (_selectedRole == null) {
+        // If role is not selected, show an error
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Please select a role')),
+        );
+        return;
+      }
+
       _formKey.currentState?.save();
       setState(() {
         _isLoading = true;
@@ -31,10 +44,11 @@ class _RegisterPageState extends State<RegisterPage> {
       try {
         final success = await userRepository
             .register(
-          name: _name,
+          username: _username, // Changed from _name to _username
           address: _address,
           email: _email,
           password: _password,
+          role: _selectedRole!, // Pass the selected role
         )
             .timeout(Duration(seconds: 5), onTimeout: () {
           throw TimeoutException("Connection timed out. Please try again.");
@@ -42,19 +56,21 @@ class _RegisterPageState extends State<RegisterPage> {
 
         if (success) {
           // Optionally, you can auto-login the user or navigate them to the login page
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Registration successful! Please login.')),
-          );
-          Navigator.pop(context); // Navigate back to login page
+          Get.snackbar('Success', 'Registration successful! Please login.',
+              snackPosition: SnackPosition.BOTTOM);
+          Get.back(); // Navigate back to login page using GetX
+          // Alternatively, use Navigator.pop(context);
         } else {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Registration failed. Please try again.')),
-          );
+          Get.snackbar('Error', 'Registration failed. Please try again.',
+              snackPosition: SnackPosition.BOTTOM);
+          // Alternatively, use ScaffoldMessenger
         }
       } on TimeoutException catch (e) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(e.message ?? 'Request timed out')),
-        );
+        Get.snackbar('Error', e.message ?? 'Request timed out',
+            snackPosition: SnackPosition.BOTTOM);
+      } catch (e) {
+        Get.snackbar('Error', 'An unexpected error occurred.',
+            snackPosition: SnackPosition.BOTTOM);
       } finally {
         setState(() {
           _isLoading = false;
@@ -103,7 +119,7 @@ class _RegisterPageState extends State<RegisterPage> {
                     border: OutlineInputBorder(),
                   ),
                   onSaved: (value) {
-                    _name = value ?? '';
+                    _username = value ?? '';
                   },
                   validator: (value) {
                     if (value == null || value.isEmpty) {
@@ -180,6 +196,36 @@ class _RegisterPageState extends State<RegisterPage> {
                     }
                     if (value.length < 6) {
                       return 'Password must be at least 6 characters';
+                    }
+                    return null;
+                  },
+                ),
+                SizedBox(height: 30),
+
+                // Role Selection Dropdown
+                DropdownButtonFormField<String>(
+                  decoration: InputDecoration(
+                    labelText: 'Select Role',
+                    border: OutlineInputBorder(),
+                  ),
+                  value: _selectedRole,
+                  items: _roles.map((role) {
+                    return DropdownMenuItem(
+                      value: role,
+                      child: Text(
+                        role[0].toUpperCase() + role.substring(1),
+                        style: TextStyle(fontSize: 16),
+                      ),
+                    );
+                  }).toList(),
+                  onChanged: (value) {
+                    setState(() {
+                      _selectedRole = value;
+                    });
+                  },
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Please select a role';
                     }
                     return null;
                   },
