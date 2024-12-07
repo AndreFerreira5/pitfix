@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:iconsax/iconsax.dart';
 import 'package:get/get.dart';
+import 'package:pitfix_frontend/src/ui/profile.dart';
+import 'package:pitfix_frontend/src/ui/settings.dart';
 import 'workshops.dart';
 
 class NavigationMenu extends StatelessWidget {
@@ -16,27 +18,27 @@ class NavigationMenu extends StatelessWidget {
         return [
           Workshops(),
           const Center(child: Text('Requests Page')),
-          const Center(child: Text('Profile Page')),
-          const Center(child: Text('Settings Page')),
+          const ProfilePage(),
+          SettingsPage(role: role),
         ];
       case 'manager':
         return [
           const Center(child: Text('My Workshop Page')),
-          const Center(child: Text('Profile Page')),
-          const Center(child: Text('Settings Page')),
+          const ProfilePage(),
+          SettingsPage(role: role),
         ];
       case 'worker':
         return [
           const Center(child: Text('Requests Page')),
-          const Center(child: Text('Profile Page')),
-          const Center(child: Text('Settings Page')),
+          const ProfilePage(),
+          SettingsPage(role: role),
         ];
       case 'client':
         return [
           const Center(child: Text('Workshops Page')),
           const Center(child: Text('My Requests Page')),
-          const Center(child: Text('Profile Page')),
-          const Center(child: Text('Settings Page')),
+          const ProfilePage(),
+          SettingsPage(role: role),
         ];
       default:
         return [const Center(child: Text('No content available'))];
