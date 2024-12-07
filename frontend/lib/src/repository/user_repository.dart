@@ -1,3 +1,5 @@
+// lib/src/repository/user_repository.dart
+
 import '../utils/api_client.dart';
 import 'dart:convert';
 
@@ -47,18 +49,21 @@ class UserRepository {
     }
   }
 
+  // Updated register method to include 'role'
   Future<bool> register({
-    required String name,
-    required String address,
+    required String username,
+    required String address, // Optional: Include if backend handles it
     required String email,
     required String password,
+    required String role, // New parameter for role
   }) async {
     try {
       final response = await apiClient.post('/auth/register', body: {
-        'name': name,
-        'address': address,
-        'email': email,
+        'username': username, // Ensure backend expects 'username'
         'password': password,
+        'email': email,
+        'role': role, // Include role in the request
+        'address': address, // Optional: Include if backend handles it
       });
 
       if (response.statusCode == 201) { // Assuming 201 Created is returned on success
