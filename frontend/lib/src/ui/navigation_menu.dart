@@ -4,6 +4,8 @@ import 'package:get/get.dart';
 import 'package:pitfix_frontend/src/ui/profile.dart';
 import 'package:pitfix_frontend/src/ui/settings.dart';
 import 'workshops.dart';
+import '../controllers/auth_controller.dart';
+import 'login.dart';
 
 class NavigationMenu extends StatelessWidget {
   final String userRole; // hold the user role
@@ -111,6 +113,18 @@ class NavigationMenu extends StatelessWidget {
                 )),
               ),
             ),
+          ),
+        ],
+      ),
+      // Optional: Add a logout button in the AppBar
+      appBar: AppBar(
+        title: Text('PitFix'),
+        actions: [
+          IconButton(
+            icon: Icon(Icons.logout),
+            onPressed: () {
+              AuthController.to.logout();
+            },
           ),
         ],
       ),
