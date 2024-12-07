@@ -6,7 +6,8 @@ import '../repository/user_repository.dart';
 class RepositoryBinding extends Bindings {
   @override
   void dependencies() {
-    final apiClient = ApiClient(baseUrl: "http://127.0.0.1:8000");
+    // change the url to localhost:8000 when in development
+    final apiClient = ApiClient(baseUrl: "https://pitfix.onrender.com");
 
     // initialize and inject repositories
     Get.put<WorkshopRepository>(WorkshopRepository(apiClient: apiClient));

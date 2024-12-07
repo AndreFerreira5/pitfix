@@ -3,12 +3,14 @@ class Workshop {
   final String? description;
   final double? rating;
   final String? imageUrl;
+  final DateTime? creationDate;
 
   Workshop({
     required this.name,
     this.description,
     this.rating,
     this.imageUrl,
+    this.creationDate,
   });
 
   factory Workshop.fromJson(Map<String, dynamic> json) {
@@ -17,6 +19,9 @@ class Workshop {
       description: json['description'] as String?,
       rating: (json['rating'] as num?)?.toDouble(),
       imageUrl: json['image_url'] as String?,
+      creationDate: json['creation_date'] != null
+          ? DateTime.parse(json['creation_date'] as String)
+          : null,
     );
   }
 
@@ -26,6 +31,7 @@ class Workshop {
       'description': description,
       'rating': rating,
       'image_url': imageUrl,
+      if (creationDate != null) 'creation_date': creationDate?.toIso8601String(),
     };
 
     json.removeWhere((key, value) => value == null);

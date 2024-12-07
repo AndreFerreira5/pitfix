@@ -96,11 +96,22 @@ class WorkshopCard extends StatelessWidget {
           children: [
             ClipRRect(
               borderRadius: BorderRadius.circular(32),
-              child: Image.network(
-                workshop.imageUrl ?? 'https://via.placeholder.com/80', // TODO provide a default image url when one is not provided
+              child: (workshop.imageUrl != null && workshop.imageUrl!.isNotEmpty)
+                  ? Image.network(
+                workshop.imageUrl!,
                 width: 80,
                 height: 80,
                 fit: BoxFit.cover,
+              )
+                  : Container(
+                width: 80,
+                height: 80,
+                color: Colors.grey[200], // Optional: Add a background color
+                child: const Icon(
+                  Icons.image_not_supported, // Choose an appropriate icon
+                  size: 40, // Adjust the size as needed
+                  color: Colors.grey, // Optional: Icon color
+                ),
               ),
             ),
             const SizedBox(width: 16),

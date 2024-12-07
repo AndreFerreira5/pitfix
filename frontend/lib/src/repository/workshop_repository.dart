@@ -19,6 +19,19 @@ class WorkshopRepository {
     }
   }
 
+  Future<Workshop> getWorkshopById(String workshopId) async {
+    final response = await apiClient.get('/workshop/$workshopId');
+
+    if (response.statusCode == 200) {
+      final Map<String, dynamic> decoded = json.decode(response.body);
+      return Workshop.fromJson(json.decode(decoded[0]['body']));
+    } else if (response.statusCode == 404) {
+      throw Exception('Workshop not found');
+    } else {
+      throw Exception('Failed to load workshop');
+    }
+  }
+
   Future<String?> addWorkshop(Workshop workshop) async {
     var workshopJson = workshop.toJson();
 
@@ -30,5 +43,35 @@ class WorkshopRepository {
       return response.body;
     }
     return null;
+  }
+
+
+  Future<String> deleteWorkshop(String workshopId) async {
+    final response = await apiClient.delete('/workshop/delete/$workshopId');
+
+    if (response.statusCode == 200) {
+      final Map<String, dynamic> decoded = json.decode(response.body);
+      return decoded['message'];
+    } else if (response.statusCode == 404) {
+      throw Exception('Workshop not found');
+    } else {
+      throw Exception('Failed to delete workshop');
+    }
+  }
+
+  Future<String> editWorkshop(String workshopId, Workshop workshop) async {
+    final response = await apiClient.put(
+      '/workshop/edit/$workshopId',
+      body: json.encode(workshop.toJson()),
+    );
+
+    if (response.statusCode == 200) {
+      final Map<String, dynamic> decoded = json.decode(response.body);
+      return decoded['message'];
+    } else if (response.statusCode == 404) {
+      throw Exception('Workshop not found');
+    } else {
+      throw Exception('Failed to edit workshop');
+    }
   }
 }

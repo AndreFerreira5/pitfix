@@ -32,6 +32,32 @@ class ApiClient {
     return response;
   }
 
+
+
+  Future<http.Response> put(String endpoint, {Map<String, String>? headers, dynamic body}) async {
+    final response = await http.put(
+      Uri.parse('$baseUrl$endpoint'),
+      headers: {
+        'Content-Type': 'application/json',
+        ...defaultHeaders,
+        ...?headers,
+      },
+      body: body is Map ? jsonEncode(body) : body,
+    );
+    _checkForErrors(response);
+    return response;
+  }
+
+  Future<http.Response> delete(String endpoint, {Map<String, String>? headers}) async {
+    final response = await http.delete(
+      Uri.parse('$baseUrl$endpoint'),
+      headers: {...defaultHeaders, if (headers != null) ...headers},
+    );
+    _checkForErrors(response);
+    return response;
+  }
+
+
   void _checkForErrors(http.Response response) {
     if (response.statusCode < 200 || response.statusCode >= 300) {
       throw Exception('API request failed with status: ${response.statusCode}');

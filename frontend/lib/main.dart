@@ -19,7 +19,7 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
         useMaterial3: true,
       ),
-      home: NavigationMenu(userRole: "admin",),
+      home: NavigationMenu(userRole: "admin",), // TODO change this to the login page object and get the user info from the backend response in the form of the authentication token and extract the info from the user from there and pass it to the safe storage using flutter to always be accessible in all the codebase (the user role for exampl, to display the app based on the role)
     );
   }
 }
