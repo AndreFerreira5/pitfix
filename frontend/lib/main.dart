@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:http/http.dart';
+import 'package:pitfix_frontend/src/repository/user_repository.dart';
 import 'src/controllers/auth_controller.dart';
 import 'src/ui/login.dart';
 import 'src/ui/navigation_menu.dart';
@@ -7,7 +9,7 @@ import 'src/bindings/repository_binding.dart';
 
 void main() {
   // Initialize AuthController before the app starts
-  Get.put(AuthController());
+  //Get.put(AuthController());
 
   runApp(const MyApp());
 }

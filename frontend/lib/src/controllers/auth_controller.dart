@@ -1,18 +1,14 @@
 import 'dart:convert';
 import 'package:get/get.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import '../repository/user_repository.dart';
-import '../utils/api_client.dart';
 import '../ui/login.dart';
-
+import '../repository/user_repository.dart';
 
 class AuthController extends GetxController {
   static AuthController get to => Get.find();
 
   final FlutterSecureStorage _storage = const FlutterSecureStorage();
-  final UserRepository _userRepository = UserRepository(
-    apiClient: ApiClient(baseUrl: 'http://127.0.0.1:8000'),
-  );
+  final UserRepository _userRepository = Get.find<UserRepository>();
 
   var accessToken = ''.obs;
   var refreshToken = ''.obs;
@@ -22,6 +18,7 @@ class AuthController extends GetxController {
   @override
   void onInit() {
     super.onInit();
+    _storage.deleteAll();
     loadTokens();
   }
 
@@ -32,9 +29,9 @@ class AuthController extends GetxController {
     isAuthenticated.value = accessToken.value.isNotEmpty;
   }
 
-  Future<void> login(String email, String password) async {
+  Future<void> login(String username, String password) async {
     try {
-      final loginResponse = await _userRepository.login(email, password);
+      final loginResponse = await _userRepository.login(username, password);
       if (loginResponse != null) {
         accessToken.value = loginResponse.accessToken;
         refreshToken.value = loginResponse.refreshToken;
@@ -50,6 +47,7 @@ class AuthController extends GetxController {
             snackPosition: SnackPosition.BOTTOM);
       }
     } catch (e) {
+      print(e);
       Get.snackbar('Error', 'An error occurred during login.',
           snackPosition: SnackPosition.BOTTOM);
     }

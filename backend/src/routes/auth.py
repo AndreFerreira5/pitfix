@@ -5,7 +5,7 @@ from dotenv import load_dotenv
 from fastapi import APIRouter, HTTPException
 import json
 from datetime import datetime, timedelta, timezone
-from db.auth import get_user_by_username, get_user_by_id, insert_user, verify_password, update_user_session_nonce
+from db.auth import get_user_by_email, get_user_by_username, get_user_by_id, insert_user, verify_password, update_user_session_nonce
 from models.auth import LoginRequest, RegisterRequest, RefreshRequest
 from utils.auth import generate_refresh_token, generate_access_token, generate_tokens_nonce, load_private_key, load_public_key
 import logging
@@ -46,9 +46,9 @@ async def login(request: LoginRequest):
             'refresh_token': refresh_token,
             'user_role': existing_user.get("role", "")
         }, 200
-    # if there was no match, return invalid login message 401
+    # if there was no match, return invalid login message 200
     elif password_matching_result["status"] == "fail":
-        raise HTTPException(status_code=401, detail="Invalid username or password")
+        raise HTTPException(status_code=200, detail="Invalid username or password")
     # if there was an error, return a 500 message
     elif password_matching_result["status"] == "error":
         raise HTTPException(status_code=500, detail="Internal Server Error")

@@ -5,7 +5,6 @@ import '../controllers/auth_controller.dart';
 import '../repository/user_repository.dart';
 import '../utils/api_client.dart';
 import 'register.dart';
-import 'navigation_menu.dart'; // Ensure this import exists
 
 class LoginPage extends StatefulWidget {
   @override
@@ -17,7 +16,7 @@ class _LoginPageState extends State<LoginPage> {
   // Removed direct instantiation of UserRepository
   // We'll use AuthController to handle login
 
-  String _email = '';
+  String _username = '';
   String _password = '';
   bool _isPasswordVisible = false;
   bool _isLoading = false;
@@ -30,7 +29,7 @@ class _LoginPageState extends State<LoginPage> {
       });
 
       try {
-        await AuthController.to.login(_email, _password);
+        await AuthController.to.login(_username, _password);
         if (AuthController.to.isAuthenticated.value) {
           // Navigation is handled reactively in main.dart via Obx
           Get.snackbar('Success', 'Login successful!',
@@ -85,20 +84,20 @@ class _LoginPageState extends State<LoginPage> {
                 // Email Field
                 TextFormField(
                   decoration: InputDecoration(
-                    labelText: 'Email',
+                    labelText: 'Username',
                     border: OutlineInputBorder(),
                   ),
-                  keyboardType: TextInputType.emailAddress,
+                  keyboardType: TextInputType.text,
                   onSaved: (value) {
-                    _email = value ?? '';
+                    _username = value ?? '';
                   },
                   validator: (value) {
                     if (value == null || value.isEmpty) {
-                      return 'Please enter your email';
+                      return 'Please enter your username';
                     }
-                    if (!RegExp(r'^[^@]+@[^@]+\.[^@]+').hasMatch(value)) {
-                      return 'Please enter a valid email';
-                    }
+                    //if (!RegExp(r'^[^@]+@[^@]+\.[^@]+').hasMatch(value)) {
+                    //  return 'Please enter a valid email';
+                    //}
                     return null;
                   },
                 ),
