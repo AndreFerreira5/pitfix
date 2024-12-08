@@ -18,7 +18,7 @@ class _ProfilePageState extends State<ProfilePage> {
   String _phone = "";
   String _address = "";
   String _billingAddress = "";
-  String _password = "";  // Make sure to include password in the profile
+  String _password = "";  // Include password in profile
 
   bool _isEditing = false;
   bool _isLoading = true;
@@ -28,7 +28,7 @@ class _ProfilePageState extends State<ProfilePage> {
   final TextEditingController _phoneController = TextEditingController();
   final TextEditingController _addressController = TextEditingController();
   final TextEditingController _billingController = TextEditingController();
-  final TextEditingController _passwordController = TextEditingController();  // Password controller
+  final TextEditingController _passwordController = TextEditingController();
 
   final UserRepository _userRepository = UserRepository(apiClient: ApiClient(baseUrl: 'http://localhost:8000'));
 
@@ -45,16 +45,15 @@ class _ProfilePageState extends State<ProfilePage> {
     _phoneController.dispose();
     _addressController.dispose();
     _billingController.dispose();
-    _passwordController.dispose();  // Dispose password controller
+    _passwordController.dispose();
     super.dispose();
   }
 
-  // Fetch user data
+  // Fetch user data by username (using the token)
   Future<void> _fetchUserProfile() async {
     try {
       final loginResponse = await _userRepository.login("username", "password");
-      final userProfile = await _userRepository.getUserById(
-        'user_id_here',  // Replace with actual user ID
+      final userProfile = await _userRepository.getUserByUsername(
         loginResponse!.accessToken,
       );
 
@@ -73,7 +72,7 @@ class _ProfilePageState extends State<ProfilePage> {
         _phoneController.text = _phone;
         _addressController.text = _address;
         _billingController.text = _billingAddress;
-        _passwordController.text = _password;  // Initialize password field
+        _passwordController.text = _password;
       });
     } catch (e) {
       setState(() {
@@ -83,14 +82,14 @@ class _ProfilePageState extends State<ProfilePage> {
     }
   }
 
-  // Save changes
+  // Save changes and update user profile
   void _saveChanges() async {
     setState(() {
       _isLoading = true;
     });
 
     try {
-      final loginResponse = await _userRepository.login("username", "password"); // Actual login logic
+      final loginResponse = await _userRepository.login("username", "password");
       final userUpdate = UserUpdate(
         name: _nameController.text,
         email: _emailController.text,
@@ -101,7 +100,6 @@ class _ProfilePageState extends State<ProfilePage> {
       );
 
       final result = await _userRepository.updateUserProfile(
-        'user_id_here',  // Replace with actual user ID
         loginResponse!.accessToken,
         userUpdate,
       );
@@ -147,7 +145,6 @@ class _ProfilePageState extends State<ProfilePage> {
               ),
               const SizedBox(height: 20),
 
-              // Name
               _buildTextField(
                 label: 'Name',
                 controller: _nameController,
@@ -155,7 +152,6 @@ class _ProfilePageState extends State<ProfilePage> {
               ),
               const SizedBox(height: 16),
 
-              // Email
               _buildTextField(
                 label: 'Email',
                 controller: _emailController,
@@ -163,7 +159,6 @@ class _ProfilePageState extends State<ProfilePage> {
               ),
               const SizedBox(height: 16),
 
-              // Phone
               _buildTextField(
                 label: 'Phone',
                 controller: _phoneController,
@@ -171,7 +166,6 @@ class _ProfilePageState extends State<ProfilePage> {
               ),
               const SizedBox(height: 16),
 
-              // Address
               _buildTextField(
                 label: 'Address',
                 controller: _addressController,
@@ -179,7 +173,6 @@ class _ProfilePageState extends State<ProfilePage> {
               ),
               const SizedBox(height: 16),
 
-              // Billing Address
               _buildTextField(
                 label: 'Billing Address',
                 controller: _billingController,
@@ -187,7 +180,6 @@ class _ProfilePageState extends State<ProfilePage> {
               ),
               const SizedBox(height: 16),
 
-              // Password
               _buildTextField(
                 label: 'Password',
                 controller: _passwordController,
@@ -195,7 +187,6 @@ class _ProfilePageState extends State<ProfilePage> {
               ),
               const SizedBox(height: 24),
 
-              // Edit/Save Button
               ElevatedButton(
                 onPressed: _isEditing ? _saveChanges : _toggleEditMode,
                 child: Text(_isEditing ? 'Save Changes' : 'Edit Profile'),

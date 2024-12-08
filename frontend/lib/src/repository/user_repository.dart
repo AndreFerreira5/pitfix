@@ -29,6 +29,9 @@ class LoginResponse {
 class UserRepository {
   final ApiClient apiClient;
 
+  // Store the username after login
+  String? username;
+
   UserRepository({required this.apiClient});
 
   // Modify the login method to use the User model if needed
@@ -101,19 +104,18 @@ class UserRepository {
     }
   }
 
-  // Get user data by ID
-  Future<User?> getUserById(String userId, String accessToken) async {
+  Future<User?> getUserByUsername(String accessToken) async {
     try {
       final response = await apiClient.get(
-        '/user/$userId', // The endpoint to fetch user by ID
+        '/user/profile',  // Route to fetch user profile by username
         headers: {
-          'Authorization': 'Bearer $accessToken', // Pass the access token in the Authorization header
+          'Authorization': 'Bearer $accessToken', // Pass the token in Authorization header
         },
       );
 
       if (response.statusCode == 200) {
         final Map<String, dynamic> userData = json.decode(response.body);
-        return User.fromJson(userData);  // Assuming you have a User.fromJson constructor
+        return User.fromJson(userData);
       } else {
         return null;
       }
@@ -122,18 +124,18 @@ class UserRepository {
     }
   }
 
-  // Update user profile by user ID
-  Future<String> updateUserProfile(String userId, String accessToken, UserUpdate userUpdate) async {
+  // Update user profile by username
+  Future<String> updateUserProfile(String accessToken, UserUpdate userUpdate) async {
     final response = await apiClient.put(
-      '/user/$userId',  // The endpoint to update user by ID
+      '/user/profile',  // Update route using username (via token)
       headers: {
-        'Authorization': 'Bearer $accessToken',  // Include access token for authentication
+        'Authorization': 'Bearer $accessToken',
       },
-      body: json.encode(userUpdate.toJson()), // Send the updated user data
+      body: json.encode(userUpdate.toJson()),
     );
 
     if (response.statusCode == 200) {
-      return json.decode(response.body)['message'];  // Assuming the response contains a message
+      return json.decode(response.body)['message']; // Success message
     } else if (response.statusCode == 404) {
       throw Exception('User not found');
     } else {

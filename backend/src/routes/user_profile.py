@@ -1,57 +1,85 @@
-from pydantic import BaseModel
+from fastapi import HTTPException, Depends
 from typing import Optional
+from pydantic import BaseModel
+import jwt
+from datetime import datetime
 
+# Secret key for JWT decoding
+SECRET_KEY = "your_secret_key"
+
+# Function to decode the JWT token and get the username
+def decode_jwt(token: str) -> dict:
+    try:
+        payload = jwt.decode(token, SECRET_KEY, algorithms=["HS256"])
+        return payload
+    except jwt.ExpiredSignatureError:
+        raise HTTPException(status_code=401, detail="Token has expired")
+    except jwt.InvalidTokenError:
+        raise HTTPException(status_code=401, detail="Invalid token")
+
+# User model
 class User(BaseModel):
     name: str
     email: str
-    password: str  # Include password field (make sure to handle securely)
+    phone: str
+    address: str
+    billingAddress: Optional[str] = None
+    password: str
 
     class Config:
         orm_mode = True  # To support MongoDB ObjectId mapping
 
-class UserUpdate(BaseModel):
-    name: str
-    email: str
-    password: str
+# Route to fetch user profile by username
+@router.get("/profile", response_model=User)
+async def get_user_profile(authorization: str = Depends(oauth2_scheme)):
+    """
+    Fetch the user's profile by username (extracted from the JWT token).
+    """
+    token = authorization.split(" ")[1]  # Token sent as "Bearer <token>"
+    decoded_token = decode_jwt(token)
+    username = decoded_token.get("username")
 
-@router.get("/profile/{user_id}", response_model=User)
-async def get_user_profile(user_id: str):
-    """
-    Fetch the user's profile by their user ID.
-    """
-    result = await get_user_by_id(user_id)
+    if not username:
+        raise HTTPException(status_code=404, detail="Username not found in token")
+
+    result = await get_user_by_username(username)  # Fetch user by username from DB
     if result["status"] == "error":
         raise HTTPException(status_code=404, detail="User not found")
 
     user_data = result["data"]
-
-    # Return only name, email, phone, address, and password
     return User(
         name=user_data['name'],
         email=user_data['email'],
         phone=user_data['phone'],
         address=user_data['address'],
         billingAddress=user_data.get('billingAddress', ''),
-        password=user_data['password'],  # Password is also part of the response
+        password=user_data['password'],
     )
 
-@router.put("/profile/{user_id}", response_model=User)
-async def update_user_profile(user_id: str, user_update: UserUpdate):
+# Route to update user profile by username
+@router.put("/profile", response_model=User)
+async def update_user_profile(user_update: UserUpdate, authorization: str = Depends(oauth2_scheme)):
     """
-    Update the user's profile with new information.
+    Update the user's profile using the username (from token).
     """
+    token = authorization.split(" ")[1]
+    decoded_token = decode_jwt(token)
+    username = decoded_token.get("username")
+
+    if not username:
+        raise HTTPException(status_code=404, detail="Username not found in token")
+
     # Ensure the user exists before attempting to update
-    result = await get_user_by_id(user_id)
+    result = await get_user_by_username(username)
     if result["status"] == "error":
         raise HTTPException(status_code=404, detail="User not found")
 
     # Update the user's profile
-    update_result = await update_user_profile(user_id, user_update)
+    update_result = await update_user_profile(username, user_update)
 
     if update_result["status"] == "error":
         raise HTTPException(status_code=400, detail="Failed to update user profile")
 
-    # Return the updated user profile
     updated_user_data = update_result["data"]
     return User(
         name=updated_user_data['name'],
@@ -59,5 +87,5 @@ async def update_user_profile(user_id: str, user_update: UserUpdate):
         phone=updated_user_data['phone'],
         address=updated_user_data['address'],
         billingAddress=updated_user_data.get('billingAddress', ''),
-        password=updated_user_data['password'],  # Password should be returned as well
+        password=updated_user_data['password'],
     )
