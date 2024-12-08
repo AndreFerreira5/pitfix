@@ -147,7 +147,9 @@ async def get_public_key():
         raise HTTPException(status_code=500, detail="Unable to retrieve public key")
 
 
-ync def get_user_profile(username: str):
+# Fetch user profile by username
+@router.get("/profile/{username}", response_model=User)
+async def get_user_profile(username: str):
     """
     Fetch the user's profile by username.
     """
