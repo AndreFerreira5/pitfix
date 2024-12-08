@@ -77,7 +77,7 @@ class UserRepository {
 
 
   // Register method now returns a User object or success response
-  Future<User?> register({
+  Future<String?> register({
     required String username,
     required String email,
     required String password,
@@ -106,7 +106,7 @@ class UserRepository {
 
               // If user creation was successful
               if (message == 'User created successfully.') {
-                return User(username: username, email: email, role: role);
+                return message;
               } else {
                 print('Error: $message');
                 return null;  // Handle any errors accordingly (e.g., user already exists)
