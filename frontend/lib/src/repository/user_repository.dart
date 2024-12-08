@@ -1,5 +1,8 @@
+import 'package:pitfix_frontend/src/models/user_update.dart';
+
 import '../utils/api_client.dart';
 import 'dart:convert';
+import '../models/user.dart';  // Import the User model
 
 class LoginResponse {
   final String accessToken;
@@ -73,7 +76,7 @@ class UserRepository {
   }
 
   // Get user data by ID
-  Future<Map<String, dynamic>?> getUserById(String userId, String accessToken) async {
+  Future<User?> getUserById(String userId, String accessToken) async {
     try {
       final response = await apiClient.get(
         '/user/$userId', // The endpoint to fetch user by ID
@@ -84,7 +87,7 @@ class UserRepository {
 
       if (response.statusCode == 200) {
         final Map<String, dynamic> userData = json.decode(response.body);
-        return userData;
+        return User.fromJson(userData);  // Assuming you have a User.fromJson constructor
       } else {
         return null;
       }
@@ -93,5 +96,22 @@ class UserRepository {
     }
   }
 
-// Additional methods (like update and delete) can be added here
+  // Update user profile by user ID
+  Future<String> updateUserProfile(String userId, String accessToken, UserUpdate userUpdate) async {
+    final response = await apiClient.put(
+      '/user/$userId',  // The endpoint to update user by ID
+      headers: {
+        'Authorization': 'Bearer $accessToken',  // Include access token for authentication
+      },
+      body: json.encode(userUpdate.toJson()), // Send the updated user data
+    );
+
+    if (response.statusCode == 200) {
+      return json.decode(response.body)['message'];  // Assuming the response contains a message
+    } else if (response.statusCode == 404) {
+      throw Exception('User not found');
+    } else {
+      throw Exception('Failed to update user profile');
+    }
+  }
 }
