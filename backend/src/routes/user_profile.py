@@ -1,80 +1,60 @@
-from fastapi import FastAPI, HTTPException, Depends
-from pydantic import BaseModel
-from typing import Optional
-import jwt
-from datetime import datetime
+from fastapi import APIRouter, HTTPException
+from db.auth import get_user_by_username, get_user_by_id, update_user_profile  # Assuming these are the DB functions for user profile
+from models.auth import User, UserUpdate  # Assuming you have a User model and UserUpdate for update
+from fastapi.encoders import jsonable_encoder
+from fastapi.responses import JSONResponse
 from bson import ObjectId
-from .connection import get_db
+import logging
 
-# Secret key for JWT decoding
-SECRET_KEY = "your_secret_key"
+logger = logging.getLogger(__name__)
 
-# Function to decode the JWT token and get the username
-def decode_jwt(token: str) -> dict:
-    try:
-        payload = jwt.decode(token, SECRET_KEY, algorithms=["HS256"])
-        return payload
-    except jwt.ExpiredSignatureError:
-        raise HTTPException(status_code=401, detail="Token has expired")
-    except jwt.InvalidTokenError:
-        raise HTTPException(status_code=401, detail="Invalid token")
+# Helper function to handle ObjectId conversion to string
+def convert_objectid(data):
+    if isinstance(data, dict):
+        return {k: convert_objectid(v) for k, v in data.items()}
+    elif isinstance(data, list):
+        return [convert_objectid(i) for i in data]
+    elif isinstance(data, ObjectId):
+        return str(data)
+    else:
+        return data
 
-# User model
-class User(BaseModel):
-    name: str
-    email: str
-    phone: str
-    address: str
-    billingAddress: Optional[str] = None
-    password: str
 
-    class Config:
-        orm_mode = True  # To support MongoDB ObjectId mapping
-
-# Fetch user by username from database
-async def get_user_by_username(username: str):
-    db = await get_db()
-    user = await db.user.find_one({"username": username})
-
-    if not user:
-        return {"status": "error", "message": "User not found"}
-
-    return {"status": "success", "data": user}
-
-# Route to fetch user profile by username (extracted from JWT token)
+# User profile fetching route
 @router.get("/profile", response_model=User)
-async def get_user_profile(authorization: str = Depends(oauth2_scheme)):
+async def get_user_profile(authorization: str):
     """
-    Fetch the user's profile by username (extracted from the JWT token).
+    Fetch the user's profile by username extracted from the JWT token.
     """
     token = authorization.split(" ")[1]  # Token sent as "Bearer <token>"
+
+    # Decode the JWT token to get the username
     decoded_token = decode_jwt(token)
     username = decoded_token.get("username")
 
     if not username:
         raise HTTPException(status_code=404, detail="Username not found in token")
 
-    result = await get_user_by_username(username)  # Fetch user by username from DB
-    if result["status"] == "error":
+    # Fetch the user by username
+    user_result = await get_user_by_username(username)
+
+    if user_result["status"] == "error":
         raise HTTPException(status_code=404, detail="User not found")
 
-    user_data = result["data"]
-    return User(
-        name=user_data['name'],
-        email=user_data['email'],
-        phone=user_data['phone'],
-        address=user_data['address'],
-        billingAddress=user_data.get('billingAddress', ''),
-        password=user_data['password'],
-    )
+    user_data = user_result["data"]
+    user_data = jsonable_encoder(convert_objectid(user_data))  # Convert MongoDB ObjectId to string
+    return JSONResponse(content=user_data)
 
-# Route to update user profile by username (using the token)
+
+# User profile update route
 @router.put("/profile", response_model=User)
-async def update_user_profile(user_update: UserUpdate, authorization: str = Depends(oauth2_scheme)):
+async def update_user_profile_route(user_update: UserUpdate, authorization: str):
     """
-    Update the user's profile using the username (from token).
+    Update the user's profile using the username (extracted from JWT token).
     """
-    token = authorization.split(" ")[1]
+    token = authorization.split(" ")[1]  # Token sent as "Bearer <token>"
+
+    # Decode the JWT token to get the username
     decoded_token = decode_jwt(token)
     username = decoded_token.get("username")
 
@@ -82,22 +62,16 @@ async def update_user_profile(user_update: UserUpdate, authorization: str = Depe
         raise HTTPException(status_code=404, detail="Username not found in token")
 
     # Ensure the user exists before attempting to update
-    result = await get_user_by_username(username)
-    if result["status"] == "error":
+    user_result = await get_user_by_username(username)
+    if user_result["status"] == "error":
         raise HTTPException(status_code=404, detail="User not found")
 
-    # Update the user's profile
-    update_result = await update_user_profile(username, user_update)
+    # Perform the update operation
+    update_result = await update_user_profile(username, user_update.dict())
 
     if update_result["status"] == "error":
         raise HTTPException(status_code=400, detail="Failed to update user profile")
 
     updated_user_data = update_result["data"]
-    return User(
-        name=updated_user_data['name'],
-        email=updated_user_data['email'],
-        phone=updated_user_data['phone'],
-        address=updated_user_data['address'],
-        billingAddress=updated_user_data.get('billingAddress', ''),
-        password=updated_user_data['password'],
-    )
+    updated_user_data = jsonable_encoder(convert_objectid(updated_user_data))  # Convert MongoDB ObjectId to string
+    return JSONResponse(content=updated_user_data)

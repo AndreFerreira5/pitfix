@@ -22,7 +22,6 @@ async def update_user_profile(user_id: str, user_update: dict):
         "phone": user_update['phone'],
         "address": user_update.get('address', ''),
         "billingAddress": user_update.get('billingAddress', ''),
-        "updatedAt": datetime.now()  # Optionally track when the profile was updated
     }
 
     result = await db.user.update_one({"_id": ObjectId(user_id)}, {"$set": update_data})
