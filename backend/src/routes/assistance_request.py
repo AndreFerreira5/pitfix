@@ -18,7 +18,7 @@ router = APIRouter()
 
 @router.get("/all")
 async def route_get_all_assistance_requests():
-    return await route_get_all_assistance_requests(), 200
+    return await get_all_assistance_requests(), 200
 
 
 @router.get("/{request_id}")
