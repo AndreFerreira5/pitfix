@@ -12,7 +12,8 @@ class AssistanceRequestRepository {
 
     if (response.statusCode == 200) {
       final List<dynamic> decoded = json.decode(response.body);
-      return decoded.map((item) => AssistanceRequest.fromJson(item)).toList();
+      final List<dynamic> requestsList = json.decode(decoded[0]['body']);
+      return requestsList.map((item) => AssistanceRequest.fromJson(item)).toList();
     } else {
       throw Exception('Failed to load assistance requests');
     }
@@ -37,29 +38,14 @@ class AssistanceRequestRepository {
     if (response.statusCode == 200) {
       final List<dynamic> decoded = json.decode(response.body);
       return decoded.map((item) => AssistanceRequest.fromJson(item)).toList();
-    } else if (response.statusCode == 404) {
-      throw Exception('No assistance requests found for the specified workshop');
     } else {
       throw Exception('Failed to load assistance requests by workshop');
     }
   }
 
-  Future<List<AssistanceRequest>> getRequestsByWorker(String workerId) async {
-    final response = await apiClient.get('/assistance_request/worker/$workerId');
-
-    if (response.statusCode == 200) {
-      final List<dynamic> decoded = json.decode(response.body);
-      return decoded.map((item) => AssistanceRequest.fromJson(item)).toList();
-    } else if (response.statusCode == 404) {
-      throw Exception('No assistance requests found for the specified worker');
-    } else {
-      throw Exception('Failed to load assistance requests by worker');
-    }
-  }
-
   Future<String> createAssistanceRequest(AssistanceRequest assistanceRequest) async {
     final response = await apiClient.post(
-      '/assistance_request',
+      '/assistance_request/add',
       body: json.encode(assistanceRequest.toJson()),
     );
 
@@ -72,7 +58,7 @@ class AssistanceRequestRepository {
 
   Future<String> editAssistanceRequest(String requestId, AssistanceRequest assistanceRequest) async {
     final response = await apiClient.put(
-      '/assistance_request/$requestId',
+      '/assistance_request/edit/$requestId',
       body: json.encode(assistanceRequest.toJson()),
     );
 
@@ -86,7 +72,7 @@ class AssistanceRequestRepository {
   }
 
   Future<String> deleteAssistanceRequest(String requestId) async {
-    final response = await apiClient.delete('/assistance_request/$requestId');
+    final response = await apiClient.delete('/assistance_request/delete/$requestId');
 
     if (response.statusCode == 200) {
       return json.decode(response.body)['message'];

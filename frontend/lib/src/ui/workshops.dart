@@ -3,26 +3,27 @@ import 'package:get/get.dart';
 import '../repository/workshop_repository.dart';
 import 'add_workshop.dart';
 import '../models/workshop.dart';
+import 'workshop_detail_page.dart'; // Add import for the details page
 
 class Workshops extends StatefulWidget {
-  const Workshops({super.key});
+  final String userRole;
+  const Workshops({super.key, required this.userRole});
 
   @override
   _WorkshopsState createState() => _WorkshopsState();
 }
 
-
 class _WorkshopsState extends State<Workshops> {
   late WorkshopRepository _workshopRepository;
   late Future<List<Workshop>> _workshopsFuture;
-  bool isAdmin = true; // set up this way for now, for demonstration purposes
+  bool isAdmin = false; // Set to true for now to simulate admin role
 
   @override
   void initState() {
     super.initState();
-
     _workshopRepository = Get.find<WorkshopRepository>();
     _workshopsFuture = _workshopRepository.getAllWorkshops();
+    isAdmin = widget.userRole == 'admin'; // Check if userRole is 'admin'
   }
 
   @override
@@ -38,7 +39,6 @@ class _WorkshopsState extends State<Workshops> {
             return const Center(child: CircularProgressIndicator());
           } else if (snapshot.hasError) {
             return const Center(child: Text('No workshops available.'));
-            //return Center(child: Text('Error: ${snapshot.error}')); // TODO simply display "no workshops available" or display the error?
           } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
             return const Center(child: Text('No workshops available.'));
           }
@@ -50,7 +50,7 @@ class _WorkshopsState extends State<Workshops> {
             padding: const EdgeInsets.all(16),
             itemBuilder: (context, index) {
               final workshop = workshops[index];
-              return WorkshopCard(workshop: workshop);
+              return WorkshopCard(workshop: workshop, isAdmin: isAdmin); // Pass isAdmin to WorkshopCard
             },
           );
         },
@@ -69,18 +69,17 @@ class _WorkshopsState extends State<Workshops> {
           child: const Icon(Icons.add),
         ),
       )
-
           : null,
     );
   }
 }
 
-
-// widget to display each workshop as a card
+// Card widget to display each workshop with a clickable action
 class WorkshopCard extends StatelessWidget {
   final Workshop workshop;
+  final bool isAdmin; // Add isAdmin as a parameter
 
-  const WorkshopCard({required this.workshop, super.key});
+  const WorkshopCard({required this.workshop, required this.isAdmin, super.key}); // Make sure to accept isAdmin
 
   @override
   Widget build(BuildContext context) {
@@ -89,63 +88,20 @@ class WorkshopCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(32),
       ),
       margin: const EdgeInsets.symmetric(vertical: 8),
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            ClipRRect(
-              borderRadius: BorderRadius.circular(32),
-              child: (workshop.imageUrl != null && workshop.imageUrl!.isNotEmpty)
-                  ? Image.network(
-                workshop.imageUrl!,
-                width: 80,
-                height: 80,
-                fit: BoxFit.cover,
-              )
-                  : Container(
-                width: 80,
-                height: 80,
-                color: Colors.grey[200], // Optional: Add a background color
-                child: const Icon(
-                  Icons.image_not_supported, // Choose an appropriate icon
-                  size: 40, // Adjust the size as needed
-                  color: Colors.grey, // Optional: Icon color
-                ),
-              ),
+      child: ListTile(
+        onTap: () {
+          // Navigate to the WorkshopDetailsPage
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => WorkshopDetailsPage(workshop: workshop, isAdmin: isAdmin), // Pass isAdmin to details page
             ),
-            const SizedBox(width: 16),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    workshop.name,
-                    style: Theme.of(context).textTheme.titleMedium,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    workshop.description ?? 'No description available',
-                    style: Theme.of(context).textTheme.bodyMedium,
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  const SizedBox(height: 8),
-                  Row(
-                    children: [
-                      const Icon(Icons.star, color: Colors.amber, size: 16),
-                      const SizedBox(width: 4),
-                      Text(workshop.rating?.toString() ?? 'N/A'),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-            const Icon(Icons.arrow_forward_ios, size: 16),
-          ],
-        ),
+          );
+        },
+        contentPadding: const EdgeInsets.all(16),
+        title: Text(workshop.name),
+        subtitle: Text(workshop.description ?? 'No description available'),
+        trailing: const Icon(Icons.arrow_forward_ios),
       ),
     );
   }

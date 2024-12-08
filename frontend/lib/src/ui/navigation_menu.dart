@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:iconsax/iconsax.dart';
 import 'package:get/get.dart';
+import 'package:pitfix_frontend/src/ui/requests.dart';
 import 'workshops.dart';
 
 class NavigationMenu extends StatelessWidget {
@@ -14,8 +15,8 @@ class NavigationMenu extends StatelessWidget {
     switch (role) {
       case 'admin':
         return [
-          Workshops(),
-          const Center(child: Text('Requests Page')),
+          Workshops(userRole: userRole),
+          AdminRequestsPage(userRole: userRole),
           const Center(child: Text('Profile Page')),
           const Center(child: Text('Settings Page')),
         ];
@@ -33,8 +34,8 @@ class NavigationMenu extends StatelessWidget {
         ];
       case 'client':
         return [
-          const Center(child: Text('Workshops Page')),
-          const Center(child: Text('My Requests Page')),
+          Workshops(userRole: userRole),
+          AdminRequestsPage(userRole: userRole),
           const Center(child: Text('Profile Page')),
           const Center(child: Text('Settings Page')),
         ];
