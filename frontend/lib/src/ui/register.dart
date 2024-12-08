@@ -5,6 +5,7 @@ import '../repository/user_repository.dart';
 import '../utils/api_client.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import '../models/user.dart';
+import 'login.dart';
 
 class RegisterPage extends StatefulWidget {
   @override
@@ -50,10 +51,11 @@ class _RegisterPageState extends State<RegisterPage> {
         });
 
         if (user != null) {
-          // Optionally, save user data to secure storage or perform auto-login
-          Get.snackbar('Success', 'Registration successful! Please login.',
-              snackPosition: SnackPosition.BOTTOM);
-          Get.back();
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            Get.snackbar('Success', 'Registration successful! Please login.',
+                snackPosition: SnackPosition.BOTTOM);
+            Get.offAll(() => LoginPage());
+          });
         } else {
           Get.snackbar('Error', 'Registration failed. Please try again.',
               snackPosition: SnackPosition.BOTTOM);

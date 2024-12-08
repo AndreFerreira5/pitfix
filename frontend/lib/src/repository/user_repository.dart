@@ -88,16 +88,36 @@ class UserRepository {
         'username': username,
         'password': password,
         'email': email,
-        'role': role, // Include role in the request
+        'role': role,
       });
 
-      if (response.statusCode == 201) {
-        final Map<String, dynamic> responseData = json.decode(response.body);
-        return User.fromJson(responseData);
+      if (response.statusCode == 201 || response.statusCode == 200) {
+        final responseData = json.decode(response.body);
+
+        // Check if the response is a List and contains at least one item
+        if (responseData is List && responseData.isNotEmpty) {
+          // Get the first item of the list, which should be a Map
+          var firstItem = responseData[0];
+
+          if (firstItem is Map<String, dynamic>) {
+            // Check if the message indicates success or error
+            if (firstItem.containsKey('message')) {
+              String message = firstItem['message'];
+
+              // If user creation was successful
+              if (message == 'User created successfully.') {
+                return User(username: username, email: email, role: role);
+              } else {
+                print('Error: $message');
+                return null;  // Handle any errors accordingly (e.g., user already exists)
+              }
+            }
+          }
+        }
       }
-      return null;
+      return null; // If response is neither a List nor a valid Map
     } catch (e) {
-      print(e);
+      print('Error during registration: $e');
       throw Exception('Failed to register: $e');
     }
   }
