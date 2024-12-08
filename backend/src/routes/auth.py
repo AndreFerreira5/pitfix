@@ -145,3 +145,26 @@ async def get_public_key():
     except Exception as e:
         logger.error(f"Failed to encode public key: {e}")
         raise HTTPException(status_code=500, detail="Unable to retrieve public key")
+
+
+@router.get("/profile")
+async def get_user_profile(username: str):
+    try:
+        # Fetch the user by username
+        user = await get_user_by_username(username)
+
+        # If user is not found, raise a 404 error
+        if not user:
+            raise HTTPException(status_code=404, detail="User not found")
+
+        # Prepare the response data directly, extracting necessary fields
+        return {
+            'username': user.get("username"),
+            'email': user.get("email"),
+            'role': user.get("role"),
+            'createdAt': user.get("createdAt").isoformat()  # Convert to ISO format for consistency
+        }
+
+    except Exception as e:
+        logging.error(f"Error fetching user profile: {e}")
+        raise HTTPException(status_code=500, detail="Internal Server Error")
