@@ -9,9 +9,9 @@ class UserRepository {
   UserRepository({required this.apiClient});
 
   // Modify the login method to use the User model if needed
-  Future<LoginResponse?> login(String email, String password) async {
+  Future<LoginResponse?> login(String username, String password) async {
     final response = await apiClient.post('/auth/login', body: {
-      'email': email,
+      'username': username,
       'password': password,
     });
 
