@@ -9,6 +9,8 @@ from db.auth import get_user_by_email, get_user_by_username, get_user_by_id, ins
 from models.auth import LoginRequest, RegisterRequest, RefreshRequest
 from utils.auth import generate_refresh_token, generate_access_token, generate_tokens_nonce, load_private_key, load_public_key
 import logging
+from models.user import User
+
 
 
 load_dotenv()
