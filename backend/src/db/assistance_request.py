@@ -27,7 +27,10 @@ async def get_all_assistance_requests():
         return JSONResponse(content=encoded_requests)
     except Exception as e:
         logger.error(f"Error retrieving assistance requests: {str(e)}")
-        return {"status": "error", "message": str(e)}
+        return JSONResponse(
+            content={"status": "error", "message": str(e)},
+            status_code=500
+        )
 
 
 async def insert_assistance_request(request_data: AssistanceRequestCreate):
