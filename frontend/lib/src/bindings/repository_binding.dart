@@ -1,4 +1,5 @@
 import 'package:get/get.dart';
+import 'package:pitfix_frontend/src/repository/assistance_request_reepository.dart';
 import '../utils/api_client.dart';
 import '../repository/workshop_repository.dart';
 import '../repository/user_repository.dart';
@@ -12,5 +13,6 @@ class RepositoryBinding extends Bindings {
     // initialize and inject repositories
     Get.put<WorkshopRepository>(WorkshopRepository(apiClient: apiClient));
     Get.put<UserRepository>(UserRepository(apiClient: apiClient));
+    Get.put<AssistanceRequestRepository>(AssistanceRequestRepository(apiClient: apiClient));
   }
 }
