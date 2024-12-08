@@ -1,5 +1,3 @@
-// lib/src/repository/user_repository.dart
-
 import '../utils/api_client.dart';
 import 'dart:convert';
 
@@ -28,11 +26,12 @@ class UserRepository {
 
   UserRepository({required this.apiClient});
 
+  // Login method
   Future<LoginResponse?> login(String username, String password) async {
     try {
       final response = await apiClient.post('/auth/login', body: {
         'username': username,
-        'password': password
+        'password': password,
       });
 
       if (response.statusCode == 200) {
@@ -49,6 +48,7 @@ class UserRepository {
     }
   }
 
+  // Register method
   Future<bool> register({
     required String username,
     required String email,
@@ -72,5 +72,26 @@ class UserRepository {
     }
   }
 
-// TODO: other methods
+  // Get user data by ID
+  Future<Map<String, dynamic>?> getUserById(String userId, String accessToken) async {
+    try {
+      final response = await apiClient.get(
+        '/user/$userId', // The endpoint to fetch user by ID
+        headers: {
+          'Authorization': 'Bearer $accessToken', // Pass the access token in the Authorization header
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final Map<String, dynamic> userData = json.decode(response.body);
+        return userData;
+      } else {
+        return null;
+      }
+    } catch (e) {
+      throw Exception('Failed to fetch user data: $e');
+    }
+  }
+
+// Additional methods (like update and delete) can be added here
 }

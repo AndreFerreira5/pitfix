@@ -45,7 +45,6 @@ class _RegisterPageState extends State<RegisterPage> {
         final success = await userRepository
             .register(
           username: _username, // Changed from _name to _username
-          address: _address,
           email: _email,
           password: _password,
           role: _selectedRole!, // Pass the selected role
