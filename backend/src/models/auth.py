@@ -16,3 +16,12 @@ class RegisterRequest(BaseModel):
 class RefreshRequest(BaseModel):
     access_token: str
     refresh_token: str
+
+
+class User(BaseModel):
+    name: str
+    email: str
+    phone: str
+    address: str
+    billingAddress: Optional[str] = None
+    # Exclude password in response
