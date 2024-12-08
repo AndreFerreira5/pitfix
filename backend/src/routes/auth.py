@@ -5,7 +5,7 @@ from dotenv import load_dotenv
 from fastapi import APIRouter, HTTPException
 import json
 from datetime import datetime, timedelta, timezone
-from db.auth import get_user_by_username, get_user_by_id, insert_user, verify_password, update_user_session_nonce
+from db.auth import get_user_by_email, get_user_by_username, get_user_by_id, insert_user, verify_password, update_user_session_nonce
 from models.auth import LoginRequest, RegisterRequest, RefreshRequest
 from utils.auth import generate_refresh_token, generate_access_token, generate_tokens_nonce, load_private_key, load_public_key
 import logging
@@ -23,7 +23,7 @@ router = APIRouter()
 
 @router.post("/login")
 async def login(request: LoginRequest):
-    existing_user = await get_user_by_username(request.username)  # retrieve user
+    existing_user = await get_user_by_email(request.email)  # retrieve user
     if existing_user is None:  # if the user is not found, return invalid login message
         return {"message": "Invalid username or password"}, 200
 

@@ -46,6 +46,7 @@ class AuthController extends GetxController {
             snackPosition: SnackPosition.BOTTOM);
       }
     } catch (e) {
+      print(e);
       Get.snackbar('Error', 'An error occurred during login.',
           snackPosition: SnackPosition.BOTTOM);
     }

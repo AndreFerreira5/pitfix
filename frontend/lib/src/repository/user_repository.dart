@@ -9,26 +9,32 @@ class UserRepository {
   UserRepository({required this.apiClient});
 
   // Modify the login method to use the User model if needed
-  Future<LoginResponse?> login(String username, String password) async {
-    try {
-      final response = await apiClient.post('/auth/login', body: {
-        'username': username,
-        'password': password
-      });
+  Future<LoginResponse?> login(String email, String password) async {
+    final response = await apiClient.post('/auth/login', body: {
+      'email': email,
+      'password': password,
+    });
 
-      if (response.statusCode == 200) {
-        final Map<String, dynamic> responseData = json.decode(response.body);
-        if (responseData.containsKey('access_token') &&
-            responseData.containsKey('refresh_token') &&
-            responseData.containsKey('user_role')) {
-          return LoginResponse.fromJson(responseData);
+    if (response.statusCode == 200) {
+      var responseData = jsonDecode(response.body);
+
+      // Check if the response is a List
+      if (responseData is List && responseData.isNotEmpty) {
+        // Access the first element, which should be a Map
+        var messageMap = responseData[0];
+
+        if (messageMap is Map<String, dynamic>) {
+          // Handle the case where login failed (e.g., Invalid username or password)
+          if (messageMap.containsKey('message') && messageMap['message'] == 'Invalid username or password') {
+            print('Login failed: Invalid credentials');
+            return null;
+          }
         }
       }
-      return null;
-    } catch (e) {
-      throw Exception('Failed to login: $e');
     }
+    return null;
   }
+
 
   // Register method now returns a User object or success response
   Future<User?> register({

@@ -5,7 +5,6 @@ import '../controllers/auth_controller.dart';
 import '../repository/user_repository.dart';
 import '../utils/api_client.dart';
 import 'register.dart';
-import 'navigation_menu.dart'; // Ensure this import exists
 
 class LoginPage extends StatefulWidget {
   @override
