@@ -97,7 +97,7 @@ async def get_assistance_request_by_id(request_id: str):
 async def get_assistance_requests_by_workshop(workshop_id: str):
     db = await get_db()
     try:
-        assistance_requests = await db.assistance_request.find_one({"workshop_id": ObjectId(workshop_id)})
+        assistance_requests = await db.assistance_request.find_one({"workshop_id": workshop_id})
         if assistance_requests:
             assistance_requests = sonable_encoder(convert_objectid(assistance_requests))
             return {"status": "success", "data": assistance_requests}
