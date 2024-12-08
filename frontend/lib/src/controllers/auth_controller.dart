@@ -28,9 +28,9 @@ class AuthController extends GetxController {
     isAuthenticated.value = accessToken.value.isNotEmpty;
   }
 
-  Future<void> login(String email, String password) async {
+  Future<void> login(String username, String password) async {
     try {
-      final loginResponse = await _userRepository.login(email, password);
+      final loginResponse = await _userRepository.login(username, password);
       if (loginResponse != null) {
         accessToken.value = loginResponse.accessToken;
         refreshToken.value = loginResponse.refreshToken;

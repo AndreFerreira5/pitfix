@@ -23,7 +23,7 @@ router = APIRouter()
 
 @router.post("/login")
 async def login(request: LoginRequest):
-    existing_user = await get_user_by_email(request.username)  # retrieve user
+    existing_user = await get_user_by_username(request.username)  # retrieve user
     if existing_user is None:  # if the user is not found, return invalid login message
         return {"message": "Invalid username or password"}, 200
 
