@@ -23,5 +23,4 @@ class User(BaseModel):
     email: str
     phone: str
     address: str
-    billingAddress: Optional[str] = None
     # Exclude password in response
