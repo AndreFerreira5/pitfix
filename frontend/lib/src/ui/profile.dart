@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../models/user_update.dart';
-import '../repository/user_repository.dart';  // Ensure correct import path
+import '../repository/user_repository.dart';
 import '../models/user.dart';
-import '../utils/api_client.dart';  // Ensure correct import path for User model
+import '../utils/api_client.dart';
 
 class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
@@ -49,13 +49,10 @@ class _ProfilePageState extends State<ProfilePage> {
     super.dispose();
   }
 
-  // Fetch user data by username (using the token)
+  // Fetch user data by the logged-in user's username
   Future<void> _fetchUserProfile() async {
     try {
-      final loginResponse = await _userRepository.login("username", "password");
-      final userProfile = await _userRepository.getUserByUsername(
-        loginResponse!.accessToken,
-      );
+      final userProfile = await _userRepository.get_user_profile();
 
       setState(() {
         _name = userProfile?.name ?? '';
@@ -89,7 +86,6 @@ class _ProfilePageState extends State<ProfilePage> {
     });
 
     try {
-      final loginResponse = await _userRepository.login("username", "password");
       final userUpdate = UserUpdate(
         name: _nameController.text,
         email: _emailController.text,
@@ -99,10 +95,7 @@ class _ProfilePageState extends State<ProfilePage> {
         password: _passwordController.text, // Send the updated password
       );
 
-      final result = await _userRepository.updateUserProfile(
-        loginResponse!.accessToken,
-        userUpdate,
-      );
+      final result = await _userRepository.updateUserProfile(userUpdate);
 
       setState(() {
         _isEditing = false;

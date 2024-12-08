@@ -123,14 +123,15 @@ class UserRepository {
   }
 
 
-  // Fetch user profile by username (from token)
-  Future<User?> getUserByUsername(String accessToken) async {
+  // Fetch user profile by the logged-in user's username
+  Future<User?> get_user_profile() async {
+    if (username == null) {
+      throw Exception("User is not logged in");
+    }
+
     try {
       final response = await apiClient.get(
-        '/user/profile',  // Route to fetch user profile by username
-        headers: {
-          'Authorization': 'Bearer $accessToken', // Pass token in Authorization header
-        },
+        '/user/profile/$username',  // Use the stored username in the URL
       );
 
       if (response.statusCode == 200) {
@@ -144,20 +145,19 @@ class UserRepository {
     }
   }
 
-  // Update user profile by username (using token)
-  Future<String> updateUserProfile(String accessToken, UserUpdate userUpdate) async {
+  // Update user profile by username
+  Future<String> updateUserProfile(UserUpdate userUpdate) async {
+    if (username == null) {
+      throw Exception("User is not logged in");
+    }
+
     final response = await apiClient.put(
-      '/user/profile',  // Update route using username (via token)
-      headers: {
-        'Authorization': 'Bearer $accessToken',
-      },
+      '/user/profile/$username',  // Use the stored username in the URL
       body: json.encode(userUpdate.toJson()),
     );
 
     if (response.statusCode == 200) {
-      return json.decode(response.body)['message']; // Success message
-    } else if (response.statusCode == 404) {
-      throw Exception('User not found');
+      return json.decode(response.body)['message'];
     } else {
       throw Exception('Failed to update user profile');
     }

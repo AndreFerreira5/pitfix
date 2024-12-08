@@ -90,18 +90,6 @@ class _SettingsPageState extends State<SettingsPage> {
                   _changeLanguage('en');
                 },
               ),
-              ListTile(
-                title: const Text('Spanish'),
-                onTap: () {
-                  _changeLanguage('es');
-                },
-              ),
-              ListTile(
-                title: const Text('French'),
-                onTap: () {
-                  _changeLanguage('fr');
-                },
-              ),
             ],
           ),
         );

@@ -147,24 +147,46 @@ async def get_public_key():
         raise HTTPException(status_code=500, detail="Unable to retrieve public key")
 
 
-@router.get("/profile")
-async def get_user_profile(username: str):
-    try:
-        # Fetch the user by username
-        user = await get_user_by_username(username)
+ync def get_user_profile(username: str):
+    """
+    Fetch the user's profile by username.
+    """
+    result = await get_user_by_username(username)
+    if result["status"] == "error":
+        raise HTTPException(status_code=404, detail="User not found")
+    user_data = result["data"]
+    return User(
+        name=user_data['name'],
+        email=user_data['email'],
+        phone=user_data['phone'],
+        address=user_data['address'],
+        billingAddress=user_data.get('billingAddress', ''),  # Optional
+        password=user_data['password'],  # Ensure to handle sensitive data properly
+    )
 
-        # If user is not found, raise a 404 error
-        if not user:
-            raise HTTPException(status_code=404, detail="User not found")
+# Route to update user profile by username
+@router.put("/profile/{username}", response_model=User)
+async def update_user_profile(username: str, user_update: UserUpdate):
+    """
+    Update the user's profile using the username.
+    """
+    # Ensure the user exists before attempting to update
+    result = await get_user_by_username(username)
+    if result["status"] == "error":
+        raise HTTPException(status_code=404, detail="User not found")
 
-        # Prepare the response data directly, extracting necessary fields
-        return {
-            'username': user.get("username"),
-            'email': user.get("email"),
-            'role': user.get("role"),
-            'createdAt': user.get("createdAt").isoformat()  # Convert to ISO format for consistency
-        }
+    # Update the user's profile
+    update_result = await update_user_profile(username, user_update)
 
-    except Exception as e:
-        logging.error(f"Error fetching user profile: {e}")
-        raise HTTPException(status_code=500, detail="Internal Server Error")
+    if update_result["status"] == "error":
+        raise HTTPException(status_code=400, detail="Failed to update user profile")
+
+    updated_user_data = update_result["data"]
+    return User(
+        name=updated_user_data['name'],
+        email=updated_user_data['email'],
+        phone=updated_user_data['phone'],
+        address=updated_user_data['address'],
+        billingAddress=updated_user_data.get('billingAddress', ''),  # Optional
+        password=updated_user_data['password'],
+    )
