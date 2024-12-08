@@ -1,5 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import '../models/user_update.dart';
+import '../repository/user_repository.dart';  // Ensure correct import path
+import '../models/user.dart';
+import '../utils/api_client.dart';  // Ensure correct import path for User model
 
 class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
@@ -9,38 +13,32 @@ class ProfilePage extends StatefulWidget {
 }
 
 class _ProfilePageState extends State<ProfilePage> {
-  // Sample user data
-  String _name = "John Doe";
-  String _email = "john.doe@example.com";
-  String _phone = "+1234567890";
-  String _address = "123 Main St, Springfield, USA";
-  String _billingAddress = "456 Elm St, Springfield, USA";
+  // User profile data
+  String _name = "";
+  String _email = "";
+  String _phone = "";
+  String _address = "";
+  String _billingAddress = "";
 
-  // Boolean to toggle between view and edit mode
   bool _isEditing = false;
+  bool _isLoading = true; // To show loading spinner while fetching user data
 
-  // Controllers to manage the text fields
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _phoneController = TextEditingController();
   final TextEditingController _addressController = TextEditingController();
   final TextEditingController _billingController = TextEditingController();
 
+  final UserRepository _userRepository = UserRepository(apiClient: ApiClient(baseUrl: 'http://localhost:8000'));
+
   @override
   void initState() {
     super.initState();
-
-    // Initialize text fields with current user data
-    _nameController.text = _name;
-    _emailController.text = _email;
-    _phoneController.text = _phone;
-    _addressController.text = _address;
-    _billingController.text = _billingAddress;
+    _fetchUserProfile();
   }
 
   @override
   void dispose() {
-    // Dispose of controllers when the widget is disposed
     _nameController.dispose();
     _emailController.dispose();
     _phoneController.dispose();
@@ -49,31 +47,82 @@ class _ProfilePageState extends State<ProfilePage> {
     super.dispose();
   }
 
-  // Function to toggle between edit and view modes
+  // Function to fetch user data
+  Future<void> _fetchUserProfile() async {
+    try {
+      final loginResponse = await _userRepository.login("username", "password"); // Dummy login, use actual login
+      final userProfile = await _userRepository.getUserById(
+        'user_id_here',  // Replace with actual user ID
+        loginResponse!.accessToken,  // Use the access token from login
+      );
+
+      setState(() {
+        _name = userProfile?.name ?? '';
+        _email = userProfile?.email ?? '';
+        _phone = userProfile?.phone ?? '';
+        _address = userProfile?.address ?? '';
+        _billingAddress = userProfile?.billingAddress ?? '';
+        _isLoading = false;
+
+        // Initialize controllers with fetched data
+        _nameController.text = _name;
+        _emailController.text = _email;
+        _phoneController.text = _phone;
+        _addressController.text = _address;
+        _billingController.text = _billingAddress;
+      });
+    } catch (e) {
+      setState(() {
+        _isLoading = false;
+      });
+      // Handle error, e.g., show a Snackbar or dialog
+      print("Error fetching user profile: $e");
+    }
+  }
+
+  // Function to save changes to user profile
+  void _saveChanges() async {
+    setState(() {
+      _isLoading = true;
+    });
+
+    try {
+      final loginResponse = await _userRepository.login("username", "password"); // Use actual login logic
+      final userUpdate = UserUpdate(
+        name: _nameController.text,
+        email: _emailController.text,
+        phone: _phoneController.text,
+        address: _addressController.text,
+        billingAddress: _billingController.text,
+      );
+
+      final result = await _userRepository.updateUserProfile(
+        'user_id_here',  // Replace with actual user ID
+        loginResponse!.accessToken,  // Use the access token from login
+        userUpdate,
+      );
+
+      setState(() {
+        _isEditing = false;
+        _isLoading = false;
+      });
+
+      // Show success message or perform other actions
+      print("User profile updated: $result");
+    } catch (e) {
+      setState(() {
+        _isLoading = false;
+      });
+      // Handle error (e.g., show a Snackbar or dialog)
+      print("Error saving changes: $e");
+    }
+  }
+
+  // Toggle edit mode
   void _toggleEditMode() {
     setState(() {
       _isEditing = !_isEditing;
     });
-  }
-
-  // Function to save the changes (for now, just print the new values)
-  void _saveChanges() {
-    setState(() {
-      _name = _nameController.text;
-      _email = _emailController.text;
-      _phone = _phoneController.text;
-      _address = _addressController.text;
-      _billingAddress = _billingController.text;
-      _isEditing = false; // Exit edit mode
-    });
-
-    // For now, print the updated values (replace with your save logic)
-    print("Saved Changes:");
-    print("Name: $_name");
-    print("Email: $_email");
-    print("Phone: $_phone");
-    print("Address: $_address");
-    print("Billing Address: $_billingAddress");
   }
 
   @override
@@ -82,13 +131,14 @@ class _ProfilePageState extends State<ProfilePage> {
       appBar: AppBar(
         title: const Text('Profile'),
       ),
-      body: Padding(
+      body: _isLoading
+          ? const Center(child: CircularProgressIndicator())
+          : Padding(
         padding: const EdgeInsets.all(16.0),
         child: SingleChildScrollView(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Profile Section Header
               const Text(
                 'Profile Information',
                 style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
