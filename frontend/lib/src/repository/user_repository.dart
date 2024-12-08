@@ -1,8 +1,7 @@
-import 'package:pitfix_frontend/src/models/user_update.dart';
-
-import '../utils/api_client.dart';
 import 'dart:convert';
-import '../models/user.dart';  // Import the User model
+import '../utils/api_client.dart';
+import '../models/user.dart';
+import '../models/user_update.dart';  // Assuming you have the UserUpdate model for profile updates
 
 class LoginResponse {
   final String accessToken;
@@ -24,8 +23,6 @@ class LoginResponse {
   }
 }
 
-
-
 class UserRepository {
   final ApiClient apiClient;
 
@@ -34,7 +31,7 @@ class UserRepository {
 
   UserRepository({required this.apiClient});
 
-  // Modify the login method to use the User model if needed
+// Modify the login method to use the User model if needed
   Future<LoginResponse?> login(String username, String password) async {
     try {
       // Sending login request to backend
@@ -78,6 +75,7 @@ class UserRepository {
     }
   }
 
+
   // Register method now returns a User object or success response
   Future<User?> register({
     required String username,
@@ -104,12 +102,14 @@ class UserRepository {
     }
   }
 
+
+  // Fetch user profile by username (from token)
   Future<User?> getUserByUsername(String accessToken) async {
     try {
       final response = await apiClient.get(
         '/user/profile',  // Route to fetch user profile by username
         headers: {
-          'Authorization': 'Bearer $accessToken', // Pass the token in Authorization header
+          'Authorization': 'Bearer $accessToken', // Pass token in Authorization header
         },
       );
 
@@ -124,7 +124,7 @@ class UserRepository {
     }
   }
 
-  // Update user profile by username
+  // Update user profile by username (using token)
   Future<String> updateUserProfile(String accessToken, UserUpdate userUpdate) async {
     final response = await apiClient.put(
       '/user/profile',  // Update route using username (via token)

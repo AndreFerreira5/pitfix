@@ -10,12 +10,14 @@ class Manager extends User {
     required String address,
     String? billingAddress,
     required this.workshopIds,
+    required String password,  // Add password field here
   }) : super(
     name: name,
     email: email,
     phone: phone,
     address: address,
     billingAddress: billingAddress,
+    password: password,  // Pass password to the User constructor
   );
 
   // Convert JSON to Manager object
@@ -27,6 +29,7 @@ class Manager extends User {
       address: json['address'],
       billingAddress: json['billingAddress'],
       workshopIds: List<int>.from(json['workshops'] ?? []),
+      password: json['password'],  // Ensure password is included in the JSON
     );
   }
 
@@ -38,4 +41,3 @@ class Manager extends User {
     return data;
   }
 }
-

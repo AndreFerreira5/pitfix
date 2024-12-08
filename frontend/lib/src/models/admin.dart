@@ -1,4 +1,4 @@
-import 'user.dart';
+import 'user.dart';  // Import the User class
 
 class Admin extends User {
   Admin({
@@ -7,12 +7,14 @@ class Admin extends User {
     required String phone,
     required String address,
     String? billingAddress,
+    required String password,  // Password should be required here too
   }) : super(
     name: name,
     email: email,
     phone: phone,
     address: address,
     billingAddress: billingAddress,
+    password: password,  // Pass password to the User constructor
   );
 
   // Convert JSON to Admin object
@@ -23,12 +25,13 @@ class Admin extends User {
       phone: json['phone'],
       address: json['address'],
       billingAddress: json['billingAddress'],
+      password: json['password'],  // Ensure password is in the JSON
     );
   }
 
   // Convert Admin object to JSON
   @override
   Map<String, dynamic> toJson() {
-    return super.toJson();
+    return super.toJson();  // Call User's toJson method
   }
 }

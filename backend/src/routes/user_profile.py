@@ -1,8 +1,10 @@
-from fastapi import HTTPException, Depends
-from typing import Optional
+from fastapi import FastAPI, HTTPException, Depends
 from pydantic import BaseModel
+from typing import Optional
 import jwt
 from datetime import datetime
+from bson import ObjectId
+from .connection import get_db
 
 # Secret key for JWT decoding
 SECRET_KEY = "your_secret_key"
@@ -29,7 +31,17 @@ class User(BaseModel):
     class Config:
         orm_mode = True  # To support MongoDB ObjectId mapping
 
-# Route to fetch user profile by username
+# Fetch user by username from database
+async def get_user_by_username(username: str):
+    db = await get_db()
+    user = await db.user.find_one({"username": username})
+
+    if not user:
+        return {"status": "error", "message": "User not found"}
+
+    return {"status": "success", "data": user}
+
+# Route to fetch user profile by username (extracted from JWT token)
 @router.get("/profile", response_model=User)
 async def get_user_profile(authorization: str = Depends(oauth2_scheme)):
     """
@@ -56,7 +68,7 @@ async def get_user_profile(authorization: str = Depends(oauth2_scheme)):
         password=user_data['password'],
     )
 
-# Route to update user profile by username
+# Route to update user profile by username (using the token)
 @router.put("/profile", response_model=User)
 async def update_user_profile(user_update: UserUpdate, authorization: str = Depends(oauth2_scheme)):
     """

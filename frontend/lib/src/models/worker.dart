@@ -10,12 +10,14 @@ class Worker extends User {
     required String address,
     String? billingAddress,
     required this.workshopId,
+    required String password,  // Add password field here
   }) : super(
     name: name,
     email: email,
     phone: phone,
     address: address,
     billingAddress: billingAddress,
+    password: password,  // Pass password to the User constructor
   );
 
   // Convert JSON to Worker object
@@ -27,6 +29,7 @@ class Worker extends User {
       address: json['address'],
       billingAddress: json['billingAddress'],
       workshopId: json['workshopId'] ?? 0,  // Default to 0 if not found
+      password: json['password'],  // Ensure password is included in the JSON
     );
   }
 
@@ -38,4 +41,3 @@ class Worker extends User {
     return data;
   }
 }
-

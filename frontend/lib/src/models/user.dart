@@ -4,7 +4,7 @@ class User {
   final String phone;
   final String address;
   final String? billingAddress;
-  final String password; // Make sure password is included
+  final String password;  // Include password in User
 
   User({
     required this.name,
@@ -12,20 +12,22 @@ class User {
     required this.phone,
     required this.address,
     this.billingAddress,
-    required this.password, // password should be required
+    required this.password,  // Make password required
   });
 
+  // Convert JSON to User object
   factory User.fromJson(Map<String, dynamic> json) {
     return User(
       name: json['name'],
       email: json['email'],
       phone: json['phone'],
       address: json['address'],
-      billingAddress: json['billingAddress'], // Optional
-      password: json['password'], // Include password in the response
+      billingAddress: json['billingAddress'],
+      password: json['password'],  // Ensure password is part of the JSON
     );
   }
 
+  // Convert User object to JSON
   Map<String, dynamic> toJson() {
     return {
       'name': name,
@@ -33,7 +35,7 @@ class User {
       'phone': phone,
       'address': address,
       'billingAddress': billingAddress,
-      'password': password,
+      'password': password,  // Include password in toJson
     };
   }
 }
