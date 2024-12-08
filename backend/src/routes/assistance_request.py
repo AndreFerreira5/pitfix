@@ -18,7 +18,7 @@ router = APIRouter()
 
 @router.get("/all", response_model=List[AssistanceRequest])
 async def route_get_all_assistance_requests():
-    result = await get_all_assistance_requests()
+    return await get_all_assistance_requests(), 200
     if result["status"] == "error":
         raise HTTPException(status_code=500, detail=result["message"])
     return result
