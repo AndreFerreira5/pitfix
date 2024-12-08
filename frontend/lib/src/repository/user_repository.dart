@@ -1,33 +1,14 @@
-// lib/src/repository/user_repository.dart
-
 import '../utils/api_client.dart';
 import 'dart:convert';
-
-class LoginResponse {
-  final String accessToken;
-  final String refreshToken;
-  final String userRole;
-
-  LoginResponse({
-    required this.accessToken,
-    required this.refreshToken,
-    required this.userRole,
-  });
-
-  factory LoginResponse.fromJson(Map<String, dynamic> json) {
-    return LoginResponse(
-      accessToken: json['access_token'],
-      refreshToken: json['refresh_token'],
-      userRole: json['user_role'],
-    );
-  }
-}
+import '../models/user.dart';
+import '../models/login_response.dart';
 
 class UserRepository {
   final ApiClient apiClient;
 
   UserRepository({required this.apiClient});
 
+  // Modify the login method to use the User model if needed
   Future<LoginResponse?> login(String username, String password) async {
     try {
       final response = await apiClient.post('/auth/login', body: {
@@ -49,7 +30,8 @@ class UserRepository {
     }
   }
 
-  Future<bool> register({
+  // Register method now returns a User object or success response
+  Future<User?> register({
     required String username,
     required String email,
     required String password,
@@ -63,15 +45,15 @@ class UserRepository {
         'role': role, // Include role in the request
       });
 
-      if (response.statusCode == 201) { // 201 Created is returned on success
-        return true;
+      if (response.statusCode == 201) {
+        final Map<String, dynamic> responseData = json.decode(response.body);
+        return User.fromJson(responseData);
       }
-      return false;
+      return null;
     } catch (e) {
-      print(e);
       throw Exception('Failed to register: $e');
     }
   }
 
-// TODO: other methods
 }
+

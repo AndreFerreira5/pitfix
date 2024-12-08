@@ -1,18 +1,14 @@
 import 'dart:convert';
 import 'package:get/get.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import '../repository/user_repository.dart';
-import '../utils/api_client.dart';
 import '../ui/login.dart';
-
+import '../repository/user_repository.dart';
 
 class AuthController extends GetxController {
   static AuthController get to => Get.find();
 
   final FlutterSecureStorage _storage = const FlutterSecureStorage();
-  final UserRepository _userRepository = UserRepository(
-    apiClient: ApiClient(baseUrl: 'http://127.0.0.1:8000'),
-  );
+  final UserRepository _userRepository = Get.find<UserRepository>();
 
   var accessToken = ''.obs;
   var refreshToken = ''.obs;
