@@ -10,30 +10,48 @@ class UserRepository {
 
   // Modify the login method to use the User model if needed
   Future<LoginResponse?> login(String username, String password) async {
-    final response = await apiClient.post('/auth/login', body: {
-      'username': username,
-      'password': password,
-    });
+    try {
+      // Sending login request to backend
+      final response = await apiClient.post('/auth/login', body: {
+        'username': username,
+        'password': password,
+      });
 
-    if (response.statusCode == 200) {
-      var responseData = jsonDecode(response.body);
+      // Check if the status code is 200 (OK)
+      if (response.statusCode == 200) {
+        var responseData = jsonDecode(response.body);
 
-      // Check if the response is a List
-      if (responseData is List && responseData.isNotEmpty) {
-        // Access the first element, which should be a Map
-        var messageMap = responseData[0];
+        // Ensure the response is a List and contains at least one element
+        if (responseData is List && responseData.isNotEmpty) {
+          var firstItem = responseData[0];
 
-        if (messageMap is Map<String, dynamic>) {
-          // Handle the case where login failed (e.g., Invalid username or password)
-          if (messageMap.containsKey('message') && messageMap['message'] == 'Invalid username or password') {
-            print('Login failed: Invalid credentials');
-            return null;
+          // Check if the first item is a map and contains the expected fields
+          if (firstItem is Map<String, dynamic>) {
+            // Case 1: Handle successful login response with tokens
+            if (firstItem.containsKey('access_token') &&
+                firstItem.containsKey('refresh_token') &&
+                firstItem.containsKey('user_role')) {
+              return LoginResponse.fromJson(firstItem);  // Success, return LoginResponse
+            }
+
+            // Case 2: Handle failed login response (Invalid credentials)
+            if (firstItem.containsKey('message') && firstItem['message'] == 'Invalid username or password') {
+              print('Login failed: Invalid credentials');
+              return null;  // Invalid credentials, return null
+            }
           }
         }
       }
+
+      // If status code isn't 200 or response doesn't match expected structure
+      print('Failed to login: ${response.statusCode}');
+      return null;
+    } catch (e) {
+      print('Error during login: $e');
+      return null;
     }
-    return null;
   }
+
 
 
   // Register method now returns a User object or success response
@@ -57,6 +75,7 @@ class UserRepository {
       }
       return null;
     } catch (e) {
+      print(e);
       throw Exception('Failed to register: $e');
     }
   }

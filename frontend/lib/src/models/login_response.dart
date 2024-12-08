@@ -14,7 +14,7 @@ class LoginResponse {
     return LoginResponse(
       accessToken: json['access_token'],
       refreshToken: json['refresh_token'],
-      userRole: json['user_role'],  // Make sure the API returns 'user_role'
+      userRole: json['user_role'],
     );
   }
 

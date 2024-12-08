@@ -46,9 +46,9 @@ async def login(request: LoginRequest):
             'refresh_token': refresh_token,
             'user_role': existing_user.get("role", "")
         }, 200
-    # if there was no match, return invalid login message 401
+    # if there was no match, return invalid login message 200
     elif password_matching_result["status"] == "fail":
-        raise HTTPException(status_code=401, detail="Invalid username or password")
+        raise HTTPException(status_code=200, detail="Invalid username or password")
     # if there was an error, return a 500 message
     elif password_matching_result["status"] == "error":
         raise HTTPException(status_code=500, detail="Internal Server Error")
