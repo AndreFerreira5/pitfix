@@ -1,11 +1,19 @@
-from fastapi import APIRouter, HTTPException
-from models.user import User, UserUpdate
-from db.user import get_user_by_id, update_user_profile  # Assuming these functions are implemented in the db layer
-from bson import ObjectId
+from pydantic import BaseModel
+from typing import Optional
 
-router = APIRouter()
+class User(BaseModel):
+    name: str
+    email: str
+    password: str  # Include password field (make sure to handle securely)
 
-# Fetch user profile by user ID
+    class Config:
+        orm_mode = True  # To support MongoDB ObjectId mapping
+
+class UserUpdate(BaseModel):
+    name: str
+    email: str
+    password: str
+
 @router.get("/profile/{user_id}", response_model=User)
 async def get_user_profile(user_id: str):
     """
@@ -17,17 +25,16 @@ async def get_user_profile(user_id: str):
 
     user_data = result["data"]
 
-    # Return the user profile data
+    # Return only name, email, phone, address, and password
     return User(
         name=user_data['name'],
         email=user_data['email'],
         phone=user_data['phone'],
-        address=user_data.get('address', ''),
+        address=user_data['address'],
         billingAddress=user_data.get('billingAddress', ''),
-        role=user_data['role']
+        password=user_data['password'],  # Password is also part of the response
     )
 
-# Update user profile
 @router.put("/profile/{user_id}", response_model=User)
 async def update_user_profile(user_id: str, user_update: UserUpdate):
     """
@@ -50,7 +57,7 @@ async def update_user_profile(user_id: str, user_update: UserUpdate):
         name=updated_user_data['name'],
         email=updated_user_data['email'],
         phone=updated_user_data['phone'],
-        address=updated_user_data.get('address', ''),
+        address=updated_user_data['address'],
         billingAddress=updated_user_data.get('billingAddress', ''),
-        role=updated_user_data['role']
+        password=updated_user_data['password'],  # Password should be returned as well
     )

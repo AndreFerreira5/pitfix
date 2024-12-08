@@ -13,21 +13,22 @@ class ProfilePage extends StatefulWidget {
 }
 
 class _ProfilePageState extends State<ProfilePage> {
-  // User profile data
   String _name = "";
   String _email = "";
   String _phone = "";
   String _address = "";
   String _billingAddress = "";
+  String _password = "";  // Make sure to include password in the profile
 
   bool _isEditing = false;
-  bool _isLoading = true; // To show loading spinner while fetching user data
+  bool _isLoading = true;
 
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _phoneController = TextEditingController();
   final TextEditingController _addressController = TextEditingController();
   final TextEditingController _billingController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();  // Password controller
 
   final UserRepository _userRepository = UserRepository(apiClient: ApiClient(baseUrl: 'http://localhost:8000'));
 
@@ -44,16 +45,17 @@ class _ProfilePageState extends State<ProfilePage> {
     _phoneController.dispose();
     _addressController.dispose();
     _billingController.dispose();
+    _passwordController.dispose();  // Dispose password controller
     super.dispose();
   }
 
-  // Function to fetch user data
+  // Fetch user data
   Future<void> _fetchUserProfile() async {
     try {
-      final loginResponse = await _userRepository.login("username", "password"); // Dummy login, use actual login
+      final loginResponse = await _userRepository.login("username", "password");
       final userProfile = await _userRepository.getUserById(
         'user_id_here',  // Replace with actual user ID
-        loginResponse!.accessToken,  // Use the access token from login
+        loginResponse!.accessToken,
       );
 
       setState(() {
@@ -62,43 +64,45 @@ class _ProfilePageState extends State<ProfilePage> {
         _phone = userProfile?.phone ?? '';
         _address = userProfile?.address ?? '';
         _billingAddress = userProfile?.billingAddress ?? '';
+        _password = userProfile?.password ?? '';  // Fetch password as well
         _isLoading = false;
 
-        // Initialize controllers with fetched data
+        // Initialize controllers
         _nameController.text = _name;
         _emailController.text = _email;
         _phoneController.text = _phone;
         _addressController.text = _address;
         _billingController.text = _billingAddress;
+        _passwordController.text = _password;  // Initialize password field
       });
     } catch (e) {
       setState(() {
         _isLoading = false;
       });
-      // Handle error, e.g., show a Snackbar or dialog
       print("Error fetching user profile: $e");
     }
   }
 
-  // Function to save changes to user profile
+  // Save changes
   void _saveChanges() async {
     setState(() {
       _isLoading = true;
     });
 
     try {
-      final loginResponse = await _userRepository.login("username", "password"); // Use actual login logic
+      final loginResponse = await _userRepository.login("username", "password"); // Actual login logic
       final userUpdate = UserUpdate(
         name: _nameController.text,
         email: _emailController.text,
         phone: _phoneController.text,
         address: _addressController.text,
         billingAddress: _billingController.text,
+        password: _passwordController.text, // Send the updated password
       );
 
       final result = await _userRepository.updateUserProfile(
         'user_id_here',  // Replace with actual user ID
-        loginResponse!.accessToken,  // Use the access token from login
+        loginResponse!.accessToken,
         userUpdate,
       );
 
@@ -107,13 +111,11 @@ class _ProfilePageState extends State<ProfilePage> {
         _isLoading = false;
       });
 
-      // Show success message or perform other actions
       print("User profile updated: $result");
     } catch (e) {
       setState(() {
         _isLoading = false;
       });
-      // Handle error (e.g., show a Snackbar or dialog)
       print("Error saving changes: $e");
     }
   }
@@ -161,9 +163,9 @@ class _ProfilePageState extends State<ProfilePage> {
               ),
               const SizedBox(height: 16),
 
-              // Phone Number
+              // Phone
               _buildTextField(
-                label: 'Phone Number',
+                label: 'Phone',
                 controller: _phoneController,
                 isEditable: _isEditing,
               ),
@@ -183,6 +185,14 @@ class _ProfilePageState extends State<ProfilePage> {
                 controller: _billingController,
                 isEditable: _isEditing,
               ),
+              const SizedBox(height: 16),
+
+              // Password
+              _buildTextField(
+                label: 'Password',
+                controller: _passwordController,
+                isEditable: _isEditing,
+              ),
               const SizedBox(height: 24),
 
               // Edit/Save Button
@@ -197,7 +207,6 @@ class _ProfilePageState extends State<ProfilePage> {
     );
   }
 
-  // Widget to display each text field with a label and controller
   Widget _buildTextField({
     required String label,
     required TextEditingController controller,
@@ -214,6 +223,7 @@ class _ProfilePageState extends State<ProfilePage> {
         isEditable
             ? TextField(
           controller: controller,
+          obscureText: label == 'Password' ? true : false,
           decoration: InputDecoration(
             border: const OutlineInputBorder(),
             hintText: 'Enter $label',

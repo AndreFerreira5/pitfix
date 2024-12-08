@@ -1,10 +1,10 @@
-// UserUpdate model (used when updating the user profile)
 class UserUpdate {
   final String name;
   final String email;
   final String phone;
   final String address;
   final String? billingAddress;
+  final String password; // Ensure password is part of the update model
 
   UserUpdate({
     required this.name,
@@ -12,6 +12,7 @@ class UserUpdate {
     required this.phone,
     required this.address,
     this.billingAddress,
+    required this.password, // password should be required for updates
   });
 
   factory UserUpdate.fromJson(Map<String, dynamic> json) {
@@ -21,6 +22,7 @@ class UserUpdate {
       phone: json['phone'],
       address: json['address'],
       billingAddress: json['billingAddress'],
+      password: json['password'],
     );
   }
 
@@ -31,6 +33,7 @@ class UserUpdate {
       'phone': phone,
       'address': address,
       'billingAddress': billingAddress,
+      'password': password,
     };
   }
 }
