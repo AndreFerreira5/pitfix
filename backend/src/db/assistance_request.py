@@ -99,7 +99,7 @@ async def get_assistance_requests_by_workshop(workshop_id: str):
     try:
         assistance_requests = await db.assistance_request.find_one({"workshop_id": workshop_id})
         if assistance_requests:
-            assistance_requests = sonable_encoder(convert_objectid(assistance_requests))
+            assistance_requests = jsonable_encoder(convert_objectid(assistance_requests))
             return {"status": "success", "data": assistance_requests}
         else:
             return {"status": "error", "message": "Request not found."}
@@ -113,7 +113,7 @@ async def get_assistance_requests_by_worker(worker_id: str):
     try:
         assistance_requests = await db.assistance_request.find_one({"workers_ids": ObjectId(worker_id)})
         if assistance_requests:
-            assistance_requests = sonable_encoder(convert_objectid(assistance_requests))
+            assistance_requests = jsonable_encoder(convert_objectid(assistance_requests))
             return {"status": "success", "data": assistance_requests}
         else:
             return {"status": "error", "message": "Request not found."}
