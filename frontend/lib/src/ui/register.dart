@@ -12,7 +12,7 @@ class RegisterPage extends StatefulWidget {
 
 class _RegisterPageState extends State<RegisterPage> {
   final _formKey = GlobalKey<FormState>();
-  final UserRepository userRepository = UserRepository(apiClient: ApiClient(baseUrl: '127.0.0.1:8000'));
+  final UserRepository userRepository = UserRepository(apiClient: ApiClient(baseUrl: 'http://127.0.0.1:8000'));
   final FlutterSecureStorage storage = FlutterSecureStorage();
 
   String _username = '';
