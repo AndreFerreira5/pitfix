@@ -4,7 +4,7 @@ import os
 from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.backends import default_backend
 import pyseto
-from pyseto import Key
+from pyseto import Key, Token
 from pathlib import Path
 import logging
 
@@ -39,11 +39,11 @@ async def generate_access_token(private_key, user, nonce: str) -> bytes:
     )
 
 
-async def decode_token(private_key, token):
-    return pyseto.decode(
+async def decode_token_payload(private_key, token):
+    return json.loads(pyseto.decode(
         private_key,
         token
-    )
+    ).payload.decode('utf-8'))
 
 
 async def generate_tokens_nonce() -> str:

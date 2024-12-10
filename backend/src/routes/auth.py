@@ -9,7 +9,7 @@ from db.auth import get_user_by_email, get_user_by_username, get_user_by_id, ins
     update_user_session_nonce
 from models.auth import LoginRequest, RegisterRequest, RefreshRequest
 from utils.auth import generate_refresh_token, generate_access_token, generate_tokens_nonce, load_private_key, \
-    load_public_key, decode_token
+    load_public_key, decode_token_payload
 import logging
 from models.user import User
 
@@ -36,9 +36,9 @@ async def login(request: LoginRequest):
     if password_matching_result["status"] == "success":
         tokens_nonce = await generate_tokens_nonce()
         access_token = await generate_access_token(private_key, existing_user, tokens_nonce)
-        access_token_exp = await decode_token(private_key, access_token)["exp"]
+        access_token_exp = (await decode_token_payload(private_key, access_token))['exp']
         refresh_token = await generate_refresh_token(private_key, existing_user, tokens_nonce)
-        refresh_token_exp = await decode_token(private_key, refresh_token)["exp"]
+        refresh_token_exp = (await decode_token_payload(private_key, refresh_token))['exp']
         nonce_update_result = await update_user_session_nonce(existing_user["_id"], tokens_nonce)
         if nonce_update_result["status"] == "fail":
             raise HTTPException(status_code=500, detail="Error updating user")
