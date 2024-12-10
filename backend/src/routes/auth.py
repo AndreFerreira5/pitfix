@@ -129,7 +129,9 @@ async def refresh(request: RefreshRequest):
     try:
         tokens_nonce = await generate_tokens_nonce()
         access_token = await generate_access_token(private_key, user, tokens_nonce)
+        access_token_exp = (await decode_token_payload(private_key, access_token))['exp']
         refresh_token = await generate_refresh_token(private_key, user, tokens_nonce)
+        refresh_token_exp = (await decode_token_payload(private_key, refresh_token))['exp']
         nonce_update_result = await update_user_session_nonce(user["_id"], tokens_nonce)
         if nonce_update_result["status"] == "fail":
             raise HTTPException(status_code=500, detail="Error updating user")
@@ -140,7 +142,12 @@ async def refresh(request: RefreshRequest):
         logger.error(f"Token generation failed: {e}")
         raise HTTPException(status_code=500, detail="Token generation failed")
 
-    return {"access_token": access_token, "refresh_token": refresh_token}
+    return {
+        'access_token': access_token,
+        'access_token_exp': access_token_exp,
+        'refresh_token': refresh_token,
+        'refresh_token_exp': refresh_token_exp
+    }, 200
 
 
 @router.get("/public-key")
