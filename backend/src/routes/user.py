@@ -1,7 +1,6 @@
 from fastapi import APIRouter, HTTPException
-from db.auth import get_user_by_username, get_user_by_id, \
-    update_user_profile  # Assuming these are the DB functions for user profile
-from models.auth import User, UserUpdate  # Assuming you have a User model and UserUpdate for update
+from db.auth import get_user_by_username, get_user_by_id
+from models.auth import User
 from fastapi.encoders import jsonable_encoder
 from fastapi.responses import JSONResponse
 from utils.conversions import convert_objectid
@@ -28,6 +27,7 @@ async def get_user_by_username_route(username: str):
     )
 
 
+"""
 @router.put("/{username}", response_model=User)
 async def update_user_by_username(username: str, user_update: UserUpdate):
     # Ensure the user exists before attempting to update
@@ -50,3 +50,4 @@ async def update_user_by_username(username: str, user_update: UserUpdate):
         phone=updated_user_data['phone'],
         address=updated_user_data['address']
     )
+"""
