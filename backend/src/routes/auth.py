@@ -5,13 +5,13 @@ from dotenv import load_dotenv
 from fastapi import APIRouter, HTTPException
 import json
 from datetime import datetime, timedelta, timezone
-from db.auth import get_user_by_email, get_user_by_username, get_user_by_id, insert_user, verify_password, update_user_session_nonce
+from db.auth import get_user_by_email, get_user_by_username, get_user_by_id, insert_user, verify_password, \
+    update_user_session_nonce
 from models.auth import LoginRequest, RegisterRequest, RefreshRequest
-from utils.auth import generate_refresh_token, generate_access_token, generate_tokens_nonce, load_private_key, load_public_key
+from utils.auth import generate_refresh_token, generate_access_token, generate_tokens_nonce, load_private_key, \
+    load_public_key
 import logging
 from models.user import User
-
-
 
 load_dotenv()
 passphrase = os.getenv("PRIVATE_KEY_PASSPHRASE").encode()
@@ -45,8 +45,7 @@ async def login(request: LoginRequest):
 
         return {
             'access_token': access_token,
-            'refresh_token': refresh_token,
-            'user_role': existing_user.get("role", "")
+            'refresh_token': refresh_token
         }, 200
     # if there was no match, return invalid login message 200
     elif password_matching_result["status"] == "fail":
@@ -143,7 +142,7 @@ async def refresh(request: RefreshRequest):
 @router.get("/public-key")
 async def get_public_key():
     try:
-        return {"public-key": public_key_pem.decode("utf-8")}, 200
+        return {"public_key": public_key_pem.decode("utf-8")}, 200
     except Exception as e:
         logger.error(f"Failed to encode public key: {e}")
         raise HTTPException(status_code=500, detail="Unable to retrieve public key")
@@ -164,7 +163,6 @@ async def get_user_profile(username: str):
         email=user_data['email'],
         phone=user_data['phone'],
         address=user_data['address'],
-        billingAddress=user_data.get('billingAddress', ''),  # Optional
-        password=user_data['password'],  # Ensure to handle sensitive data properly
+        billingAddress=user_data.get('billingAddress', ''),
+        password=user_data['password'],
     )
-

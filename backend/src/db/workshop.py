@@ -4,20 +4,11 @@ from models.workshop import Workshop, WorkshopCreate
 import logging
 from fastapi.encoders import jsonable_encoder
 from fastapi.responses import JSONResponse
+from utils.conversions import convert_objectid
 
 
 logger = logging.getLogger(__name__)
 
-
-def convert_objectid(data):
-    if isinstance(data, dict):
-        return {k: convert_objectid(v) for k, v in data.items()}
-    elif isinstance(data, list):
-        return [convert_objectid(i) for i in data]
-    elif isinstance(data, ObjectId):
-        return str(data)
-    else:
-        return data
 
 
 async def get_all_workshops():

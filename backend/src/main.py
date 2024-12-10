@@ -1,5 +1,5 @@
 from fastapi import FastAPI, Depends
-from routes import auth, workshop, assistance_request
+from routes import auth, workshop, assistance_request, user
 from db.connection import db_connect, db_disconnect
 import uvicorn
 from contextlib import asynccontextmanager
@@ -21,6 +21,7 @@ app = FastAPI(lifespan=lifespan)
 app.include_router(auth.router, prefix="/auth", tags=["auth"])
 app.include_router(workshop.router, prefix="/workshop", tags=["workshop"])
 app.include_router(assistance_request.router, prefix="/assistance_request", tags=["assistance_request"])
+app.include_router(user.router, prefix="/user", tags=["user"])
 
 
 @app.get("/ping")
