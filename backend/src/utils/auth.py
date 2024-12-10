@@ -39,6 +39,13 @@ async def generate_access_token(private_key, user, nonce: str) -> bytes:
     )
 
 
+async def decode_token(private_key, token):
+    return pyseto.decode(
+        private_key,
+        token
+    )
+
+
 async def generate_tokens_nonce() -> str:
     return os.urandom(32).hex()
 
