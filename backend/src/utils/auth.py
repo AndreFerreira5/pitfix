@@ -26,7 +26,7 @@ async def generate_refresh_token(private_key, user, nonce: str) -> bytes:
 
 
 async def generate_access_token(private_key, user, nonce: str) -> bytes:
-    token_expiration_time = datetime.now() + timedelta(minutes=2)
+    token_expiration_time = datetime.now() + timedelta(minutes=15)
     payload_dict = {
         "exp": token_expiration_time.isoformat() + 'Z',
         "user_id": str(user["_id"]),
