@@ -11,7 +11,7 @@ logger = logging.getLogger(__name__)
 router = APIRouter()
 
 
-@router.get("/{username}", response_model=User)
+@router.get("/user/{username}", response_model=User)
 async def get_user_by_username_route(username: str):
     user = await get_user_by_username(username)
     if not user:

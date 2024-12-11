@@ -3,15 +3,33 @@ import '../utils/api_client.dart';
 import '../models/user.dart';
 import '../models/user_update.dart';
 import '../models/auth.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 class UserRepository {
   final ApiClient apiClient;
+  final FlutterSecureStorage secureStorage = FlutterSecureStorage();
 
   // Store the username and token after login
   String? username;
   String? accessToken;
 
-  UserRepository({required this.apiClient});
+  UserRepository({required this.apiClient}) {
+    _loadCredentials(); // Load credentials on initialization
+  }
+
+  // Load the stored credentials (e.g., from secure storage)
+  Future<void> _loadCredentials() async {
+    username = await secureStorage.read(key: 'username');
+    accessToken = await secureStorage.read(key: 'access_token');
+  }
+
+  // Save credentials to secure storage
+  Future<void> _saveCredentials(String username, String accessToken) async {
+    await secureStorage.write(key: 'username', value: username);
+    await secureStorage.write(key: 'access_token', value: accessToken);
+    this.username = username;
+    this.accessToken = accessToken;
+  }
 
   // Modify the login method to use the User model if needed
   Future<AuthTokens?> login(String username, String password) async {
@@ -31,7 +49,9 @@ class UserRepository {
                 firstItem.containsKey('access_token_exp') &&
                 firstItem.containsKey('refresh_token') &&
                 firstItem.containsKey('refresh_token_exp')) {
-              return AuthTokens.fromJson(firstItem);
+              final authTokens = AuthTokens.fromJson(firstItem);
+              await _saveCredentials(username, authTokens.accessToken); // Save credentials securely
+              return authTokens;
             }
 
             if (firstItem.containsKey('message') && firstItem['message'] == 'Invalid username or password') {
@@ -49,8 +69,6 @@ class UserRepository {
       return null;
     }
   }
-
-
 
   // Register method now returns a User object or success response
   Future<String?> register({
@@ -98,50 +116,30 @@ class UserRepository {
     }
   }
 
-
   // Fetch user profile by the logged-in user's username
   Future<User?> get_user_profile() async {
+    print(username);
+    print(accessToken);
     if (username == null || accessToken == null) {
-      throw Exception("User is not logged in");
+      throw Exception('User is not logged in');
     }
 
     try {
       final response = await apiClient.get(
-        '/user/profile/$username',  // Use the stored username in the URL
-        headers: {'Authorization': 'Bearer $accessToken'},  // Pass the access token
+        '/user/profile/$username', // Use the stored username in the URL
+        headers: {'Authorization': 'Bearer $accessToken'}, // Include token in the headers
       );
 
       if (response.statusCode == 200) {
         final Map<String, dynamic> userData = json.decode(response.body);
-        return User.fromJson(userData);
+        return User.fromJson(userData); // Return the User model object
       } else {
-        return null;
+        return null; // Handle failure case
       }
     } catch (e) {
       throw Exception('Failed to fetch user data: $e');
     }
   }
-
-
-  /*Future<> getUser() async {
-
-  }*/
-
-
-  Future<String?> getUserRole(String username) async {
-    final response = await apiClient.get(
-      '/user/$username/role',
-      headers: {'Authorization': 'Bearer $accessToken'},
-    );
-
-    if (response.statusCode == 200) {
-      print(json.decode(response.body)[0]['role']);
-      return json.decode(response.body)[0]['role'];
-    } else {
-      throw Exception('Failed to update user profile');
-    }
-  }
-
 
   // Update user profile by username
   Future<String> updateUserProfile(UserUpdate userUpdate) async {
@@ -160,5 +158,32 @@ class UserRepository {
     } else {
       throw Exception('Failed to update user profile');
     }
+  }
+
+  Future<String?> getUserRole(String username) async {
+    if (accessToken == null) {
+      throw Exception("User is not logged in");
+    }
+
+    final response = await apiClient.get(
+      '/user/$username/role',
+      headers: {'Authorization': 'Bearer $accessToken'},
+    );
+
+    if (response.statusCode == 200) {
+      print(json.decode(response.body)[0]['role']);
+      return json.decode(response.body)[0]['role'];
+    } else {
+      throw Exception('Failed to fetch user role');
+    }
+  }
+
+  // Logout method to clear credentials and reset the session
+  Future<void> logout() async {
+    await secureStorage.delete(key: 'username');
+    await secureStorage.delete(key: 'access_token');
+    username = null;
+    accessToken = null;
+    print('User logged out');
   }
 }
