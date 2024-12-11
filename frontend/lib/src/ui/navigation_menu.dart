@@ -38,7 +38,7 @@ class _NavigationMenuState extends State<NavigationMenu> {
     switch (role) {
       case 'admin':
         return [
-          Workshops(),
+          Workshops(userRole: role),
           const Center(child: Text('Requests Page')),
           const ProfilePage(),
           SettingsPage(role: role),
@@ -57,7 +57,7 @@ class _NavigationMenuState extends State<NavigationMenu> {
         ];
       case 'client':
         return [
-          const Center(child: Text('Workshops Page')),
+          Workshops(userRole: role),
           const Center(child: Text('My Requests Page')),
           const ProfilePage(),
           SettingsPage(role: role),
