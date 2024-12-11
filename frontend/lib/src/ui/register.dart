@@ -15,7 +15,7 @@ class RegisterPage extends StatefulWidget {
 class _RegisterPageState extends State<RegisterPage> {
   final _formKey = GlobalKey<FormState>();
   final UserRepository userRepository = Get.find<UserRepository>();
-  final FlutterSecureStorage storage = FlutterSecureStorage();
+  final FlutterSecureStorage storage = Get.find<FlutterSecureStorage>();
 
   String _username = '';
   String _email = '';

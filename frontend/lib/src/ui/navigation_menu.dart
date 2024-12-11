@@ -5,13 +5,33 @@ import 'package:pitfix_frontend/src/ui/profile.dart';
 import 'package:pitfix_frontend/src/ui/settings.dart';
 import 'workshops.dart';
 import '../controllers/auth_controller.dart';
-import 'login.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
-class NavigationMenu extends StatelessWidget {
-  final String userRole; // hold the user role
-  final NavigationController navController = Get.put(NavigationController()); // instantiate the controller
+class NavigationMenu extends StatefulWidget {
+  const NavigationMenu({super.key});
 
-  NavigationMenu({super.key, required this.userRole});
+  @override
+  _NavigationMenuState createState() => _NavigationMenuState();
+}
+
+class _NavigationMenuState extends State<NavigationMenu> {
+  final NavigationController navController = Get.put(NavigationController());
+  final FlutterSecureStorage _storage = Get.find<FlutterSecureStorage>();
+  final AuthController authController = Get.find<AuthController>();
+  String? userRole;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadUserRole();
+  }
+
+  Future<void> _loadUserRole() async {
+    String? role = await _storage.read(key: 'user_role');
+    setState(() {
+      userRole = role;
+    });
+  }
 
   // Define pages based on user role
   List<Widget> _getPages(String role) {
@@ -83,8 +103,10 @@ class NavigationMenu extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final pages = _getPages(userRole); // get pages based on role
-    final destinations = _getDestinations(userRole); // get destinations based on role
+    userRole = AuthController.to.userRole.value;
+
+    final pages = _getPages(userRole!); // get pages based on role
+    final destinations = _getDestinations(userRole!); // get destinations based on role
 
     return Scaffold(
       body: Stack(

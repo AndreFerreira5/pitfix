@@ -4,7 +4,6 @@ class User {
   final String phone;
   final String address;
   final String? billingAddress;
-  final String password;  // Include password in User
 
   User({
     required this.name,
@@ -12,7 +11,6 @@ class User {
     required this.phone,
     required this.address,
     this.billingAddress,
-    required this.password,  // Make password required
   });
 
   // Convert JSON to User object
@@ -23,7 +21,6 @@ class User {
       phone: json['phone'],
       address: json['address'],
       billingAddress: json['billingAddress'],
-      password: json['password'],  // Ensure password is part of the JSON
     );
   }
 
@@ -35,7 +32,153 @@ class User {
       'phone': phone,
       'address': address,
       'billingAddress': billingAddress,
-      'password': password,  // Include password in toJson
     };
+  }
+}
+
+
+class Client extends User {
+  Client({
+    required String name,
+    required String email,
+    required String phone,
+    required String address,
+    String? billingAddress,
+  }) : super(
+    name: name,
+    email: email,
+    phone: phone,
+    address: address,
+    billingAddress: billingAddress,
+  );
+
+  // Convert JSON to Client object
+  factory Client.fromJson(Map<String, dynamic> json) {
+    return Client(
+      name: json['name'],
+      email: json['email'],
+      phone: json['phone'],
+      address: json['address'],
+      billingAddress: json['billingAddress'],
+    );
+  }
+
+  // Convert Client object to JSON
+  @override
+  Map<String, dynamic> toJson() {
+    return super.toJson();  // Call User's toJson method
+  }
+}
+
+
+class Worker extends User {
+  String? workshopId;  // The ID of the workshop assigned to this worker
+
+  Worker({
+    required String name,
+    required String email,
+    required String phone,
+    required String address,
+    String? billingAddress,
+    required this.workshopId,
+  }) : super(
+    name: name,
+    email: email,
+    phone: phone,
+    address: address,
+    billingAddress: billingAddress,
+  );
+
+  // Convert JSON to Worker object
+  factory Worker.fromJson(Map<String, dynamic> json) {
+    return Worker(
+      name: json['name'],
+      email: json['email'],
+      phone: json['phone'],
+      address: json['address'],
+      billingAddress: json['billingAddress'],
+      workshopId: json['workshopId'],
+    );
+  }
+
+  // Convert Worker object to JSON
+  @override
+  Map<String, dynamic> toJson() {
+    final data = super.toJson();
+    data['workshopId'] = workshopId;
+    return data;
+  }
+}
+
+class Manager extends User {
+  List<String?> workshopIds;  // List of workshops managed by the manager
+
+  Manager({
+    required String name,
+    required String email,
+    required String phone,
+    required String address,
+    String? billingAddress,
+    required this.workshopIds,
+  }) : super(
+    name: name,
+    email: email,
+    phone: phone,
+    address: address,
+    billingAddress: billingAddress,
+  );
+
+  // Convert JSON to Manager object
+  factory Manager.fromJson(Map<String, dynamic> json) {
+    return Manager(
+      name: json['name'],
+      email: json['email'],
+      phone: json['phone'],
+      address: json['address'],
+      billingAddress: json['billingAddress'],
+      workshopIds: List<String?>.from(json['workshops'] ?? []),
+    );
+  }
+
+  // Convert Manager object to JSON
+  @override
+  Map<String, dynamic> toJson() {
+    final data = super.toJson();
+    data['workshops'] = workshopIds;
+    return data;
+  }
+}
+
+
+class Admin extends User {
+  Admin({
+    required String name,
+    required String email,
+    required String phone,
+    required String address,
+    String? billingAddress,
+  }) : super(
+    name: name,
+    email: email,
+    phone: phone,
+    address: address,
+    billingAddress: billingAddress,
+  );
+
+  // Convert JSON to Admin object
+  factory Admin.fromJson(Map<String, dynamic> json) {
+    return Admin(
+      name: json['name'],
+      email: json['email'],
+      phone: json['phone'],
+      address: json['address'],
+      billingAddress: json['billingAddress'],
+    );
+  }
+
+  // Convert Admin object to JSON
+  @override
+  Map<String, dynamic> toJson() {
+    return super.toJson();  // Call User's toJson method
   }
 }

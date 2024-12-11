@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import '../controllers/auth_controller.dart';
 import '../repository/user_repository.dart';
 import '../utils/api_client.dart';
+import 'navigation_menu.dart';
 import 'register.dart';
 
 class LoginPage extends StatefulWidget {
@@ -13,8 +14,6 @@ class LoginPage extends StatefulWidget {
 
 class _LoginPageState extends State<LoginPage> {
   final _formKey = GlobalKey<FormState>();
-  // Removed direct instantiation of UserRepository
-  // We'll use AuthController to handle login
 
   String _username = '';
   String _password = '';
@@ -29,14 +28,19 @@ class _LoginPageState extends State<LoginPage> {
       });
 
       try {
-        await AuthController.to.login(_username, _password);
-        if (AuthController.to.isAuthenticated.value) {
+        var loginSuccessful = await AuthController.to.login(_username, _password);
+        if (loginSuccessful) {
           // Navigation is handled reactively in main.dart via Obx
           Get.snackbar('Success', 'Login successful!',
               snackPosition: SnackPosition.BOTTOM);
+
+          //await AuthController.to.loadUserRole(_username);
+          Get.offAll(() => const NavigationMenu());
         }
       } catch (e) {
         // Errors are handled inside AuthController
+        Get.snackbar('Error', 'Login failed: $e',
+            snackPosition: SnackPosition.BOTTOM);
       } finally {
         setState(() {
           _isLoading = false;

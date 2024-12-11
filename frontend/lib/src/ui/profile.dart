@@ -60,7 +60,6 @@ class _ProfilePageState extends State<ProfilePage> {
         _phone = userProfile?.phone ?? '';
         _address = userProfile?.address ?? '';
         _billingAddress = userProfile?.billingAddress ?? '';
-        _password = userProfile?.password ?? '';  // Fetch password as well
         _isLoading = false;
 
         // Initialize controllers
