@@ -23,4 +23,3 @@ class User(BaseModel):
     email: str
     phone: str
     address: str
-    # Exclude password in response
