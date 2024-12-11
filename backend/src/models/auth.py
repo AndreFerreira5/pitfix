@@ -17,9 +17,3 @@ class RefreshRequest(BaseModel):
     access_token: str
     refresh_token: str
 
-
-class User(BaseModel):
-    name: str
-    email: str
-    phone: str
-    address: str

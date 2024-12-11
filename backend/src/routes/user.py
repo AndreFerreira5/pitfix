@@ -1,6 +1,6 @@
 from fastapi import APIRouter, HTTPException
 from db.auth import get_user_by_username, get_user_by_id
-from models.auth import User
+from models.user import User
 from fastapi.encoders import jsonable_encoder
 from fastapi.responses import JSONResponse
 from utils.conversions import convert_objectid
@@ -17,13 +17,14 @@ async def get_user_by_username_route(username: str):
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
 
-    return User(
-        name=user['name'],
-        role=user['role'],
-        email=user['email'],
-        phone=user['phone'],
-        address=user['address']
-    )
+    # user.pop("_id", None)
+    user.pop("password", None)
+    user.pop("createdAt", None)
+    user.pop("session_nonce", None)
+    user["_id"] = str(user["_id"])
+
+    logger.info("Returned user %s", user["username"])
+    return User.parse_obj(user)
 
 
 @router.get("/{username}/role")
@@ -32,6 +33,19 @@ async def get_user_role_by_username_route(username: str):
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
 
+    logger.info("Returned role from user %s", user["username"])
     if user["role"]:
         return {"role": user["role"]}, 200
 
+
+@router.get("/{username}/requests")
+async def get_user_requests_by_username_route(username: str):
+    user = await get_user_by_username(username)
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    logger.info("Returned requests from user %s", user["username"])
+    if "requests" in user:
+        return {"requests": user["requests"]}, 200
+    else:
+        return {"requests": []}, 200

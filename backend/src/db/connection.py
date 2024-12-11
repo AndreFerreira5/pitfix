@@ -34,7 +34,7 @@ class MongoDB:
                 self._db = self._client[os.getenv('MONGO_DB_NAME')]
 
                 await self._db.command('ping')
-                logger.info("Successfully connected to MongoDB.")
+                logger.info(f'Successfully connected to {"dev" if is_env_dev else "prod"} MongoDB.')
             except PyMongoError as e:
                 logger.error(f"Failed to connect to MongoDB: {str(e)}")
                 raise e
