@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:iconsax/iconsax.dart';
 import 'package:get/get.dart';
+import 'package:pitfix_frontend/src/ui/admin_requests.dart';
 import 'package:pitfix_frontend/src/ui/profile.dart';
 import 'package:pitfix_frontend/src/ui/settings.dart';
 import 'workshops.dart';
@@ -39,7 +40,7 @@ class _NavigationMenuState extends State<NavigationMenu> {
       case 'admin':
         return [
           Workshops(userRole: role),
-          const Center(child: Text('Requests Page')),
+          const AdminRequests(),
           const ProfilePage(),
           SettingsPage(role: role),
         ];
