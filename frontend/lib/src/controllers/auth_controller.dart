@@ -162,6 +162,8 @@ class AuthController extends GetxController {
         await _storage.write(key: 'refresh_token', value: loginResponse.refreshToken);
         await _storage.write(key: 'refresh_token_exp', value: loginResponse.refreshTokenExp);
 
+        await _storage.write(key: 'username', value: username);
+
         final gotUserRole = await _userRepository.getUserRole(username);
         print(gotUserRole);
         if (gotUserRole != null) {
