@@ -3,7 +3,6 @@ import 'package:get/get.dart';
 import '../models/user_update.dart';
 import '../repository/user_repository.dart';
 import '../models/user.dart';
-import '../utils/api_client.dart';
 
 class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
@@ -18,7 +17,7 @@ class _ProfilePageState extends State<ProfilePage> {
   String _phone = "";
   String _address = "";
   String _billingAddress = "";
-  String _password = "";  // Include password in profile
+  String _password = "";
 
   bool _isEditing = false;
   bool _isLoading = true;
@@ -30,11 +29,12 @@ class _ProfilePageState extends State<ProfilePage> {
   final TextEditingController _billingController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
 
-  final UserRepository _userRepository = UserRepository(apiClient: ApiClient(baseUrl: 'http://localhost:8000'));
+  late UserRepository _userRepository;
 
   @override
   void initState() {
     super.initState();
+    _userRepository = Get.find<UserRepository>(); // Get the repository instance
     _fetchUserProfile();
   }
 
@@ -62,7 +62,7 @@ class _ProfilePageState extends State<ProfilePage> {
         _billingAddress = userProfile?.billingAddress ?? '';
         _isLoading = false;
 
-        // Initialize controllers
+        // Initialize controllers with the fetched data
         _nameController.text = _name;
         _emailController.text = _email;
         _phoneController.text = _phone;

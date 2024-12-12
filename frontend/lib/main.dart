@@ -4,6 +4,7 @@ import 'src/controllers/auth_controller.dart';
 import 'src/ui/login.dart';
 import 'src/ui/navigation_menu.dart';
 import 'src/bindings/initial_binding.dart';
+import 'src/bindings/repository_binding.dart';
 
 void main() {
   runApp(const MyApp());
