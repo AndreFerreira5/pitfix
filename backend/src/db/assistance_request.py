@@ -122,7 +122,6 @@ async def get_assistance_requests_by_worker(worker_id: str):
 
 async def get_assistance_requests_workers(assistance_request_id: str):
     db = await get_db()
-    print("ASDASDSADSAD")
     try:
         assistance_request = await db.assistance_request.find_one({"_id": ObjectId(assistance_request_id)})
         if assistance_request:

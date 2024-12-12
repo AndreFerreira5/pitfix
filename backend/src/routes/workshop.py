@@ -3,9 +3,14 @@ from db.workshop import (
     get_all_workshops,
     get_workshop_by_id,
     get_workshop_by_name,
+    # get_workshop_workers,
     insert_workshop,
     delete_workshop,
     edit_workshop
+)
+
+from db.user import (
+    get_all_workers_with_workshop_id,
 )
 
 from models.workshop import Workshop, WorkshopCreate
@@ -19,6 +24,15 @@ router = APIRouter()
 @router.get("/all")
 async def get_workshops():
     return await get_all_workshops(), 200
+
+
+@router.get("/{workshop_id}/workers")
+async def get_workshop_workers_route(workshop_id: str):
+    result = await get_all_workers_with_workshop_id(workshop_id)
+    if result["status"] == "error":
+        raise HTTPException(status_code=404 if "not found" in result["message"].lower() else 500,
+                            detail=result["message"])
+    return result["data"], 200
 
 
 @router.get("/id/{workshop_id}")
