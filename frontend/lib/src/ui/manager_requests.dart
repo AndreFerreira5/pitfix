@@ -4,19 +4,19 @@ import 'package:pitfix_frontend/src/ui/add_request.dart'; // Assuming you have t
 import '../models/assistance_request.dart';
 import '../repository/assistance_request_repository.dart'; // Assuming this repository exists
 
-class AdminRequests extends StatefulWidget {
-  const AdminRequests({super.key});
+class ManagerRequests extends StatefulWidget {
+  const ManagerRequests({super.key});
 
   @override
-  _AdminRequestsState createState() => _AdminRequestsState();
+  _ManagerRequestsState createState() => _ManagerRequestsState();
 }
 
-class _AdminRequestsState extends State<AdminRequests> {
+class _ManagerRequestsState extends State<ManagerRequests> {
   late AssistanceRequestRepository _assistanceRequestRepository;
   late Future<List<AssistanceRequest>> _assistanceRequestsFuture;
 
   @override
-  void initState() {
+  void initState() { // TODO get the workshop of the manager
     super.initState();
     _assistanceRequestRepository = Get.find<AssistanceRequestRepository>();
     _assistanceRequestsFuture = _assistanceRequestRepository.getAllAssistanceRequests();
@@ -72,7 +72,7 @@ class _AdminRequestsState extends State<AdminRequests> {
               itemBuilder: (context, index) {
                 final request = requests[index];
                 return RequestCard(request: request,
-                onDelete: _deleteRequest,
+                  onDelete: _deleteRequest,
                 );
               },
             );

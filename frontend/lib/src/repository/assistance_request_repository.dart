@@ -61,11 +61,13 @@ class AssistanceRequestRepository {
   Future<String> createAssistanceRequest(AssistanceRequest assistanceRequest) async {
     var requestJson = assistanceRequest.toJson();
 
-    final response = await apiClient.post('/assistance_request/add',
-      body: requestJson);
+    final response = await apiClient.post('/assistance_request/add', body: requestJson);
+    print('Response body: ${response.body}');
 
     if (response.statusCode == 200) {
-      return json.decode(response.body)['message'];
+      final List<dynamic> decoded = json.decode(response.body);
+      print("Decoded: $decoded");
+      return decoded[0];
     } else {
       throw Exception('Failed to create assistance request');
     }
@@ -78,7 +80,8 @@ class AssistanceRequestRepository {
     );
 
     if (response.statusCode == 200) {
-      return json.decode(response.body)['message'];
+      final List<dynamic> decoded = json.decode(response.body);
+      return decoded[0]['message'];
     } else if (response.statusCode == 404) {
       throw Exception('Assistance request not found');
     } else {
@@ -90,7 +93,8 @@ class AssistanceRequestRepository {
     final response = await apiClient.delete('/assistance_request/delete/$requestId');
 
     if (response.statusCode == 200) {
-      return json.decode(response.body)['message'];
+      final List<dynamic> decoded = json.decode(response.body);
+      return decoded[0]['message'];
     } else if (response.statusCode == 404) {
       throw Exception('Assistance request not found');
     } else {
