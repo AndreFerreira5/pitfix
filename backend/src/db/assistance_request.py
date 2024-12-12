@@ -92,7 +92,9 @@ async def get_assistance_request_by_id(request_id: str):
 async def get_assistance_requests_by_workshop(workshop_id: str):
     db = await get_db()
     try:
-        assistance_requests = await db.assistance_request.find_one({"workshop_id": workshop_id})
+        assistance_requests_cursor = db.assistance_request.find({"workshop_id": ObjectId(workshop_id)})
+        assistance_requests = await assistance_requests_cursor.to_list(length=100)
+        print(assistance_requests)
         if assistance_requests:
             assistance_requests = jsonable_encoder(convert_objectid(assistance_requests))
             return {"status": "success", "data": assistance_requests}

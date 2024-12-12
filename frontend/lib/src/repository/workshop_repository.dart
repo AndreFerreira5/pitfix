@@ -20,7 +20,20 @@ class WorkshopRepository {
   }
 
   Future<Workshop> getWorkshopById(String workshopId) async {
-    final response = await apiClient.get('/workshop/$workshopId');
+    final response = await apiClient.get('/workshop/id/$workshopId');
+
+    if (response.statusCode == 200) {
+      final Map<String, dynamic> decoded = json.decode(response.body);
+      return Workshop.fromJson(json.decode(decoded[0]['body']));
+    } else if (response.statusCode == 404) {
+      throw Exception('Workshop not found');
+    } else {
+      throw Exception('Failed to load workshop');
+    }
+  }
+
+  Future<Workshop> getWorkshopByName(String workshopName) async {
+    final response = await apiClient.get('/workshop/name/$workshopName');
 
     if (response.statusCode == 200) {
       final Map<String, dynamic> decoded = json.decode(response.body);

@@ -203,7 +203,7 @@ class _AddRequestPageState extends State<AddRequestPage> {
       final newRequest = AssistanceRequest(
         title: _titleController.text,
         description: _descriptionController.text,
-        workshopId: _selectedWorkshop ?? "", // Pass the workshop ID
+        workshopId: _selectedWorkshop ?? "",
         workersIds: _workersIds,
         isCompleted: _isCompleted,
         creationDate: _creationDate,

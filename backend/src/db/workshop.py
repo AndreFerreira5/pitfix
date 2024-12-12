@@ -78,3 +78,19 @@ async def get_workshop_by_id(workshop_id: str):
         logger.error(f"Error retrieving workshop: {str(e)}")
         return {"status": "error", "message": str(e)}
 
+
+async def get_workshop_by_name(workshop_name: str):
+    db = await get_db()
+
+    try:
+        workshop = await db.workshop.find_one({"name": workshop_name})
+
+        if workshop:
+            workshop = jsonable_encoder(convert_objectid(workshop))
+            return {"status": "success", "data": workshop}
+        else:
+            return {"status": "error", "message": "Workshop not found."}
+
+    except Exception as e:
+        logger.error(f"Error retrieving workshop by name '{workshop_name}': {str(e)}")
+        return {"status": "error", "message": str(e)}

@@ -21,7 +21,10 @@ async def get_user_by_username_route(username: str):
     user.pop("password", None)
     user.pop("createdAt", None)
     user.pop("session_nonce", None)
-    user["_id"] = str(user["_id"])
+    user["_id"] = convert_objectid(user["_id"])
+    if "requests" in user:
+        user["requests"] = convert_objectid(user["requests"])
+
 
     logger.info("Returned user %s", user["username"])
     return User.parse_obj(user)
@@ -51,3 +54,20 @@ async def get_user_requests_by_username_route(username: str):
         return {"requests": user["requests"]}, 200
     else:
         return {"requests": []}, 200
+
+
+@router.get("/{username}/workshop-id")
+async def get_manager_workshop_by_username_route(username: str):
+    user = await get_user_by_username(username)
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    if "role" in user and user["role"] != "manager":
+        raise HTTPException(status_code=400, detail="User is not a manager")
+
+    if "workshop_id" not in user or not user["workshop_id"]:
+        raise HTTPException(status_code=404, detail="Manager does not have a workshop ID assigned")
+
+    # Log the request and return the workshopId
+    logger.info("Returned workshop ID for manager %s", user["username"])
+    return {"workshop_id": convert_objectid(user["workshop_id"])}, 200

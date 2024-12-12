@@ -4,6 +4,7 @@ from models.assistance_request import AssistanceRequest, AssistanceRequestCreate
 from bson import ObjectId
 
 from db.user import insert_request_in_user, delete_request_from_user
+from db.workshop import get_workshop_by_id
 
 from db.assistance_request import (
     get_all_assistance_requests,
@@ -52,6 +53,7 @@ async def route_create_assistance_request(
         request_data: AssistanceRequestCreate,
         username: str = Query(..., description="Username of the person creating the request")
 ):
+    workshop = await get_workshop_by_id()
     result = await insert_assistance_request(request_data)
 
     if result["status"] == "error":

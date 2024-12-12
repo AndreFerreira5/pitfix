@@ -190,7 +190,20 @@ class UserRepository {
     );
 
     if (response.statusCode == 200) {
+      var decodedResponse = json.decode(response.body);
+      print(decodedResponse[0]['requests']);
+      var requests = decodedResponse[0]['requests'];
+      print(requests);
+      if (requests != null) {
+        List<String> stringRequests = List<String>.from(requests.map((e) => e.toString()));
+        print(stringRequests);
+        return stringRequests;
+      } else {
+        return null;
+      }
+
       print(json.decode(response.body)[0]['requests']);
+      print(json.decode(response.body)[0]['requests'] is List<String>);
       return json.decode(response.body)[0]['requests'];
     } else {
       throw Exception('Failed to fetch user requests');
