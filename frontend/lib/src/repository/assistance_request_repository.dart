@@ -23,8 +23,9 @@ class AssistanceRequestRepository {
     final response = await apiClient.get('/assistance_request/$requestId');
 
     if (response.statusCode == 200) {
-      final Map<String, dynamic> decoded = json.decode(response.body);
-      return AssistanceRequest.fromJson(decoded);
+      final decodedResponse = json.decode(response.body);
+      print(decodedResponse);
+      return AssistanceRequest.fromJson(decodedResponse[0]);
     } else if (response.statusCode == 404) {
       throw Exception('Assistance request not found');
     } else {

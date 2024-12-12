@@ -48,17 +48,18 @@ class _ClientRequestsState extends State<ClientRequests> {
       print("isNotEmpty: ${userRequestIds?.isNotEmpty}");
 
       if (userRequestIds != null && userRequestIds.isNotEmpty) {
-        List<String> requestIds = List<String>.from(userRequestIds);
+        print("HERE");
+        //List<String> requestIds = List<String>.from(userRequestIds);
 
         // Now fetch the corresponding assistance requests for each ID
         List<Future<AssistanceRequest>> futures = [
-          for (var requestId in requestIds)
+          for (var requestId in userRequestIds)
             _assistanceRequestRepository.getAssistanceRequestById(requestId),
         ];
-
+        print("HERE 22");
         // Wait for all requests to be fetched
         List<AssistanceRequest> results = await Future.wait(futures);
-
+        print("HERE 333");
         setState(() {
           _assistanceRequests = results; // Update the state with the fetched requests
         });
