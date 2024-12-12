@@ -25,10 +25,20 @@ class AuthController extends GetxController {
   void onInit() {
     super.onInit();
 
+    _loadUserRole();
+
     checkAccessTokenExpiration();
     _startPeriodicTokenCheck();
   }
 
+  Future<void> _loadUserRole() async {
+    String? storedRole = await _storage.read(key: 'user_role');
+    if (storedRole != null) {
+      userRole.value = storedRole;
+    } else {
+      print("User role not found in secure storage.");
+    }
+  }
 
   @override
   void onClose() {
@@ -45,8 +55,6 @@ class AuthController extends GetxController {
 
 
   Future<void> checkAccessTokenExpiration() async {
-    if(!isLoggedIn.value) return;
-
     print("Checking access token expiration...");
     var accessTokenExp = await _storage.read(key: 'access_token_exp');
     if (accessTokenExp == null) {
@@ -171,6 +179,7 @@ class AuthController extends GetxController {
         print(gotUserRole);
         if (gotUserRole != null) {
           userRole.value = gotUserRole;
+          await _storage.write(key: 'user_role', value: gotUserRole);
         }
         return true;
       } else {

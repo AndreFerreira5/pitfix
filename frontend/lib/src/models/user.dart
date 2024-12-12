@@ -88,7 +88,7 @@ class Client extends User {
 
 
 class Worker extends User {
-  String? workshopId;  // The ID of the workshop assigned to this worker
+  String? workshopId;
 
   Worker({
     super.id,

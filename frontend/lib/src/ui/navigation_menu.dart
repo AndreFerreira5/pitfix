@@ -106,6 +106,8 @@ class _NavigationMenuState extends State<NavigationMenu> {
   @override
   Widget build(BuildContext context) {
     userRole = AuthController.to.userRole.value;
+    print("userRole: $userRole");
+
     if(userRole == null || userRole == ""){
       AuthController.to.logout("Error", "Couldn't get the user role");
     }

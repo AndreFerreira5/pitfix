@@ -7,14 +7,14 @@ import 'package:provider/provider.dart';
 import '../models/assistance_request.dart';
 import '../repository/assistance_request_repository.dart';
 
-class ClientRequests extends StatefulWidget {
-  const ClientRequests({super.key});
+class WorkerRequests extends StatefulWidget {
+  const WorkerRequests({super.key});
 
   @override
-  _ClientRequestsState createState() => _ClientRequestsState();
+  _WorkerRequestsState createState() => _WorkerRequestsState();
 }
 
-class _ClientRequestsState extends State<ClientRequests> {
+class _WorkerRequestsState extends State<WorkerRequests> {
   final FlutterSecureStorage _storage = Get.find<FlutterSecureStorage>();
   late AssistanceRequestRepository _assistanceRequestRepository;
   late UserRepository _userRepository;
