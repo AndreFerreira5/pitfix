@@ -230,7 +230,6 @@ class UserRepository {
     );
 
     if (response.statusCode == 200) {
-      print(json.decode(response.body)[0]['workshop_id']);
       return json.decode(response.body)[0]['workshop_id'];
     }else if(response.statusCode == 404){
       throw Exception("Manager does not have a workshop ID assigned.");
@@ -240,16 +239,6 @@ class UserRepository {
     }
   }
 
-  Future<List<User>> getWorkersForWorkshop(String workshopId) async {
-    final response = await apiClient.get('/users/workshop/$workshopId');
-
-    if (response.statusCode == 200) {
-      final List<dynamic> decoded = json.decode(response.body);
-      return decoded.map((item) => User.fromJson(item)).toList();
-    } else {
-      throw Exception('Failed to load workers');
-    }
-  }
 
 
 }

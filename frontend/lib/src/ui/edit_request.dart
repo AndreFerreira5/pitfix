@@ -4,6 +4,7 @@ import 'package:pitfix_frontend/src/repository/assistance_request_repository.dar
 import 'package:pitfix_frontend/src/repository/user_repository.dart';
 import 'package:pitfix_frontend/src/models/assistance_request.dart';
 import 'package:pitfix_frontend/src/models/user.dart';
+import 'package:pitfix_frontend/src/repository/workshop_repository.dart';
 
 class EditRequestScreen extends StatefulWidget {
   final AssistanceRequest request;
@@ -16,7 +17,7 @@ class EditRequestScreen extends StatefulWidget {
 
 class _EditRequestScreenState extends State<EditRequestScreen> {
   late AssistanceRequestRepository _assistanceRequestRepository;
-  late UserRepository _userRepository;
+  late WorkshopRepository _workshopRepository;
   List<User> _workers = [];
   List<String> _selectedWorkerIds = [];
   List<User> _assignedWorkers = []; // List to store assigned workers
@@ -28,7 +29,7 @@ class _EditRequestScreenState extends State<EditRequestScreen> {
   void initState() {
     super.initState();
     _assistanceRequestRepository = Get.find<AssistanceRequestRepository>();
-    _userRepository = Get.find<UserRepository>();
+    _workshopRepository = Get.find<WorkshopRepository>();
     _loadWorkers();
   }
 
@@ -41,8 +42,7 @@ class _EditRequestScreenState extends State<EditRequestScreen> {
     try {
       // Fetch workers for the current workshop
       final workshopId = widget.request.workshopId;
-      final workers = await _userRepository.getWorkersForWorkshop(workshopId);
-
+      final workers = await _workshopRepository.getWorkersForWorkshop(workshopId);
       setState(() {
         _workers = workers;
         _assignedWorkers = _workers.where((worker) => widget.request.workersIds.contains(worker.id)).toList(); // Get the assigned workers
@@ -51,6 +51,7 @@ class _EditRequestScreenState extends State<EditRequestScreen> {
       });
     } catch (e) {
       setState(() {
+        print("(ERROR)1-Failed to load workers: $e");
         _errorMessage = "Failed to load workers: $e";
         _isLoading = false;
       });
@@ -60,7 +61,9 @@ class _EditRequestScreenState extends State<EditRequestScreen> {
   // Method to update the request
   Future<void> _updateRequest() async {
     try {
-      widget.request.workersIds = _selectedWorkerIds;
+      // Ensure that workersIds is initialized correctly
+      widget.request.workersIds = List.from(_selectedWorkerIds); // Create a new list to avoid modifying the original one directly
+
       await _assistanceRequestRepository.editAssistanceRequest(
         widget.request.id!,
         widget.request,
@@ -70,6 +73,7 @@ class _EditRequestScreenState extends State<EditRequestScreen> {
         const SnackBar(content: Text('Workers assigned successfully')),
       );
     } catch (e) {
+      print("(ERROR)2-Failed to load workers: $e");
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Failed to assign workers: $e')),
       );
@@ -151,3 +155,5 @@ class _EditRequestScreenState extends State<EditRequestScreen> {
     );
   }
 }
+
+
