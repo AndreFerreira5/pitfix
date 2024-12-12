@@ -86,6 +86,14 @@ class WorkshopCard extends StatelessWidget {
 
   const WorkshopCard({required this.workshop, super.key});
 
+  bool isValidUrl(String url) {
+    const regex = r'^(https?|ftp)://([a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}(/.*)?$';
+    final regExp = RegExp(regex);
+
+    return regExp.hasMatch(url);
+  }
+
+
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
@@ -110,7 +118,8 @@ class WorkshopCard extends StatelessWidget {
             children: [
               ClipRRect(
                 borderRadius: BorderRadius.circular(32),
-                child: (workshop.imageUrl != null && workshop.imageUrl!.isNotEmpty)
+                child: (workshop.imageUrl != null && workshop.imageUrl!.isNotEmpty
+                        && isValidUrl(workshop.imageUrl!))
                     ? Image.network(
                   workshop.imageUrl!,
                   width: 80,
@@ -120,11 +129,11 @@ class WorkshopCard extends StatelessWidget {
                     : Container(
                   width: 80,
                   height: 80,
-                  color: Colors.grey[200], // Optional: Add a background color
+                  color: Colors.grey[200],
                   child: const Icon(
-                    Icons.image_not_supported, // Choose an appropriate icon
-                    size: 40, // Adjust the size as needed
-                    color: Colors.grey, // Optional: Icon color
+                    Icons.image_not_supported,
+                    size: 40,
+                    color: Colors.grey,
                   ),
                 ),
               ),
