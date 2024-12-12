@@ -205,4 +205,25 @@ class UserRepository {
     accessToken = null;
     print('User logged out');
   }
+
+  Future<String?> getManagerWorkshopId(String username) async {
+    if (accessToken == null) {
+      throw Exception("User is not logged in");
+    }
+
+    final response = await apiClient.get(
+      '/user/$username/workshop-id',
+      headers: {'Authorization': 'Bearer $accessToken'},
+    );
+
+    if (response.statusCode == 200) {
+      return json.decode(response.body)[0]['workshop_id'];
+    }else if(response.statusCode == 404){
+      throw Exception("Manager does not have a workshop ID assigned.");
+    }
+    else {
+      throw Exception('Failed to fetch user data');
+    }
+  }
+
 }
