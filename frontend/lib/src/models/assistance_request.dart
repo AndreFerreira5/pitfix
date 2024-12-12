@@ -1,11 +1,9 @@
-import 'dart:convert';
-
 class AssistanceRequest {
   final String? id;
   final String title;
   final String description;
   final String workshopId;
-  final List<String> workersIds;
+  late final List<String> workersIds;
   final bool? isCompleted;
   final DateTime creationDate;
 
@@ -25,7 +23,7 @@ class AssistanceRequest {
       title: jsonInput['title'] as String,
       description: jsonInput['description'] as String,
       workshopId: jsonInput['workshop_id'] as String,
-      workersIds: List<String>.from(jsonInput['workers_ids'] as List<dynamic>),
+      workersIds: List<String>.from(jsonInput['workers_ids'] ?? []), // Handle null case if 'workers_ids' is not provided
       isCompleted: jsonInput['is_completed'] as bool? ?? false,
       creationDate: DateTime.parse(jsonInput['creation_date'] as String),
     );

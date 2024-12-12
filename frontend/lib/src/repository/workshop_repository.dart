@@ -1,6 +1,7 @@
 import 'dart:convert';
 import '../utils/api_client.dart';
 import '../models/workshop.dart';
+import '../models/user.dart';
 
 class WorkshopRepository {
   final ApiClient apiClient;
@@ -85,6 +86,31 @@ class WorkshopRepository {
       throw Exception('Workshop not found');
     } else {
       throw Exception('Failed to edit workshop');
+    }
+  }
+  // Fetch workers for a specific workshop
+  Future<List<Worker>> getWorkersForWorkshop(String workshopId) async {
+    final response = await apiClient.get('/workshop/$workshopId/workers');
+
+    if (response.statusCode == 200) {
+      try {
+        // Decode the response body
+        final List<dynamic> decoded = json.decode(response.body);
+
+        // The first element contains the worker data
+        final List<dynamic> workersList = decoded[0];  // The data is in the first element of the array
+
+        // Map the list to Worker objects
+        return workersList.map((item) => Worker.fromJson(item)).toList();
+      } catch (e) {
+        print('Error parsing workers: $e');
+        throw Exception('Failed to parse workers data');
+      }
+    } else if (response.statusCode == 404) {
+      print("WORKERS NOT FOUND");
+      throw Exception('Workers not found for the specified workshop');
+    } else {
+      throw Exception('Failed to load workers for the workshop');
     }
   }
 }
