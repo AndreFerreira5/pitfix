@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:get/get.dart';
 import 'package:pitfix_frontend/src/ui/add_request.dart'; // Assuming you have this page
 import '../models/assistance_request.dart';
@@ -12,8 +13,10 @@ class AdminRequests extends StatefulWidget {
 }
 
 class _AdminRequestsState extends State<AdminRequests> {
+  final FlutterSecureStorage _storage = Get.find<FlutterSecureStorage>();
   late AssistanceRequestRepository _assistanceRequestRepository;
   late Future<List<AssistanceRequest>> _assistanceRequestsFuture;
+  String? username;
 
   @override
   void initState() {
@@ -24,9 +27,17 @@ class _AdminRequestsState extends State<AdminRequests> {
 
   // Function to delete a request
   Future<void> _deleteRequest(String requestId) async {
+    username = await _storage.read(key: "username");
+
+    // Check if username is null or empty
+    if (username == null || username!.isEmpty) {
+      print("Error: Username is null or empty");
+      return; // Handle error appropriately, maybe show an error message
+    }
+
     try {
       // Delete the request from the backend
-      await _assistanceRequestRepository.deleteAssistanceRequest(requestId);
+      await _assistanceRequestRepository.deleteAssistanceRequest(requestId, username!);
 
       // After deletion, refetch the list of requests
       setState(() {

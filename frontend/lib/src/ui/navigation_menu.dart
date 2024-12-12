@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import 'package:pitfix_frontend/src/ui/admin_requests.dart';
 import 'package:pitfix_frontend/src/ui/profile.dart';
 import 'package:pitfix_frontend/src/ui/settings.dart';
+import 'client_requests.dart';
 import 'workshops.dart';
 import '../controllers/auth_controller.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
@@ -59,7 +60,7 @@ class _NavigationMenuState extends State<NavigationMenu> {
       case 'client':
         return [
           Workshops(userRole: role),
-          const Center(child: Text('My Requests Page')),
+          const ClientRequests(),
           const ProfilePage(),
           SettingsPage(role: role),
         ];

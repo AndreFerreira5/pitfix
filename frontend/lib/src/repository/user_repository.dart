@@ -179,6 +179,24 @@ class UserRepository {
     }
   }
 
+  Future<List<String>?> getUserRequestsIds(String username) async {
+    if (accessToken == null) {
+      throw Exception("User is not logged in");
+    }
+
+    final response = await apiClient.get(
+      '/user/$username/requests',
+      headers: {'Authorization': 'Bearer $accessToken'},
+    );
+
+    if (response.statusCode == 200) {
+      print(json.decode(response.body)[0]['requests']);
+      return json.decode(response.body)[0]['requests'];
+    } else {
+      throw Exception('Failed to fetch user requests');
+    }
+  }
+
   // Logout method to clear credentials and reset the session
   Future<void> logout() async {
     await secureStorage.delete(key: 'username');

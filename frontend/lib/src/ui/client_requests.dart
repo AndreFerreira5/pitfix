@@ -1,28 +1,75 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:get/get.dart';
-import 'package:pitfix_frontend/src/ui/add_request.dart'; // Assuming you have this page
+import 'package:pitfix_frontend/src/repository/user_repository.dart';
+import 'package:pitfix_frontend/src/ui/add_request.dart';
+import 'package:provider/provider.dart';
 import '../models/assistance_request.dart';
-import '../repository/assistance_request_repository.dart'; // Assuming this repository exists
+import '../repository/assistance_request_repository.dart';
 
-class ManagerRequests extends StatefulWidget {
-  const ManagerRequests({super.key});
+class ClientRequests extends StatefulWidget {
+  const ClientRequests({super.key});
 
   @override
-  _ManagerRequestsState createState() => _ManagerRequestsState();
+  _ClientRequestsState createState() => _ClientRequestsState();
 }
 
-class _ManagerRequestsState extends State<ManagerRequests> {
+class _ClientRequestsState extends State<ClientRequests> {
   final FlutterSecureStorage _storage = Get.find<FlutterSecureStorage>();
   late AssistanceRequestRepository _assistanceRequestRepository;
-  late Future<List<AssistanceRequest>> _assistanceRequestsFuture;
+  late UserRepository _userRepository;
+  late Future<List<String>?> userRequestsIds;
+  late List<AssistanceRequest> _assistanceRequests = [];
+
   String? username;
 
   @override
-  void initState() { // TODO get the workshop of the manager
+  void initState() {
     super.initState();
     _assistanceRequestRepository = Get.find<AssistanceRequestRepository>();
-    _assistanceRequestsFuture = _assistanceRequestRepository.getAllAssistanceRequests();
+    _userRepository = Get.find<UserRepository>();
+    initAsync();
+  }
+
+  // Fetch user data and assistance requests
+  Future<void> initAsync() async {
+    username = await _storage.read(key: "username");
+
+    // Check if username is null or empty
+    if (username == null || username!.isEmpty) {
+      print("Error: Username is null or empty");
+      return; // Handle error appropriately, maybe show an error message
+    }
+
+    // Get the user request IDs and handle the result asynchronously
+    try {
+      final userRequestIds = await _userRepository.getUserRequestsIds(username!);
+      print("userRequestIds: $userRequestIds");
+      print("isNotEmpty: ${userRequestIds?.isNotEmpty}");
+
+      if (userRequestIds != null && userRequestIds.isNotEmpty) {
+        List<String> requestIds = List<String>.from(userRequestIds);
+
+        // Now fetch the corresponding assistance requests for each ID
+        List<Future<AssistanceRequest>> futures = [
+          for (var requestId in requestIds)
+            _assistanceRequestRepository.getAssistanceRequestById(requestId),
+        ];
+
+        // Wait for all requests to be fetched
+        List<AssistanceRequest> results = await Future.wait(futures);
+
+        setState(() {
+          _assistanceRequests = results; // Update the state with the fetched requests
+        });
+      } else {
+        setState(() {
+          _assistanceRequests = []; // If no requests, set it to empty
+        });
+      }
+    } catch (e) {
+      print("Error fetching user request IDs: $e");
+    }
   }
 
   // Function to delete a request
@@ -39,9 +86,9 @@ class _ManagerRequestsState extends State<ManagerRequests> {
       // Delete the request from the backend
       await _assistanceRequestRepository.deleteAssistanceRequest(requestId, username!);
 
-      // After deletion, refetch the list of requests
+      // After deletion, remove the request from the local list and update UI
       setState(() {
-        _assistanceRequestsFuture = _assistanceRequestRepository.getAllAssistanceRequests();
+        _assistanceRequests.removeWhere((request) => request.id == requestId);
       });
 
       // Show success message
@@ -63,32 +110,20 @@ class _ManagerRequestsState extends State<ManagerRequests> {
         appBar: AppBar(
           title: const Text("All Assistance Requests"),
         ),
-        body: FutureBuilder<List<AssistanceRequest>>(
-          future: _assistanceRequestsFuture,
-          builder: (context, snapshot) {
-            if (snapshot.connectionState == ConnectionState.waiting) {
-              return const Center(child: CircularProgressIndicator());
-            } else if (snapshot.hasError) {
-              print(snapshot.error);
-              return const Center(child: Text('No requests available.'));
-            } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-              return const Center(child: Text('No requests available.'));
-            }
-
-            final requests = snapshot.data!;
-
-            return ListView.builder(
-              itemCount: requests.length,
-              padding: const EdgeInsets.all(16),
-              itemBuilder: (context, index) {
-                final request = requests[index];
-                return RequestCard(request: request,
-                  onDelete: _deleteRequest,
-                );
-              },
+        body: _assistanceRequests.isEmpty
+            ? const Center(child: CircularProgressIndicator())
+            : ListView.builder(
+          itemCount: _assistanceRequests.length,
+          padding: const EdgeInsets.all(16),
+          itemBuilder: (context, index) {
+            final request = _assistanceRequests[index];
+            return RequestCard(
+              request: request,
+              onDelete: _deleteRequest,
             );
           },
         ),
+
         floatingActionButton: Padding(
           padding: const EdgeInsets.only(bottom: 80.0),
           child: FloatingActionButton(

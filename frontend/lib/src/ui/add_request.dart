@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:get/get.dart';
 import '../models/assistance_request.dart';
 import '../repository/assistance_request_repository.dart';  // AssistanceRequestRepository
@@ -18,6 +19,9 @@ class _AddRequestPageState extends State<AddRequestPage> {
   final TextEditingController _titleController = TextEditingController();
   final TextEditingController _descriptionController = TextEditingController();
 
+  final FlutterSecureStorage _storage = Get.find<FlutterSecureStorage>();
+  String? username;
+
   String? _selectedWorkshop;
   bool _isCompleted = false;
   DateTime _creationDate = DateTime.now();
@@ -33,6 +37,12 @@ class _AddRequestPageState extends State<AddRequestPage> {
     _assistanceRequestRepository = Get.find<AssistanceRequestRepository>();
     _workshopRepository = Get.find<WorkshopRepository>();
     _workshopsFuture = _workshopRepository.getAllWorkshops(); // Fetch all workshops
+    _getUsername();
+  }
+
+  Future<void> _getUsername() async {
+    username = await _storage.read(key: 'username');
+    setState(() {});
   }
 
   @override
@@ -183,6 +193,13 @@ class _AddRequestPageState extends State<AddRequestPage> {
   // Method to submit the form
   Future<void> _submitForm() async {
     if (_formKey.currentState!.validate()) {
+      if (username == null || username!.isEmpty) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Username is not available')),
+        );
+        return;
+      }
+
       final newRequest = AssistanceRequest(
         title: _titleController.text,
         description: _descriptionController.text,
@@ -193,7 +210,7 @@ class _AddRequestPageState extends State<AddRequestPage> {
       );
 
       try {
-        final result = await _assistanceRequestRepository.createAssistanceRequest(newRequest);
+        final result = await _assistanceRequestRepository.createAssistanceRequest(newRequest, username!);
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(result)));
         Navigator.pop(context); // Go back to the previous page
       } catch (e) {
