@@ -4,6 +4,7 @@ class User {
   final String phone;
   final String address;
   final String? billingAddress;
+  final List<String>? requests;
 
   User({
     required this.name,
@@ -11,6 +12,7 @@ class User {
     required this.phone,
     required this.address,
     this.billingAddress,
+    this.requests,
   });
 
   // Convert JSON to User object
@@ -21,6 +23,7 @@ class User {
       phone: json['phone'],
       address: json['address'],
       billingAddress: json['billingAddress'],
+      requests: List<String>.from(json['requests'] as List<dynamic>),
     );
   }
 
@@ -32,6 +35,7 @@ class User {
       'phone': phone,
       'address': address,
       'billingAddress': billingAddress,
+      'requests': requests,
     };
   }
 }
@@ -44,6 +48,7 @@ class Client extends User {
     required String phone,
     required String address,
     String? billingAddress,
+    List<String>? requests,
   }) : super(
     name: name,
     email: email,
