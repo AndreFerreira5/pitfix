@@ -29,8 +29,12 @@ async def insert_assistance_request(request_data: AssistanceRequestCreate):
     request_dict = {k: v for k, v in request_data.dict().items() if v is not None}
 
     try:
-        await db.assistance_request.insert_one(request_dict)
-        return {"status": "success", "message": "Assistance request created successfully."}
+        result = await db.assistance_request.insert_one(request_dict)
+        return {
+            "status": "success",
+            "message": "Assistance request created successfully.",
+            "request_id": str(result.inserted_id)
+        }
 
     except Exception as e:
         logger.error(f"Error creating assistance request: {str(e)}")

@@ -11,7 +11,7 @@ logger = logging.getLogger(__name__)
 router = APIRouter()
 
 
-@router.get("/user/{username}", response_model=User)
+@router.get("/{username}", response_model=User)
 async def get_user_by_username_route(username: str):
     user = await get_user_by_username(username)
     if not user:
@@ -46,6 +46,8 @@ async def get_user_requests_by_username_route(username: str):
 
     logger.info("Returned requests from user %s", user["username"])
     if "requests" in user:
+        user["requests"] = convert_objectid(user["requests"])
+        print(user["requests"])
         return {"requests": user["requests"]}, 200
     else:
         return {"requests": []}, 200
