@@ -1,11 +1,9 @@
-import 'dart:convert';
-
 class AssistanceRequest {
   final String? id;
   final String title;
   final String description;
   final String workshopId;
-  final List<String> workersIds;
+  late final List<String> workersIds;
   final bool? isCompleted;
   final DateTime creationDate;
 

@@ -37,7 +37,7 @@ class AssistanceRequestRepository {
     final response = await apiClient.get('/assistance_request/workshop/$workshopId');
 
     if (response.statusCode == 200) {
-      final List<dynamic> decoded = json.decode(response.body);
+      final List<dynamic> decoded = json.decode(response.body)[0];
       return decoded.map((item) => AssistanceRequest.fromJson(item)).toList();
     } else if (response.statusCode == 404) {
       throw Exception('No assistance requests found for the specified workshop');

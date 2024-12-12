@@ -5,6 +5,7 @@ import 'package:pitfix_frontend/src/repository/user_repository.dart';
 import 'package:pitfix_frontend/src/repository/assistance_request_repository.dart';
 import 'package:pitfix_frontend/src/models/assistance_request.dart';
 import 'package:provider/provider.dart';
+import '../ui/edit_request.dart';
 
 class ManagerRequests extends StatefulWidget {
   const ManagerRequests({super.key});
