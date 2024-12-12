@@ -51,3 +51,20 @@ async def get_user_requests_by_username_route(username: str):
         return {"requests": user["requests"]}, 200
     else:
         return {"requests": []}, 200
+
+
+@router.get("/{username}/workshop-id")
+async def get_manager_workshop_by_username_route(username: str):
+    user = await get_user_by_username(username)
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    if user["role"] != "manager":
+        raise HTTPException(status_code=400, detail="User is not a manager")
+
+    if "workshop_id" not in user or not user["workshop_id"]:
+        raise HTTPException(status_code=404, detail="Manager does not have a workshop ID assigned")
+
+    # Log the request and return the workshopId
+    logger.info("Returned workshop ID for manager %s", user["username"])
+    return {"workshop_id": user["workshop_id"]}, 200
