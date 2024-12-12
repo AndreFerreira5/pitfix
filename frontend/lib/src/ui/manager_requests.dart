@@ -61,7 +61,7 @@ class _ManagerRequestsState extends State<ManagerRequests> {
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar(
-          title: const Text("All Assistance Requests"),
+          title: const Text("Workshop Requests"),
         ),
         body: FutureBuilder<List<AssistanceRequest>>(
           future: _assistanceRequestsFuture,

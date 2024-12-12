@@ -126,7 +126,7 @@ class Worker extends User {
 }
 
 class Manager extends User {
-  List<String?> workshopIds;  // List of workshops managed by the manager
+  String? workshopId;  // The ID of the workshop managed by this manager
 
   Manager({
     super.id,
@@ -137,7 +137,7 @@ class Manager extends User {
     required String super.address,
     super.name,
     String? billingAddress,
-    required this.workshopIds,
+    required this.workshopId,
     super.requests,
   });
 
@@ -150,7 +150,7 @@ class Manager extends User {
       address: json['address'],
       name: json['name'],
       billingAddress: json['billingAddress'],
-      workshopIds: List<String>.from(json['workshops'] ?? []),
+      workshopId: json['workshopId'],
       requests: List<String>.from(json['requests'] ?? []),
     );
   }
@@ -158,7 +158,7 @@ class Manager extends User {
   @override
   Map<String, dynamic> toJson() {
     final data = super.toJson();
-    data['workshops'] = workshopIds;
+    if (workshopId != null) data['workshopId'] = workshopId;
     return data;
   }
 }
