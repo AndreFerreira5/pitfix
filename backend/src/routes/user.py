@@ -21,7 +21,10 @@ async def get_user_by_username_route(username: str):
     user.pop("password", None)
     user.pop("createdAt", None)
     user.pop("session_nonce", None)
-    user["_id"] = str(user["_id"])
+    user["_id"] = convert_objectid(user["_id"])
+    if "requests" in user:
+        user["requests"] = convert_objectid(user["requests"])
+
 
     logger.info("Returned user %s", user["username"])
     return User.parse_obj(user)
