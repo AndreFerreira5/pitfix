@@ -132,6 +132,17 @@ class _ManagerRequestsState extends State<ManagerRequests> {
           return RequestCard(
             request: request,
             onDelete: _deleteRequest,
+            onEdit: () async {
+              // Navigate to the edit screen with the selected request
+              await Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => EditRequestScreen(request: request), //TODO edit_request page
+                ),
+              );
+              // After editing, reload the requests (you might want to optimize this)
+              initAsync();
+            },
           );
         },
       ),
@@ -139,12 +150,18 @@ class _ManagerRequestsState extends State<ManagerRequests> {
   }
 }
 
-// Card widget to display individual requests
+// Card widget to display individual requests with an edit button
 class RequestCard extends StatelessWidget {
   final AssistanceRequest request;
   final Function(String) onDelete;
+  final VoidCallback onEdit;  // Added onEdit callback
 
-  const RequestCard({required this.request, required this.onDelete, super.key});
+  const RequestCard({
+    required this.request,
+    required this.onDelete,
+    required this.onEdit,
+    super.key,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -191,6 +208,10 @@ class RequestCard extends StatelessWidget {
                   onDelete(request.id!); // Call the onDelete callback
                 }
               },
+            ),
+            IconButton(
+              icon: const Icon(Icons.edit),
+              onPressed: onEdit,  // Trigger the edit action
             ),
           ],
         ),

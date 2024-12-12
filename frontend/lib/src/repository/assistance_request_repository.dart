@@ -105,4 +105,6 @@ class AssistanceRequestRepository {
       throw Exception('Failed to delete assistance request');
     }
   }
+
+
 }
