@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:iconsax/iconsax.dart';
 import 'package:get/get.dart';
 import 'package:pitfix_frontend/src/ui/admin_requests.dart';
+import 'package:pitfix_frontend/src/ui/manager_requests.dart';
 import 'package:pitfix_frontend/src/ui/profile.dart';
 import 'package:pitfix_frontend/src/ui/settings.dart';
 import 'client_requests.dart';
@@ -47,7 +48,7 @@ class _NavigationMenuState extends State<NavigationMenu> {
         ];
       case 'manager':
         return [
-          const Center(child: Text('My Workshop Page')),
+          const ManagerRequests(),
           const ProfilePage(),
           SettingsPage(role: role),
         ];
