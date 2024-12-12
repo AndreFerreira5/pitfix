@@ -18,6 +18,7 @@ class AuthController extends GetxController {
   Timer? _timer;
 
   var userRole = ''.obs;
+  var isLoggedIn = false.obs;
 
 
   @override
@@ -44,6 +45,8 @@ class AuthController extends GetxController {
 
 
   Future<void> checkAccessTokenExpiration() async {
+    if(!isLoggedIn.value) return;
+
     print("Checking access token expiration...");
     var accessTokenExp = await _storage.read(key: 'access_token_exp');
     if (accessTokenExp == null) {
@@ -184,6 +187,7 @@ class AuthController extends GetxController {
   }
 
   Future<void> logout([String? snackbarTitle, String? snackbarMessage]) async {
+    isLoggedIn.value = false;
     isAccessTokenExpired.value = true;
     isRefreshTokenExpired.value = true;
     // TODO inform backend that the tokens are to be made invalid/unusable

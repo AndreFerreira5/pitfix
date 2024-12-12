@@ -30,6 +30,7 @@ class _LoginPageState extends State<LoginPage> {
       try {
         var loginSuccessful = await AuthController.to.login(_username, _password);
         if (loginSuccessful) {
+          AuthController.to.isLoggedIn.value = true;
           // Navigation is handled reactively in main.dart via Obx
           Get.snackbar('Success', 'Login successful!',
               snackPosition: SnackPosition.BOTTOM);

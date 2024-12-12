@@ -126,7 +126,7 @@ class UserRepository {
 
     try {
       final response = await apiClient.get(
-        '/user/profile/$username', // Use the stored username in the URL
+        '/user/$username', // Use the stored username in the URL
         headers: {'Authorization': 'Bearer $accessToken'}, // Include token in the headers
       );
 
