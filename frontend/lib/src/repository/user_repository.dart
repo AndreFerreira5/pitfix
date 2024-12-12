@@ -132,6 +132,7 @@ class UserRepository {
 
       if (response.statusCode == 200) {
         final Map<String, dynamic> userData = json.decode(response.body);
+        print(userData["username"]);
         return User.fromJson(userData); // Return the User model object
       } else {
         return null; // Handle failure case

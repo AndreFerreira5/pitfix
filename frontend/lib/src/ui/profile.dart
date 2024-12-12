@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:iconsax/iconsax.dart';
 import '../models/user_update.dart';
 import '../repository/user_repository.dart';
 import '../models/user.dart';
@@ -17,7 +18,6 @@ class _ProfilePageState extends State<ProfilePage> {
   String _phone = "";
   String _address = "";
   String _billingAddress = "";
-  String _password = "";
 
   bool _isEditing = false;
   bool _isLoading = true;
@@ -27,7 +27,6 @@ class _ProfilePageState extends State<ProfilePage> {
   final TextEditingController _phoneController = TextEditingController();
   final TextEditingController _addressController = TextEditingController();
   final TextEditingController _billingController = TextEditingController();
-  final TextEditingController _passwordController = TextEditingController();
 
   late UserRepository _userRepository;
 
@@ -45,7 +44,6 @@ class _ProfilePageState extends State<ProfilePage> {
     _phoneController.dispose();
     _addressController.dispose();
     _billingController.dispose();
-    _passwordController.dispose();
     super.dispose();
   }
 
@@ -53,13 +51,18 @@ class _ProfilePageState extends State<ProfilePage> {
   Future<void> _fetchUserProfile() async {
     try {
       final userProfile = await _userRepository.get_user_profile();
-
+      print(userProfile);
+      const String placeholderText = '--';
       setState(() {
-        _name = userProfile?.name ?? '';
-        _email = userProfile?.email ?? '';
-        _phone = userProfile?.phone ?? '';
-        _address = userProfile?.address ?? '';
-        _billingAddress = userProfile?.billingAddress ?? '';
+        _name = userProfile?.name ?? placeholderText;
+        _email = userProfile?.email ?? placeholderText;
+        _phone = userProfile?.phone ?? placeholderText;
+        _address = userProfile?.address ?? placeholderText;
+        if(userProfile is Client) {
+          _billingAddress = userProfile.billingAddress ?? placeholderText;
+        } else {
+          _billingAddress = '';
+        }
         _isLoading = false;
 
         // Initialize controllers with the fetched data
@@ -68,7 +71,6 @@ class _ProfilePageState extends State<ProfilePage> {
         _phoneController.text = _phone;
         _addressController.text = _address;
         _billingController.text = _billingAddress;
-        _passwordController.text = _password;
       });
     } catch (e) {
       setState(() {
@@ -91,7 +93,6 @@ class _ProfilePageState extends State<ProfilePage> {
         phone: _phoneController.text,
         address: _addressController.text,
         billingAddress: _billingController.text,
-        password: _passwordController.text, // Send the updated password
       );
 
       final result = await _userRepository.updateUserProfile(userUpdate);
@@ -120,9 +121,10 @@ class _ProfilePageState extends State<ProfilePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      /*
       appBar: AppBar(
         title: const Text('Profile'),
-      ),
+      ),*/
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
           : Padding(
@@ -171,13 +173,6 @@ class _ProfilePageState extends State<ProfilePage> {
                 isEditable: _isEditing,
               ),
               const SizedBox(height: 16),
-
-              _buildTextField(
-                label: 'Password',
-                controller: _passwordController,
-                isEditable: _isEditing,
-              ),
-              const SizedBox(height: 24),
 
               ElevatedButton(
                 onPressed: _isEditing ? _saveChanges : _toggleEditMode,
