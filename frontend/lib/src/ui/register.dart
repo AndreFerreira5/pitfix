@@ -53,20 +53,20 @@ class _RegisterPageState extends State<RegisterPage> {
         if (user != null) {
           WidgetsBinding.instance.addPostFrameCallback((_) {
             Get.snackbar('Success', 'Registration successful! Please login.',
-                snackPosition: SnackPosition.BOTTOM);
+                snackPosition: SnackPosition.TOP);
             Get.offAll(() => LoginPage());
           });
         } else {
           Get.snackbar('Error', 'Registration failed. Please try again.',
-              snackPosition: SnackPosition.BOTTOM);
+              snackPosition: SnackPosition.TOP);
         }
       } on TimeoutException catch (e) {
         Get.snackbar('Error', e.message ?? 'Request timed out',
-            snackPosition: SnackPosition.BOTTOM);
+            snackPosition: SnackPosition.TOP);
       } catch (e) {
         print(e);
         Get.snackbar('Error', 'An unexpected error occurred.',
-            snackPosition: SnackPosition.BOTTOM);
+            snackPosition: SnackPosition.TOP);
       } finally {
         setState(() {
           _isLoading = false;
@@ -90,7 +90,7 @@ class _RegisterPageState extends State<RegisterPage> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Image.asset(
-                  'assets/logo.png',
+                  'assets/images/logo.png',
                   height: 112,
                   width: 430,
                 ),

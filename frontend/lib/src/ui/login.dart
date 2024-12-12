@@ -33,7 +33,7 @@ class _LoginPageState extends State<LoginPage> {
           AuthController.to.isLoggedIn.value = true;
           // Navigation is handled reactively in main.dart via Obx
           Get.snackbar('Success', 'Login successful!',
-              snackPosition: SnackPosition.BOTTOM);
+              snackPosition: SnackPosition.TOP);
 
           //await AuthController.to.loadUserRole(_username);
           Get.offAll(() => const NavigationMenu());
@@ -41,7 +41,7 @@ class _LoginPageState extends State<LoginPage> {
       } catch (e) {
         // Errors are handled inside AuthController
         Get.snackbar('Error', 'Login failed: $e',
-            snackPosition: SnackPosition.BOTTOM);
+            snackPosition: SnackPosition.TOP);
       } finally {
         setState(() {
           _isLoading = false;
@@ -69,7 +69,7 @@ class _LoginPageState extends State<LoginPage> {
               children: [
                 // Logo
                 Image.asset(
-                  'assets/logo.png',
+                  'assets/images/logo.png',
                   height: 112,
                   width: 430,
                 ),

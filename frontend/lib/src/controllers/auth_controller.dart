@@ -145,13 +145,13 @@ class AuthController extends GetxController {
         return true;
       } else {
         Get.snackbar('Error', 'Invalid credentials, please try again.',
-            snackPosition: SnackPosition.BOTTOM);
+            snackPosition: SnackPosition.TOP);
         return false;
       }
     } catch (e) {
       print(e);
       Get.snackbar('Error', 'An error occurred during login.',
-          snackPosition: SnackPosition.BOTTOM);
+          snackPosition: SnackPosition.TOP);
       return false;
     }
   }*/
@@ -184,13 +184,13 @@ class AuthController extends GetxController {
         return true;
       } else {
         Get.snackbar('Error', 'Invalid credentials, please try again.',
-            snackPosition: SnackPosition.BOTTOM);
+            snackPosition: SnackPosition.TOP);
         return false;
       }
     } catch (e) {
       print(e);
       Get.snackbar('Error', 'An error occurred during login.',
-          snackPosition: SnackPosition.BOTTOM);
+          snackPosition: SnackPosition.TOP);
       return false;
     }
   }
@@ -206,7 +206,7 @@ class AuthController extends GetxController {
 
     if(snackbarTitle != null &&snackbarMessage != null) {
       Get.snackbar(snackbarTitle, snackbarMessage,
-          snackPosition: SnackPosition.BOTTOM);
+          snackPosition: SnackPosition.TOP);
     }
   }
 }

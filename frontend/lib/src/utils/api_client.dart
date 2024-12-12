@@ -81,7 +81,7 @@ class ApiClient {
     if (response.statusCode == 401) {
       // Unauthorized - possibly token expired
       Get.snackbar('Session Expired', 'Please log in again.',
-          snackPosition: SnackPosition.BOTTOM);
+          snackPosition: SnackPosition.TOP);
       AuthController.to.logout();
     } else if (response.statusCode < 200 || response.statusCode >= 300) {
       throw Exception('API request failed with status: ${response.statusCode}');

@@ -1,4 +1,8 @@
 import 'dart:convert';
+import 'package:get/get.dart';
+import 'package:get/get_core/src/get_main.dart';
+import 'package:get/get_navigation/src/snackbar/snackbar.dart';
+
 import '../utils/api_client.dart';
 import '../models/user.dart';
 import '../models/user_update.dart';
@@ -55,6 +59,8 @@ class UserRepository {
             }
 
             if (firstItem.containsKey('message') && firstItem['message'] == 'Invalid username or password') {
+              Get.snackbar('Error', 'Login failed: Invalid credentials',
+                  snackPosition: SnackPosition.TOP);
               print('Login failed: Invalid credentials');
               return null;  // Invalid credentials
             }
@@ -63,8 +69,12 @@ class UserRepository {
       }
 
       print('Failed to login: ${response.statusCode}');
+      Get.snackbar('Error', 'Failed to login: ${response.statusCode}',
+          snackPosition: SnackPosition.TOP);
       return null;
     } catch (e) {
+      Get.snackbar('Error', '$e',
+          snackPosition: SnackPosition.TOP);
       print('Error during login: $e');
       return null;
     }
