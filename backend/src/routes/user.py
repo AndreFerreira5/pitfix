@@ -59,7 +59,7 @@ async def get_manager_workshop_by_username_route(username: str):
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
 
-    if user["role"] != "manager":
+    if "role" in user and user["role"] != "manager":
         raise HTTPException(status_code=400, detail="User is not a manager")
 
     if "workshop_id" not in user or not user["workshop_id"]:
@@ -67,4 +67,4 @@ async def get_manager_workshop_by_username_route(username: str):
 
     # Log the request and return the workshopId
     logger.info("Returned workshop ID for manager %s", user["username"])
-    return {"workshop_id": user["workshop_id"]}, 200
+    return {"workshop_id": convert_objectid(user["workshop_id"])}, 200
