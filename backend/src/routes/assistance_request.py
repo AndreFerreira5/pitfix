@@ -4,7 +4,6 @@ from models.assistance_request import AssistanceRequest, AssistanceRequestCreate
 from bson import ObjectId
 
 from db.user import insert_request_in_user, delete_request_from_user
-from db.workshop import get_workshop_by_id
 
 from db.assistance_request import (
     get_all_assistance_requests,
@@ -13,7 +12,8 @@ from db.assistance_request import (
     edit_assistance_request,
     get_assistance_request_by_id,
     get_assistance_requests_by_workshop,
-    get_assistance_requests_by_worker
+    get_assistance_requests_by_worker,
+    get_assistance_requests_workers
 )
 
 router = APIRouter()
@@ -28,7 +28,8 @@ async def route_get_all_assistance_requests():
 async def route_get_assistance_request_by_id(request_id: str):
     result = await get_assistance_request_by_id(request_id)
     if result["status"] == "error":
-        raise HTTPException(status_code=404 if "not found" in result["message"].lower() else 500, detail=result["message"])
+        raise HTTPException(status_code=404 if "not found" in result["message"].lower() else 500,
+                            detail=result["message"])
     return result["data"], 200
 
 
@@ -36,7 +37,8 @@ async def route_get_assistance_request_by_id(request_id: str):
 async def route_get_requests_by_workshop(workshop_id: str):
     result = await get_assistance_requests_by_workshop(workshop_id)
     if result["status"] == "error":
-        raise HTTPException(status_code=404 if "not found" in result["message"].lower() else 500, detail=result["message"])
+        raise HTTPException(status_code=404 if "not found" in result["message"].lower() else 500,
+                            detail=result["message"])
     return result["data"], 200
 
 
@@ -44,7 +46,17 @@ async def route_get_requests_by_workshop(workshop_id: str):
 async def route_get_requests_by_worker(worker_id: str):
     result = await get_assistance_requests_by_worker(worker_id)
     if result["status"] == "error":
-        raise HTTPException(status_code=404 if "not found" in result["message"].lower() else 500, detail=result["message"])
+        raise HTTPException(status_code=404 if "not found" in result["message"].lower() else 500,
+                            detail=result["message"])
+    return result["data"], 200
+
+
+@router.get("/{assistance_request_id}/workers")
+async def route_get_request_workers(assistance_request_id: str):
+    result = await get_assistance_requests_workers(assistance_request_id)
+    if result["status"] == "error":
+        raise HTTPException(status_code=404 if "not found" in result["message"].lower() else 500,
+                            detail=result["message"])
     return result["data"], 200
 
 
@@ -53,7 +65,6 @@ async def route_create_assistance_request(
         request_data: AssistanceRequestCreate,
         username: str = Query(..., description="Username of the person creating the request")
 ):
-    workshop = await get_workshop_by_id()
     result = await insert_assistance_request(request_data)
 
     if result["status"] == "error":
@@ -71,7 +82,8 @@ async def route_create_assistance_request(
 async def route_edit_assistance_request(request_id: str, updated_data: AssistanceRequestCreate):
     result = await edit_assistance_request(request_id, updated_data)
     if result["status"] == "error":
-        raise HTTPException(status_code=404 if "not found" in result["message"].lower() else 500, detail=result["message"])
+        raise HTTPException(status_code=404 if "not found" in result["message"].lower() else 500,
+                            detail=result["message"])
     return {"message": result["message"]}, 200
 
 
@@ -79,12 +91,13 @@ async def route_edit_assistance_request(request_id: str, updated_data: Assistanc
 async def route_delete_assistance_request(request_id: str, username: str):
     result = await delete_assistance_request(request_id)
     if result["status"] == "error":
-        raise HTTPException(status_code=404 if "not found" in result["message"].lower() else 500, detail=result["message"])
+        raise HTTPException(status_code=404 if "not found" in result["message"].lower() else 500,
+                            detail=result["message"])
 
     user_result = await delete_request_from_user(username, request_id)
 
     if user_result["status"] == "success":
         return {"message": result["message"]}, 200
     else:
-        raise HTTPException(status_code=500, detail=user_result.get("message", "Failed to remove request from user's list"))
-
+        raise HTTPException(status_code=500,
+                            detail=user_result.get("message", "Failed to remove request from user's list"))

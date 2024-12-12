@@ -118,3 +118,22 @@ async def get_assistance_requests_by_worker(worker_id: str):
     except Exception as e:
         logger.error(f"Error retrieving assistance requests for worker {worker_id}: {str(e)}")
         return {"status": "error", "message": str(e)}
+
+
+async def get_assistance_requests_workers(assistance_request_id: str):
+    db = await get_db()
+    try:
+        assistance_request = await db.assistance_request.find_one({"_id": ObjectId(assistance_request_id)})
+        if assistance_request:
+            assistance_request = jsonable_encoder(convert_objectid(assistance_request))
+
+            if "workers_ids" in assistance_request:
+                return {"status": "success", "data": assistance_request["workers_ids"]}
+            else:
+                return {"status": "success", "data": []}
+        else:
+            return {"status": "error", "message": "Assistance request not found."}
+
+    except Exception as e:
+        logger.error(f"Error retrieving assistance request: {str(e)}")
+        return {"status": "error", "message": str(e)}
