@@ -80,6 +80,29 @@ class UserRepository {
     }
   }
 
+  Future<List<dynamic>?> getRequestsByUsername(String username) async {
+    if (accessToken == null) {
+      throw Exception("User is not logged in");
+    }
+
+    try {
+      final response = await apiClient.get(
+        '/assistance_request/worker/username/$username',
+        headers: {'Authorization': 'Bearer $accessToken'}, // Include token if required
+      );
+
+      if (response.statusCode == 200) {
+        print(json.decode(response.body)[0]);
+        final List<dynamic> requestsData = json.decode(response.body)[0];
+        return requestsData;
+      } else {
+        throw Exception('Failed to fetch requests');
+      }
+    } catch (e) {
+      throw Exception('Error fetching requests: $e');
+    }
+  }
+
   // Register method now returns a User object or success response
   Future<String?> register({
     required String username,

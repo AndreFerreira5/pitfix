@@ -43,7 +43,7 @@ class _WorkerRequestsState extends State<WorkerRequests> {
 
     // Get the user request IDs and handle the result asynchronously
     try {
-      final userRequestIds = await _userRepository.getUserRequestsIds(username!);
+      final userRequestIds = await _userRepository.getRequestsByUsername(username!);
 
       if (userRequestIds != null && userRequestIds.isNotEmpty) {
         // Now fetch the corresponding assistance requests for each ID
