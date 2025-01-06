@@ -71,3 +71,31 @@ async def get_manager_workshop_by_username_route(username: str):
     # Log the request and return the workshopId
     logger.info("Returned workshop ID for manager %s", user["username"])
     return {"workshop_id": convert_objectid(user["workshop_id"])}, 200
+
+
+@router.put("/update/{user_id}")
+async def update_user(user_id: str, request: UserUpdateRequest):
+    """
+    Update user information.
+    """
+    # Fetch the user from the database
+    user = await get_user_by_id(user_id)
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    # Prepare the update data
+    update_data = request.dict(exclude_unset=True)
+
+    if not update_data:
+        raise HTTPException(status_code=400, detail="No fields provided for update")
+
+    # Perform the update in the database
+    update_result = await update_user_by_id(user_id, update_data)
+
+    if update_result["status"] == "fail":
+        raise HTTPException(status_code=400, detail=update_result["message"])
+    elif update_result["status"] == "error":
+        raise HTTPException(status_code=500, detail="Failed to update user")
+
+    # Return a success message
+    return {"status": "success", "message": "User updated successfully"}

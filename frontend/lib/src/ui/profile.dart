@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:iconsax/iconsax.dart';
 import '../models/user_update.dart';
 import '../repository/user_repository.dart';
-import '../models/user.dart';
 
 class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
@@ -47,22 +45,16 @@ class _ProfilePageState extends State<ProfilePage> {
     super.dispose();
   }
 
-  // Fetch user data by the logged-in user's username
   Future<void> _fetchUserProfile() async {
     try {
       final userProfile = await _userRepository.get_user_profile();
-      print(userProfile);
       const String placeholderText = '--';
       setState(() {
         _name = userProfile?.name ?? placeholderText;
         _email = userProfile?.email ?? placeholderText;
         _phone = userProfile?.phone ?? placeholderText;
         _address = userProfile?.address ?? placeholderText;
-        if(userProfile is Client) {
-          _billingAddress = userProfile.billingAddress ?? placeholderText;
-        } else {
-          _billingAddress = '';
-        }
+        _billingAddress = userProfile is Client ? userProfile.billingAddress ?? placeholderText : '';
         _isLoading = false;
 
         // Initialize controllers with the fetched data
@@ -76,12 +68,14 @@ class _ProfilePageState extends State<ProfilePage> {
       setState(() {
         _isLoading = false;
       });
-      print("Error fetching user profile: $e");
+      Get.snackbar('Error', 'Failed to load profile: $e',
+          snackPosition: SnackPosition.BOTTOM);
     }
   }
 
-  // Save changes and update user profile
   void _saveChanges() async {
+    if (!_validateInputs()) return;
+
     setState(() {
       _isLoading = true;
     });
@@ -97,21 +91,43 @@ class _ProfilePageState extends State<ProfilePage> {
 
       final result = await _userRepository.updateUserProfile(userUpdate);
 
+      // Fetch the updated profile to refresh the page
+      await _fetchUserProfile();
+
       setState(() {
         _isEditing = false;
         _isLoading = false;
       });
 
-      print("User profile updated: $result");
+      Get.snackbar('Success', result, snackPosition: SnackPosition.BOTTOM);
+      print("Profile updated successfully: $result");
     } catch (e) {
       setState(() {
         _isLoading = false;
       });
-      print("Error saving changes: $e");
+
+      Get.snackbar('Error', 'Failed to update profile: $e',
+          snackPosition: SnackPosition.BOTTOM);
     }
   }
 
-  // Toggle edit mode
+  bool _validateInputs() {
+    if (_nameController.text.isEmpty ||
+        _emailController.text.isEmpty ||
+        !_emailController.text.contains('@') ||
+        _phoneController.text.isEmpty) {
+      Get.snackbar(
+        'Invalid Input',
+        'Please fill in all fields correctly',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.redAccent,
+        colorText: Colors.white,
+      );
+      return false;
+    }
+    return true;
+  }
+
   void _toggleEditMode() {
     setState(() {
       _isEditing = !_isEditing;
@@ -121,10 +137,6 @@ class _ProfilePageState extends State<ProfilePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      /*
-      appBar: AppBar(
-        title: const Text('Profile'),
-      ),*/
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
           : Padding(
@@ -138,42 +150,36 @@ class _ProfilePageState extends State<ProfilePage> {
                 style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 20),
-
               _buildTextField(
                 label: 'Name',
                 controller: _nameController,
                 isEditable: _isEditing,
               ),
               const SizedBox(height: 16),
-
               _buildTextField(
                 label: 'Email',
                 controller: _emailController,
                 isEditable: _isEditing,
               ),
               const SizedBox(height: 16),
-
               _buildTextField(
                 label: 'Phone',
                 controller: _phoneController,
                 isEditable: _isEditing,
               ),
               const SizedBox(height: 16),
-
               _buildTextField(
                 label: 'Address',
                 controller: _addressController,
                 isEditable: _isEditing,
               ),
               const SizedBox(height: 16),
-
               _buildTextField(
                 label: 'Billing Address',
                 controller: _billingController,
                 isEditable: _isEditing,
               ),
               const SizedBox(height: 16),
-
               ElevatedButton(
                 onPressed: _isEditing ? _saveChanges : _toggleEditMode,
                 child: Text(_isEditing ? 'Save Changes' : 'Edit Profile'),
@@ -201,7 +207,7 @@ class _ProfilePageState extends State<ProfilePage> {
         isEditable
             ? TextField(
           controller: controller,
-          obscureText: label == 'Password' ? true : false,
+          obscureText: label == 'Password',
           decoration: InputDecoration(
             border: const OutlineInputBorder(),
             hintText: 'Enter $label',

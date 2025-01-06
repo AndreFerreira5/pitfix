@@ -177,3 +177,36 @@ async def get_user_profile(username: str):
         billingAddress=user_data.get('billingAddress', ''),
         password=user_data['password'],
     )
+
+@router.put("/update/{user_id}")
+async def update_user_by_id(user_id: str, update_data: dict):
+    """
+    Update user information by user ID.
+
+    :param user_id: The ID of the user to update.
+    :param update_data: A dictionary containing the fields to update.
+    :return: A status message indicating success or failure.
+    """
+    try:
+        # Fetch the user to ensure they exist
+        existing_user = await get_user_by_id(user_id)
+        if not existing_user:
+            raise HTTPException(status_code=404, detail="User not found")
+
+        # Update the user information
+        result = await db.users.update_one({"_id": user_id}, {"$set": update_data})
+
+        if result.modified_count == 0:
+            raise HTTPException(status_code=400, detail="No changes were made to the user")
+
+        # Return a success message
+        return {"status": "success", "message": "User updated successfully"}
+
+    except HTTPException as e:
+        # Raise HTTP exceptions directly
+        logger.error(f"HTTPException: {e.detail}")
+        raise e
+    except Exception as e:
+        # Log and raise internal server errors
+        logger.error(f"Error updating user: {e}")
+        raise HTTPException(status_code=500, detail="Internal Server Error")
