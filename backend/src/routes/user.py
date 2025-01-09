@@ -1,5 +1,5 @@
 from fastapi import APIRouter, HTTPException
-from db.auth import get_user_by_username, get_user_by_id
+from db.auth import get_user_by_username, get_user_by_id, update_user_by_username
 from models.user import User
 from fastapi.encoders import jsonable_encoder
 from fastapi.responses import JSONResponse
@@ -73,13 +73,13 @@ async def get_manager_workshop_by_username_route(username: str):
     return {"workshop_id": convert_objectid(user["workshop_id"])}, 200
 
 
-@router.put("/update/{user_id}")
-async def update_user(user_id: str, request: UserUpdateRequest):
+@router.put("/update/{username}")
+async def update_user_by_username_route(username: str, request: UserUpdateRequest):
     """
-    Update user information.
+    Update user information by username.
     """
-    # Fetch the user from the database
-    user = await get_user_by_id(user_id)
+    # Fetch the user from the database using username
+    user = await get_user_by_username(username)
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
 
@@ -90,7 +90,7 @@ async def update_user(user_id: str, request: UserUpdateRequest):
         raise HTTPException(status_code=400, detail="No fields provided for update")
 
     # Perform the update in the database
-    update_result = await update_user_by_id(user_id, update_data)
+    update_result = await update_user_by_username(user["_id"], update_data)  # Update by MongoDB `_id`
 
     if update_result["status"] == "fail":
         raise HTTPException(status_code=400, detail=update_result["message"])

@@ -175,17 +175,17 @@ class UserRepository {
     }
   }
 
-  // Update user profile by username
   Future<String> updateUserProfile(UserUpdate userUpdate) async {
     if (username == null || accessToken == null) {
       throw Exception("User is not logged in");
     }
 
     try {
+      // Send request to update user by username
       final response = await apiClient.put(
-        '/update/$username', // Updated endpoint URL to match backend
-        headers: {'Authorization': 'Bearer $accessToken'}, // Include token
-        body: json.encode(userUpdate.toJson()), // Send the updated data as JSON
+        '/update/$username',
+        headers: {'Authorization': 'Bearer $accessToken'},  // Include token
+        body: json.encode(userUpdate.toJson()),  // Send the updated data as JSON
       );
 
       // Handle response

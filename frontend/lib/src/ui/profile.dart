@@ -15,7 +15,6 @@ class _ProfilePageState extends State<ProfilePage> {
   String _email = "";
   String _phone = "";
   String _address = "";
-  String _billingAddress = "";
 
   bool _isEditing = false;
   bool _isLoading = true;
@@ -24,7 +23,6 @@ class _ProfilePageState extends State<ProfilePage> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _phoneController = TextEditingController();
   final TextEditingController _addressController = TextEditingController();
-  final TextEditingController _billingController = TextEditingController();
 
   late UserRepository _userRepository;
 
@@ -41,7 +39,6 @@ class _ProfilePageState extends State<ProfilePage> {
     _emailController.dispose();
     _phoneController.dispose();
     _addressController.dispose();
-    _billingController.dispose();
     super.dispose();
   }
 
@@ -54,7 +51,6 @@ class _ProfilePageState extends State<ProfilePage> {
         _email = userProfile?.email ?? placeholderText;
         _phone = userProfile?.phone ?? placeholderText;
         _address = userProfile?.address ?? placeholderText;
-        _billingAddress = userProfile is Client ? userProfile.billingAddress ?? placeholderText : '';
         _isLoading = false;
 
         // Initialize controllers with the fetched data
@@ -62,7 +58,6 @@ class _ProfilePageState extends State<ProfilePage> {
         _emailController.text = _email;
         _phoneController.text = _phone;
         _addressController.text = _address;
-        _billingController.text = _billingAddress;
       });
     } catch (e) {
       setState(() {
@@ -86,7 +81,6 @@ class _ProfilePageState extends State<ProfilePage> {
         email: _emailController.text,
         phone: _phoneController.text,
         address: _addressController.text,
-        billingAddress: _billingController.text,
       );
 
       final result = await _userRepository.updateUserProfile(userUpdate);
@@ -171,12 +165,6 @@ class _ProfilePageState extends State<ProfilePage> {
               _buildTextField(
                 label: 'Address',
                 controller: _addressController,
-                isEditable: _isEditing,
-              ),
-              const SizedBox(height: 16),
-              _buildTextField(
-                label: 'Billing Address',
-                controller: _billingController,
                 isEditable: _isEditing,
               ),
               const SizedBox(height: 16),
