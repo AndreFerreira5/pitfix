@@ -131,48 +131,80 @@ class _ProfilePageState extends State<ProfilePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.grey[100], // Subtle background color
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
-          : Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: SingleChildScrollView(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text(
-                'Profile Information',
-                style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+          : Center(
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Card(
+            elevation: 4,
+            shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16)),
+            child: Padding(
+              padding: const EdgeInsets.all(20.0),
+              child: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    const Text(
+                      'Profile Information',
+                      style: TextStyle(
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.blue,
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+                    _buildTextField(
+                      label: 'Name',
+                      controller: _nameController,
+                      isEditable: _isEditing,
+                    ),
+                    const SizedBox(height: 16),
+                    _buildTextField(
+                      label: 'Email',
+                      controller: _emailController,
+                      isEditable: _isEditing,
+                    ),
+                    const SizedBox(height: 16),
+                    _buildTextField(
+                      label: 'Phone',
+                      controller: _phoneController,
+                      isEditable: _isEditing,
+                    ),
+                    const SizedBox(height: 16),
+                    _buildTextField(
+                      label: 'Address',
+                      controller: _addressController,
+                      isEditable: _isEditing,
+                    ),
+                    const SizedBox(height: 24),
+                    SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.blue, // Button color
+                          padding: const EdgeInsets.symmetric(
+                              vertical: 14), // Padding
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                        ),
+                        onPressed: _isEditing
+                            ? _saveChanges
+                            : _toggleEditMode,
+                        child: Text(
+                          _isEditing ? 'Save Changes' : 'Edit Profile',
+                          style: const TextStyle(fontSize: 16),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
               ),
-              const SizedBox(height: 20),
-              _buildTextField(
-                label: 'Name',
-                controller: _nameController,
-                isEditable: _isEditing,
-              ),
-              const SizedBox(height: 16),
-              _buildTextField(
-                label: 'Email',
-                controller: _emailController,
-                isEditable: _isEditing,
-              ),
-              const SizedBox(height: 16),
-              _buildTextField(
-                label: 'Phone',
-                controller: _phoneController,
-                isEditable: _isEditing,
-              ),
-              const SizedBox(height: 16),
-              _buildTextField(
-                label: 'Address',
-                controller: _addressController,
-                isEditable: _isEditing,
-              ),
-              const SizedBox(height: 16),
-              ElevatedButton(
-                onPressed: _isEditing ? _saveChanges : _toggleEditMode,
-                child: Text(_isEditing ? 'Save Changes' : 'Edit Profile'),
-              ),
-            ],
+            ),
           ),
         ),
       ),
@@ -192,18 +224,17 @@ class _ProfilePageState extends State<ProfilePage> {
           style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
         ),
         const SizedBox(height: 8),
-        isEditable
-            ? TextField(
+        TextField(
+          enabled: isEditable,
           controller: controller,
-          obscureText: label == 'Password',
           decoration: InputDecoration(
-            border: const OutlineInputBorder(),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(8),
+            ),
+            filled: true,
+            fillColor: isEditable ? Colors.white : Colors.grey[200],
             hintText: 'Enter $label',
           ),
-        )
-            : Text(
-          controller.text,
-          style: const TextStyle(fontSize: 16),
         ),
       ],
     );
