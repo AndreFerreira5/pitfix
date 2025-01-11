@@ -24,7 +24,6 @@ class AssistanceRequestRepository {
 
     if (response.statusCode == 200) {
       final decodedResponse = json.decode(response.body);
-      print(decodedResponse);
       return AssistanceRequest.fromJson(decodedResponse[0]);
     } else if (response.statusCode == 404) {
       throw Exception('Assistance request not found');
@@ -93,13 +92,16 @@ class AssistanceRequestRepository {
   }
 
   Future<String> deleteAssistanceRequest(String requestId, String username) async {
+    print("boas1");
     final uri = Uri.parse('/assistance_request/delete/$requestId?username=$username');
+    print(uri.toString());
 
     final response = await apiClient.delete(uri.toString());
+    print("boas");
 
     if (response.statusCode == 200) {
-      final List<dynamic> decoded = json.decode(response.body);
-      return decoded[0]['message'];
+      final Map<String, dynamic> decoded = json.decode(response.body);
+      return decoded['message'];
     } else if (response.statusCode == 404) {
       throw Exception('Assistance request not found');
     } else {

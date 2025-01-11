@@ -10,7 +10,8 @@ class RepositoryBinding extends Bindings {
   void dependencies() {
     // change the url to localhost when in development
     //final apiClient = ApiClient(baseUrl: "https://pitfix.onrender.com");
-    final apiClient = ApiClient(baseUrl: "http://localhost:6969");
+    //final apiClient = ApiClient(baseUrl: "http://localhost:8000");
+    final apiClient = ApiClient(baseUrl: "http://100.64.195.51:6969");
 
     // initialize and inject repositories
     Get.put<WorkshopRepository>(WorkshopRepository(apiClient: apiClient));

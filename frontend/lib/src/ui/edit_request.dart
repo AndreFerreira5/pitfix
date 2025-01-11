@@ -62,7 +62,9 @@ class _EditRequestScreenState extends State<EditRequestScreen> {
   Future<void> _updateRequest() async {
     try {
       // Ensure that workersIds is initialized correctly
-      widget.request.workersIds = List.from(_selectedWorkerIds); // Create a new list to avoid modifying the original one directly
+      widget.request.workersIds
+        ..clear()
+        ..addAll(_selectedWorkerIds);
 
       await _assistanceRequestRepository.editAssistanceRequest(
         widget.request.id!,

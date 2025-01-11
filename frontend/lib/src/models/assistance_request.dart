@@ -4,7 +4,7 @@ class AssistanceRequest {
   final String description;
   final String workshopId;
   late final List<String> workersIds;
-  final bool? isCompleted;
+  bool? isCompleted;
   final DateTime creationDate;
 
   AssistanceRequest({
