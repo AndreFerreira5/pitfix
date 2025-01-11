@@ -103,11 +103,14 @@ class _ClientRequestsState extends State<ClientRequests> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: AppBar(
-          title: const Text("All Assistance Requests"),
-        ),
         body: _assistanceRequests.isEmpty
-            ? const Center(child: CircularProgressIndicator())
+            ? const Center(
+              child: Text(
+              "You have no assistance requests.",
+              style: TextStyle(fontSize: 18),
+              textAlign: TextAlign.center,
+              ),
+            )
             : ListView.builder(
           itemCount: _assistanceRequests.length,
           padding: const EdgeInsets.all(16),

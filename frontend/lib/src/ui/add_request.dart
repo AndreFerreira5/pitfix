@@ -7,7 +7,9 @@ import '../repository/workshop_repository.dart';  // WorkshopRepository
 import '../models/workshop.dart';  // Workshop model
 
 class AddRequestPage extends StatefulWidget {
-  const AddRequestPage({super.key});
+  final String? preselectedWorkshop;
+
+  const AddRequestPage({Key? key, this.preselectedWorkshop}) : super(key: key);
 
   @override
   _AddRequestPageState createState() => _AddRequestPageState();
@@ -37,6 +39,7 @@ class _AddRequestPageState extends State<AddRequestPage> {
     _assistanceRequestRepository = Get.find<AssistanceRequestRepository>();
     _workshopRepository = Get.find<WorkshopRepository>();
     _workshopsFuture = _workshopRepository.getAllWorkshops(); // Fetch all workshops
+    _selectedWorkshop = widget.preselectedWorkshop;
     _getUsername();
   }
 

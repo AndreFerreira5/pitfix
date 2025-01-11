@@ -118,9 +118,6 @@ class _ManagerRequestsState extends State<ManagerRequests> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text("Workshop Requests"),
-      ),
       body: _isLoading
           ? const Center(child: CircularProgressIndicator()) // Loading indicator
           : _errorMessage != null
@@ -138,7 +135,7 @@ class _ManagerRequestsState extends State<ManagerRequests> {
               await Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => EditRequestScreen(request: request), //TODO edit_request page
+                  builder: (context) => EditRequestScreen(request: request),
                 ),
               );
               // After editing, reload the requests (you might want to optimize this)

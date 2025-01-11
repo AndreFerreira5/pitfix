@@ -5,7 +5,8 @@ from db.workshop import (
     get_workshop_by_name,
     # get_workshop_workers,
     insert_workshop,
-    delete_workshop,
+    delete_workshop_by_id,
+    delete_workshop_by_name,
     edit_workshop
 )
 
@@ -67,9 +68,18 @@ async def add_workshop(workshop_data: WorkshopCreate):
         return result["message"], 201
 
 
-@router.delete("/delete/{workshop_id}")
+@router.delete("/delete/id/{workshop_id}")
 async def delete_workshop_route(workshop_id: str):
-    result = await delete_workshop(workshop_id)
+    result = await delete_workshop_by_id(workshop_id)
+    if result["status"] == "error":
+        raise HTTPException(status_code=404 if "not found" in result["message"].lower() else 500,
+                            detail=result["message"])
+    return {"message": result["message"]}, 200
+
+
+@router.delete("/delete/name/{workshop_name}")
+async def delete_workshop_by_name_route(workshop_name: str):
+    result = await delete_workshop_by_name(workshop_name)
     if result["status"] == "error":
         raise HTTPException(status_code=404 if "not found" in result["message"].lower() else 500,
                             detail=result["message"])

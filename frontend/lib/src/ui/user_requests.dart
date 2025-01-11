@@ -27,9 +27,6 @@ class _UserRequestsState extends State<UserRequests> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text("All Assistance Requests"),
-      ),
       body: FutureBuilder<List<AssistanceRequest>>(
         future: _assistanceRequestsFuture,
         builder: (context, snapshot) {

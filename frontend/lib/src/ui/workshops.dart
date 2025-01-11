@@ -24,16 +24,19 @@ class _WorkshopsState extends State<Workshops> {
     super.initState();
 
     _workshopRepository = Get.find<WorkshopRepository>();
-    _workshopsFuture = _workshopRepository.getAllWorkshops();
+    _refreshWorkshops();
     isAdmin = widget.userRole == 'admin';
+  }
+
+  void _refreshWorkshops() {
+    setState(() {
+      _workshopsFuture = _workshopRepository.getAllWorkshops();
+    });
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text("Workshops"),
-      ),
       body: FutureBuilder<List<Workshop>>(
         future: _workshopsFuture,
         builder: (context, snapshot) {
@@ -52,7 +55,10 @@ class _WorkshopsState extends State<Workshops> {
             padding: const EdgeInsets.all(16),
             itemBuilder: (context, index) {
               final workshop = workshops[index];
-              return WorkshopCard(workshop: workshop);
+              return WorkshopCard(
+                  workshop: workshop,
+                  onRefresh: _refreshWorkshops,
+              );
             },
           );
         },
@@ -65,7 +71,11 @@ class _WorkshopsState extends State<Workshops> {
             Navigator.push(
               context,
               MaterialPageRoute(builder: (context) => AddWorkshopPage()),
-            );
+            ).then((value) {
+              if (value == true) {
+                _refreshWorkshops();
+              }
+            });
           },
           tooltip: "Add Workshop",
           child: const Icon(Icons.add),
@@ -79,8 +89,9 @@ class _WorkshopsState extends State<Workshops> {
 // widget to display each workshop as a card
 class WorkshopCard extends StatefulWidget {
   final Workshop workshop;
+  final VoidCallback onRefresh;
 
-  const WorkshopCard({required this.workshop, super.key});
+  const WorkshopCard({required this.workshop, required this.onRefresh, super.key});
 
   @override
   _WorkshopCardState createState() => _WorkshopCardState();
@@ -108,15 +119,21 @@ class _WorkshopCardState extends State<WorkshopCard> {
           _isHovered = false;
         });
       },
-      cursor: SystemMouseCursors.click, // Make sure the cursor changes to a clickable hand
+      cursor: SystemMouseCursors.click,
       child: GestureDetector(
         onTap: () {
           Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (context) => WorkshopDetailPage(workshop: widget.workshop),
+              builder: (context) => WorkshopDetailPage(
+                  workshop: widget.workshop
+              ),
             ),
-          );
+          ).then((value) {
+            if (value == true) {
+              widget.onRefresh();
+            }
+          });
         },
         child: Card(
           shape: RoundedRectangleBorder(

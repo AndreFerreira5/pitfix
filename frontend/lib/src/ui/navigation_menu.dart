@@ -105,26 +105,42 @@ class _NavigationMenuState extends State<NavigationMenu> {
     }
   }
 
+  // Define titles for the pages
+  List<String> _getTitles(String role) {
+    switch (role) {
+      case 'admin':
+        return ['PitFix - Workshops', 'PitFix - Requests', 'PitFix - Profile', 'PitFix - Settings'];
+      case 'manager':
+        return ['PitFix - My Workshop', 'PitFix - Profile', 'PitFix - Settings'];
+      case 'worker':
+        return ['PitFix - Requests', 'PitFix - Profile', 'PitFix - Settings'];
+      case 'client':
+        return ['PitFix - Workshops', 'PitFix - My Requests', 'PitFix - Profile', 'PitFix - Settings'];
+      default:
+        return ['PitFix'];
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     userRole = AuthController.to.userRole.value;
-    print("userRole: $userRole");
 
-    if(userRole == null || userRole == ""){
+    if (userRole == null || userRole == "") {
       AuthController.to.logout("Error", "Couldn't get the user role");
     }
 
     final pages = _getPages(userRole!); // get pages based on role
     final destinations = _getDestinations(userRole!); // get destinations based on role
+    final titles = _getTitles(userRole!); // get titles based on role
 
     return Scaffold(
       body: Stack(
         children: [
-          // reactive page content based on selected index
+          // Reactive page content based on selected index
           Obx(() => Positioned.fill(
             child: pages[navController.selectedIndex.value],
           )),
-          // floating navigation bar
+          // Floating navigation bar
           Positioned(
             left: 20,
             right: 20,
@@ -136,38 +152,51 @@ class _NavigationMenuState extends State<NavigationMenu> {
               ),
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(24),
-                child: Obx(() => NavigationBar( // wrap NavigationBar in Obx to reactively update
+                child: Obx(() => NavigationBar(
                   destinations: destinations,
                   height: 60,
-                  selectedIndex: navController.selectedIndex.value, // bind to controller
-                  onDestinationSelected: navController.changePage, // update index on tap
+                  selectedIndex: navController.selectedIndex.value,
+                  onDestinationSelected: navController.changePage,
                 )),
               ),
             ),
           ),
         ],
       ),
-      // Optional: Add a logout button in the AppBar
       appBar: AppBar(
-        title: Text('PitFix'),
-        actions: [
-          IconButton(
-            icon: Icon(Icons.logout),
-            onPressed: () {
-              AuthController.to.logout();
-            },
-          ),
-        ],
+        title: Obx(() {
+          final titleParts = titles[navController.selectedIndex.value].split(' - ');
+          return RichText(
+            text: TextSpan(
+              style: Theme.of(context)
+                  .appBarTheme
+                  .titleTextStyle
+                  ?.copyWith(color: Colors.white) ??
+                  const TextStyle(fontSize: 20, color: Colors.blue),
+              children: [
+                TextSpan(
+                  text: titleParts[0], // "PitFix"
+                  style: const TextStyle(fontWeight: FontWeight.bold),
+                ),
+                if (titleParts.length > 1)
+                  TextSpan(
+                    text: ' - ${titleParts[1]}', // The rest of the title
+                  ),
+              ],
+            ),
+          );
+        }),
       ),
+
     );
   }
 }
 
 class NavigationController extends GetxController {
-  // observable for the selected index
+  // Observable for the selected index
   var selectedIndex = 0.obs;
 
-  // method to update the selected index
+  // Method to update the selected index
   void changePage(int index) {
     selectedIndex.value = index;
   }
