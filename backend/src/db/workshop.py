@@ -31,10 +31,24 @@ async def insert_workshop(workshop_data: WorkshopCreate):
         return {"status": "error", "message": str(e)}
 
 
-async def delete_workshop(workshop_id: str):
+async def delete_workshop_by_id(workshop_id: str):
     db = await get_db()
     try:
         result = await db.workshop.delete_one({"_id": ObjectId(workshop_id)})
+        if result.deleted_count == 1:
+            return {"status": "success", "message": "Workshop deleted successfully."}
+        else:
+            return {"status": "error", "message": "Workshop not found."}
+
+    except Exception as e:
+        logger.error(str(e))
+        return {"status": "error", "message": str(e)}
+
+
+async def delete_workshop_by_name(workshop_name: str):
+    db = await get_db()
+    try:
+        result = await db.workshop.delete_one({"name": workshop_name})
         if result.deleted_count == 1:
             return {"status": "success", "message": "Workshop deleted successfully."}
         else:
