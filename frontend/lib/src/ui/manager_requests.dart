@@ -118,9 +118,6 @@ class _ManagerRequestsState extends State<ManagerRequests> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text("Workshop Requests"),
-      ),
       body: _isLoading
           ? const Center(child: CircularProgressIndicator()) // Loading indicator
           : _errorMessage != null
