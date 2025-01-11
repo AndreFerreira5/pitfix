@@ -167,13 +167,12 @@ class RequestCard extends StatelessWidget {
         ? 'Unknown'
         : (request.isCompleted! ? 'Completed' : 'Waiting');
 
-    String workshopIdDisplay = request.workshopId ?? 'Unknown Workshop';
 
     return Card(
       margin: const EdgeInsets.symmetric(vertical: 8),
       child: ListTile(
         title: Text(request.title),
-        subtitle: Text("Status: $status\nWorkshop: $workshopIdDisplay"),
+        subtitle: Text("Status: $status"),
         trailing: Row(
           mainAxisSize: MainAxisSize.min,
           children: [

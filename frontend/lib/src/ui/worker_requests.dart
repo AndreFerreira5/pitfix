@@ -121,19 +121,15 @@ class RequestCard extends StatelessWidget {
         ? 'Unknown'
         : (request.isCompleted! ? 'Completed' : 'Waiting');
 
-    // Use a fallback string if workshopId is null
-    String workshopIdDisplay = request.workshopId ?? 'Unknown Workshop';
-
-
     return Card(
       margin: const EdgeInsets.symmetric(vertical: 8),
       child: ListTile(
         title: Text(request.title),
-        subtitle: Text("Status: $status\nWorkshop: $workshopIdDisplay"),
+        subtitle: Text("Status: $status"),
         trailing: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            IconButton(
+            IconButton( // TODO: editar todas os campos
               icon: const Icon(Icons.edit),
               onPressed: onEdit,
             ),
