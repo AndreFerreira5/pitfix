@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 import '../models/workshop.dart';
+import 'add_request.dart';
 
 class WorkshopDetailPage extends StatelessWidget {
   final Workshop workshop;
@@ -119,14 +120,19 @@ class WorkshopDetailPage extends StatelessWidget {
                       ),
                       shadowColor: Colors.black.withOpacity(0.3),
                     ),
-                    child: Text(
-                      'Add Request',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                      ),
+                    child: FloatingActionButton(
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => AddRequestPage(preselectedWorkshop: workshop.name),
+                          ),
+                        );
+                      },
+                      tooltip: "Add Request",
+                      child: const Icon(Icons.add),
                     ),
+
                   ),
                 ),
               ),
