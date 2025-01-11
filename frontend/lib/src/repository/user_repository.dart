@@ -183,7 +183,7 @@ class UserRepository {
     try {
       // Send request to update user by username
       final response = await apiClient.put(
-        '/update/$username',
+        '/user/update/$username',
         headers: {'Authorization': 'Bearer $accessToken'},  // Include token
         body: json.encode(userUpdate.toJson()),  // Send the updated data as JSON
       );
