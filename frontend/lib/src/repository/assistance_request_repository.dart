@@ -24,7 +24,6 @@ class AssistanceRequestRepository {
 
     if (response.statusCode == 200) {
       final decodedResponse = json.decode(response.body);
-      print(decodedResponse);
       return AssistanceRequest.fromJson(decodedResponse[0]);
     } else if (response.statusCode == 404) {
       throw Exception('Assistance request not found');

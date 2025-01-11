@@ -6,6 +6,7 @@ import 'package:pitfix_frontend/src/ui/add_request.dart';
 import 'package:provider/provider.dart';
 import '../models/assistance_request.dart';
 import '../repository/assistance_request_repository.dart';
+import '../ui/edit_requests_worker.dart';
 
 class WorkerRequests extends StatefulWidget {
   const WorkerRequests({super.key});
@@ -49,7 +50,7 @@ class _WorkerRequestsState extends State<WorkerRequests> {
         // Now fetch the corresponding assistance requests for each ID
         List<Future<AssistanceRequest>> futures = [
           for (var requestId in userRequestIds)
-            _assistanceRequestRepository.getAssistanceRequestById(requestId),
+            _assistanceRequestRepository.getAssistanceRequestById(requestId["_id"]),
         ];
 
         // Wait for all requests to be fetched
@@ -65,38 +66,6 @@ class _WorkerRequestsState extends State<WorkerRequests> {
       }
     } catch (e) {
       print("Error fetching user request IDs: $e");
-    }
-  }
-
-  // Function to delete a request
-  Future<void> _deleteRequest(String requestId) async {
-    username = await _storage.read(key: "username");
-
-    // Check if username is null or empty
-    if (username == null || username!.isEmpty) {
-      print("Error: Username is null or empty");
-      return; // Handle error appropriately, maybe show an error message
-    }
-
-    try {
-      // Delete the request from the backend
-      await _assistanceRequestRepository.deleteAssistanceRequest(requestId, username!);
-
-      // After deletion, remove the request from the local list and update UI
-      setState(() {
-        _assistanceRequests.removeWhere((request) => request.id == requestId);
-      });
-
-      // Show success message
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Request deleted successfully')),
-      );
-    } catch (e) {
-      print("Error: $e");
-      // Show error message if deletion fails
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to delete request: $e')),
-      );
     }
   }
 
@@ -121,24 +90,20 @@ class _WorkerRequestsState extends State<WorkerRequests> {
             final request = _assistanceRequests[index];
             return RequestCard(
               request: request,
-              onDelete: _deleteRequest,
+              onEdit: ()async{
+                // Navigate to the edit screen with the selected request
+                await Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => EditRequestsWorker(request: request),
+                  ),
+                );
+                // After editing, reload the requests (you might want to optimize this)
+                initAsync();
+              },
             );
           },
         ),
-
-        floatingActionButton: Padding(
-          padding: const EdgeInsets.only(bottom: 80.0),
-          child: FloatingActionButton(
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => const AddRequestPage()),
-              );
-            },
-            tooltip: "Add Request",
-            child: const Icon(Icons.add),
-          ),
-        )
     );
   }
 }
@@ -146,9 +111,12 @@ class _WorkerRequestsState extends State<WorkerRequests> {
 // Card widget to display individual requests
 class RequestCard extends StatelessWidget {
   final AssistanceRequest request;
-  final Function(String) onDelete;
+  final VoidCallback onEdit;  // Added onEdit callback
 
-  const RequestCard({required this.request, required this.onDelete, super.key});
+  const RequestCard({
+    required this.request,
+    required this.onEdit,
+    super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -170,40 +138,7 @@ class RequestCard extends StatelessWidget {
           children: [
             IconButton(
               icon: const Icon(Icons.edit),
-              onPressed: () {
-                // Add code to navigate to edit request page if necessary
-              },
-            ),
-            IconButton(
-              icon: const Icon(Icons.delete),
-              onPressed: () async {
-                // Confirm deletion with a dialog
-                bool? confirmDelete = await showDialog(
-                  context: context,
-                  builder: (context) => AlertDialog(
-                    title: const Text('Delete Request'),
-                    content: const Text('Are you sure you want to delete this request?'),
-                    actions: [
-                      TextButton(
-                        onPressed: () {
-                          Navigator.of(context).pop(false);
-                        },
-                        child: const Text('Cancel'),
-                      ),
-                      TextButton(
-                        onPressed: () {
-                          Navigator.of(context).pop(true);
-                        },
-                        child: const Text('Delete'),
-                      ),
-                    ],
-                  ),
-                );
-
-                if (confirmDelete == true) {
-                  onDelete(request.id!); // Call the onDelete callback
-                }
-              },
+              onPressed: onEdit,
             ),
           ],
         ),
