@@ -1,6 +1,6 @@
 from fastapi import APIRouter, HTTPException
 from db.auth import get_user_by_username, get_user_by_id, update_user_by_username
-from models.user import User
+from models.user import User, UserUpdate
 from fastapi.encoders import jsonable_encoder
 from fastapi.responses import JSONResponse
 from utils.conversions import convert_objectid
@@ -24,7 +24,6 @@ async def get_user_by_username_route(username: str):
     user["_id"] = convert_objectid(user["_id"])
     if "requests" in user:
         user["requests"] = convert_objectid(user["requests"])
-
 
     logger.info("Returned user %s", user["username"])
     return User.parse_obj(user)
@@ -74,12 +73,13 @@ async def get_manager_workshop_by_username_route(username: str):
 
 
 @router.put("/update/{username}")
-async def update_user_by_username_route(username: str, request: UserUpdateRequest):
+async def update_user_by_username_route(username: str, request: UserUpdate):
     """
     Update user information by username.
     """
     # Fetch the user from the database using username
     user = await get_user_by_username(username)
+    print(user)
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
 
@@ -90,7 +90,7 @@ async def update_user_by_username_route(username: str, request: UserUpdateReques
         raise HTTPException(status_code=400, detail="No fields provided for update")
 
     # Perform the update in the database
-    update_result = await update_user_by_username(user["_id"], update_data)  # Update by MongoDB `_id`
+    update_result = await update_user_by_username(username, update_data)  # Update by MongoDB `_id`
 
     if update_result["status"] == "fail":
         raise HTTPException(status_code=400, detail=update_result["message"])

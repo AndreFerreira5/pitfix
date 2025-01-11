@@ -1,5 +1,5 @@
 from typing import List, Optional
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, validator
 from bson import ObjectId
 from datetime import datetime, timezone
 
@@ -26,3 +26,16 @@ class AssistanceRequestCreate(BaseModel):
     workers_ids: List[str] = Field(default_factory=list, description="List of worker IDs assigned to this request.")
     is_completed: Optional[bool] = Field(default=False, description="Completion status of the request.")
     creation_date: datetime = Field(default_factory=lambda: datetime.now(timezone.utc), description="Timestamp of when the request was created.")
+
+    @validator("workers_ids", each_item=True)
+    def validate_workers_ids(cls, v):
+        if not ObjectId.is_valid(v):
+            raise ValueError(f"Invalid ObjectId: {v}")
+        return ObjectId(v)
+
+    @validator("workshop_id")
+    def validate_workshop_id(cls, v):
+        if not ObjectId.is_valid(v):
+            raise ValueError(f"Invalid ObjectId: {v}")
+        return ObjectId(v)
+

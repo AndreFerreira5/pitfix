@@ -19,9 +19,24 @@ class User(BaseModel):
         json_encoders = {ObjectId: str}
 
 
-class UserUpdateRequest(BaseModel):
+class Client(User):
+    billing_address: Optional[str] = ""
+
+
+class Worker(User):
+    workshop_id: Optional[str] = None
+
+
+class Manager(User):
+    workshop_id: Optional[str] = None
+
+
+class Admin(User):
+    pass
+
+
+class UserUpdate(BaseModel):
     name: Optional[str]
     email: Optional[str]
     phone: Optional[str]
     address: Optional[str]
-    billingAddress: Optional[str]

@@ -4,6 +4,7 @@ from models.assistance_request import AssistanceRequest, AssistanceRequestCreate
 from bson import ObjectId
 
 from db.user import insert_request_in_user, delete_request_from_user
+from db.auth import get_user_by_username
 
 from db.assistance_request import (
     get_all_assistance_requests,
@@ -44,6 +45,21 @@ async def route_get_requests_by_workshop(workshop_id: str):
 
 @router.get("/worker/{worker_id}")
 async def route_get_requests_by_worker(worker_id: str):
+    result = await get_assistance_requests_by_worker(worker_id)
+    if result["status"] == "error":
+        raise HTTPException(status_code=404 if "not found" in result["message"].lower() else 500,
+                            detail=result["message"])
+    return result["data"], 200
+
+
+@router.get("/worker/username/{username}")
+async def route_get_requests_by_worker_username(username: str):
+    worker = await get_user_by_username(username)
+    if not worker:
+        raise HTTPException(status_code=404, detail="Worker not found")
+
+    worker_id = str(worker["_id"])
+    print(worker)
     result = await get_assistance_requests_by_worker(worker_id)
     if result["status"] == "error":
         raise HTTPException(status_code=404 if "not found" in result["message"].lower() else 500,
