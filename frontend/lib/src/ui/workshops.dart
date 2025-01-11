@@ -31,9 +31,6 @@ class _WorkshopsState extends State<Workshops> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text("Workshops"),
-      ),
       body: FutureBuilder<List<Workshop>>(
         future: _workshopsFuture,
         builder: (context, snapshot) {

@@ -103,9 +103,6 @@ class _WorkerRequestsState extends State<WorkerRequests> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: AppBar(
-          title: const Text("All Assistance Requests"),
-        ),
         body: _assistanceRequests.isEmpty
             ? const Center(child: CircularProgressIndicator())
             : ListView.builder(
