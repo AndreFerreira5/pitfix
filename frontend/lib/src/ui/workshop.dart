@@ -179,7 +179,7 @@ class WorkshopDetailPage extends StatelessWidget {
       );
 
       // Navigate back to the previous page after deletion
-      Navigator.pop(context);
+      Navigator.pop(context, true);
     } catch (e) {
       // Handle errors
       ScaffoldMessenger.of(context).showSnackBar(
