@@ -1,11 +1,11 @@
 from .connection import get_db
 from bson import ObjectId
 from models.assistance_request import AssistanceRequest, AssistanceRequestCreate
+from pydantic import ValidationError
 import logging
 from fastapi.encoders import jsonable_encoder
 from fastapi.responses import JSONResponse
 from utils.conversions import convert_objectid
-
 
 logger = logging.getLogger(__name__)
 
@@ -57,7 +57,7 @@ async def delete_assistance_request(request_id: str):
 
 async def edit_assistance_request(request_id: str, updated_data: AssistanceRequestCreate):
     db = await get_db()
-    updated_dict = {k: v for k, v in updated_data.dict().items() if v is not None}
+    updated_dict = {k: v for k, v in updated_data.dict(by_alias=True).items() if v is not None}
 
     try:
         result = await db.assistance_request.update_one(
@@ -67,6 +67,10 @@ async def edit_assistance_request(request_id: str, updated_data: AssistanceReque
             return {"status": "success", "message": "Assistance request updated successfully."}
         else:
             return {"status": "error", "message": "Assistance request not found."}
+
+    except ValidationError as e:
+        logger.error(f"Validation error: {str(e)}")
+        return {"status": "error", "message": str(e)}
 
     except Exception as e:
         logger.error(f"Error updating assistance request: {str(e)}")
@@ -108,7 +112,11 @@ async def get_assistance_requests_by_workshop(workshop_id: str):
 async def get_assistance_requests_by_worker(worker_id: str):
     db = await get_db()
     try:
-        assistance_requests = await db.assistance_request.find_one({"workers_ids": ObjectId(worker_id)})
+        assistance_requests_cursor = db.assistance_request.find({
+            "workers_ids": ObjectId(worker_id)
+        })
+        assistance_requests = await assistance_requests_cursor.to_list(length=100)
+        print(assistance_requests)
         if assistance_requests:
             assistance_requests = jsonable_encoder(convert_objectid(assistance_requests))
             return {"status": "success", "data": assistance_requests}

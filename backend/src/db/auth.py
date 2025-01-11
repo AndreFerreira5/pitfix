@@ -77,3 +77,33 @@ async def update_user_session_nonce(user_id: ObjectId, session_nonce: str):
     except Exception as e:
         logger.error(str(e))
         return {"status": "error", "message": str(e)}
+
+
+async def update_user_by_username(username: str, update_data: dict):
+    """
+    Update user information based on the username.
+
+    :param username: The username of the user to update.
+    :param update_data: A dictionary containing the fields to update.
+    :return: A dictionary indicating the status of the operation.
+    """
+    db = await get_db()
+
+    try:
+        # Perform the update operation
+        update_result = await db.user.update_one(
+            {"username": username},
+            {"$set": update_data}
+        )
+
+        if update_result.matched_count == 0:
+            return {"status": "fail", "message": "User not found."}
+
+        if update_result.modified_count == 1:
+            return {"status": "success", "message": "User updated successfully."}
+        else:
+            return {"status": "no_change", "message": "No changes were made to the user."}
+
+    except Exception as e:
+        logger.error(f"Error updating user {username}: {str(e)}")
+        return {"status": "error", "message": str(e)}

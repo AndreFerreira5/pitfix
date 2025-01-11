@@ -17,3 +17,26 @@ class User(BaseModel):
         allow_population_by_field_name = True
         arbitrary_types_allowed = True
         json_encoders = {ObjectId: str}
+
+
+class Client(User):
+    billing_address: Optional[str] = ""
+
+
+class Worker(User):
+    workshop_id: Optional[str] = None
+
+
+class Manager(User):
+    workshop_id: Optional[str] = None
+
+
+class Admin(User):
+    pass
+
+
+class UserUpdate(BaseModel):
+    name: Optional[str]
+    email: Optional[str]
+    phone: Optional[str]
+    address: Optional[str]

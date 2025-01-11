@@ -72,3 +72,4 @@ async def get_all_workers_with_workshop_id(workshop_id: str):
         logger.error(f"Error retrieving assistance requests for workshop {workshop_id}: {str(e)}")
         return {"status": "error", "message": str(e)}
 
+

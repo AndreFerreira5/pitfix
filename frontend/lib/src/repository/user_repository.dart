@@ -165,7 +165,7 @@ class UserRepository {
 
       if (response.statusCode == 200) {
         final Map<String, dynamic> userData = json.decode(response.body);
-        print(userData["username"]);
+        print(userData);
         return User.fromJson(userData); // Return the User model object
       } else {
         return null; // Handle failure case
@@ -175,22 +175,37 @@ class UserRepository {
     }
   }
 
-  // Update user profile by username
   Future<String> updateUserProfile(UserUpdate userUpdate) async {
     if (username == null || accessToken == null) {
       throw Exception("User is not logged in");
     }
 
-    final response = await apiClient.put(
-      '/user/profile/$username',  // Use the stored username in the URL
-      headers: {'Authorization': 'Bearer $accessToken'},  // Include token in the request header
-      body: json.encode(userUpdate.toJson()),
-    );
+    try {
+      // Send request to update user by username
+      final response = await apiClient.put(
+        '/user/update/$username',
+        headers: {'Authorization': 'Bearer $accessToken'},  // Include token
+        body: json.encode(userUpdate.toJson()),  // Send the updated data as JSON
+      );
 
-    if (response.statusCode == 200) {
-      return json.decode(response.body)['message'];
-    } else {
-      throw Exception('Failed to update user profile');
+      // Handle response
+      if (response.statusCode == 200) {
+        final responseData = json.decode(response.body);
+        if (responseData is Map<String, dynamic> &&
+            responseData.containsKey('message')) {
+          return responseData['message']; // Return success message
+        } else {
+          throw Exception("Unexpected response format");
+        }
+      } else if (response.statusCode == 400) {
+        throw Exception("Bad request: No changes made or invalid data");
+      } else if (response.statusCode == 404) {
+        throw Exception("User not found");
+      } else {
+        throw Exception("Failed to update user profile: ${response.statusCode}");
+      }
+    } catch (e) {
+      throw Exception("Error updating user profile: $e");
     }
   }
 
