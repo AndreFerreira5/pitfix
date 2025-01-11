@@ -1,0 +1,11 @@
+{
+  "language": "Idioma",
+  "logout": "Sair",
+  "version": "Versão",
+  "welcome": "Bem-vindo",
+  "login": "Entrar",
+  "register": "Registrar",
+  "profile_information": "Informações do Perfil",
+  "change_language": "Alterar Idioma",
+  "@@locale": "pt"
+}

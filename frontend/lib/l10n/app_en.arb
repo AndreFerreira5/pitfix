@@ -1,0 +1,11 @@
+{
+  "language": "Language",
+  "logout": "Logout",
+  "version": "Version",
+  "welcome": "Welcome",
+  "login": "Login",
+  "register": "Register",
+  "profile_information": "Profile Information",
+  "change_language": "Change Language",
+  "@@locale": "en"
+}
