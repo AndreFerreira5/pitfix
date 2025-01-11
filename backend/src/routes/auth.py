@@ -63,7 +63,8 @@ async def login(request: LoginRequest):
 async def register(request: RegisterRequest):
     # TODO user and password should never be the same
     # TODO password should be secure and longer than 8 characters
-    user_insertion_result = await insert_user(request.username, request.password, request.email, request.role)
+    user_insertion_result = await insert_user(request.name, request.username, request.password, request.email,
+                                              request.role, request.address, request.billingAddress, request.phone)
 
     # if there was no user with the same username, return 201 code
     if user_insertion_result["status"] == "success":
@@ -177,6 +178,7 @@ async def get_user_profile(username: str):
         billingAddress=user_data.get('billingAddress', ''),
         password=user_data['password'],
     )
+
 
 @router.put("/update/{user_id}")
 async def update_user_by_id(user_id: str, update_data: dict):

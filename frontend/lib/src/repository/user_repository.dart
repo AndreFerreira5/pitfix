@@ -109,45 +109,64 @@ class UserRepository {
     required String email,
     required String password,
     required String role,
+    String? phone,
+    required String? address,
+    String? billingAddress,
+    String? workshopId,
+    String? name,
   }) async {
     try {
-      final response = await apiClient.post('/auth/register', body: {
+      // Construct the request body dynamically based on role
+      final requestBody = {
         'username': username,
-        'password': password,
         'email': email,
+        'password': password,
         'role': role,
-      });
+      };
+
+      if (name != null && name.isNotEmpty) requestBody['name'] = name;
+      if (phone != null && phone.isNotEmpty) requestBody['phone'] = phone;
+      if (address != null && address.isNotEmpty) requestBody['address'] = address;
+
+      if (role == 'client' && billingAddress != null && billingAddress.isNotEmpty) {
+        requestBody['billingAddress'] = billingAddress;
+      }
+
+      if ((role == 'worker' || role == 'manager') && workshopId != null && workshopId.isNotEmpty) {
+        requestBody['workshopId'] = workshopId;
+      }
+
+      // Make the POST request to the backend
+      final response = await apiClient.post('/auth/register', body: requestBody);
 
       if (response.statusCode == 201 || response.statusCode == 200) {
         final responseData = json.decode(response.body);
 
-        // Check if the response is a List and contains at least one item
+        // Check if the response contains a success message
         if (responseData is List && responseData.isNotEmpty) {
-          // Get the first item of the list, which should be a Map
           var firstItem = responseData[0];
 
-          if (firstItem is Map<String, dynamic>) {
-            // Check if the message indicates success or error
-            if (firstItem.containsKey('message')) {
-              String message = firstItem['message'];
+          if (firstItem is Map<String, dynamic> && firstItem.containsKey('message')) {
+            String message = firstItem['message'];
 
-              // If user creation was successful
-              if (message == 'User created successfully.') {
-                return message;
-              } else {
-                print('Error: $message');
-                return null;  // Handle any errors accordingly (e.g., user already exists)
-              }
+            // If user creation was successful
+            if (message == 'User created successfully.') {
+              return message;
+            } else {
+              print('Error: $message');
+              return null; // Handle errors (e.g., user already exists)
             }
           }
         }
       }
-      return null; // If response is neither a List nor a valid Map
+
+      return null; // Handle unexpected response format
     } catch (e) {
       print('Error during registration: $e');
       throw Exception('Failed to register: $e');
     }
   }
+
 
   // Fetch user profile by the logged-in user's username
   Future<User?> get_user_profile() async {
