@@ -60,11 +60,11 @@ class WorkshopRepository {
   }
 
 
-  Future<String> deleteWorkshop(String workshopId) async {
-    final response = await apiClient.delete('/workshop/delete/$workshopId');
+  Future<String> deleteWorkshopById(String workshopId) async {
+    final response = await apiClient.delete('/workshop/delete/id/$workshopId');
 
     if (response.statusCode == 200) {
-      final Map<String, dynamic> decoded = json.decode(response.body);
+      final Map<String, dynamic> decoded = json.decode(response.body[0]);
       return decoded['message'];
     } else if (response.statusCode == 404) {
       throw Exception('Workshop not found');
@@ -72,6 +72,20 @@ class WorkshopRepository {
       throw Exception('Failed to delete workshop');
     }
   }
+
+  Future<String> deleteWorkshopByName(String workshopName) async {
+    final response = await apiClient.delete('/workshop/delete/name/$workshopName');
+
+    if (response.statusCode == 200){
+      final Map<String, dynamic> decoded = json.decode(response.body)[0];
+      return decoded['message'];
+    } else if (response.statusCode == 404) {
+      throw Exception('Workshop not found');
+    } else {
+      throw Exception('Failed to delete workshop');
+    }
+  }
+
 
   Future<String> editWorkshop(String workshopId, Workshop workshop) async {
     final response = await apiClient.put(

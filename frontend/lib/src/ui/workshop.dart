@@ -1,144 +1,207 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-
+import 'package:get/get.dart';
 import '../models/workshop.dart';
+import '../repository/workshop_repository.dart';
 import 'add_request.dart';
 
 class WorkshopDetailPage extends StatelessWidget {
   final Workshop workshop;
 
-  const WorkshopDetailPage({super.key, required this.workshop});
+  WorkshopDetailPage({Key? key, required this.workshop}) : super(key: key);
+
+  final WorkshopRepository _workshopRepository = Get.find<WorkshopRepository>();
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(workshop.name), // Use the workshop's name as the title
+        title: Text(workshop.name),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.edit),
+            onPressed: () {
+              // Navigate to edit workshop page or handle edit functionality
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => EditWorkshopPage(workshop: workshop),
+                ),
+              );
+            },
+          ),
+          IconButton(
+            icon: const Icon(Icons.delete),
+            onPressed: () {
+              // Handle delete functionality
+              _showDeleteConfirmationDialog(context);
+            },
+          ),
+        ],
       ),
-      body: SafeArea( // SafeArea ensures the content doesn't overlap system UI
-        child: Stack( // Stack allows us to overlay the button at the bottom
+      body: SafeArea(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            // Main content of the page
-            SingleChildScrollView( // Allows scrolling in case content overflows
-              child: Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    // Workshop Image - Centered at the top
-                    ClipRRect(
-                      borderRadius: BorderRadius.circular(16),
-                      child: (workshop.imageUrl != null && workshop.imageUrl!.isNotEmpty)
-                          ? Image.network(
-                        workshop.imageUrl!,
-                        fit: BoxFit.cover,
-                        width: double.infinity,
-                        height: 250,
-                      )
-                          : Container(
-                        color: Colors.grey[200],
-                        height: 250,
-                        child: const Icon(
-                          Icons.image_not_supported,
-                          size: 60,
-                          color: Colors.grey,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-                    // Workshop name below the image
-                    Text(
-                      workshop.name,
-                      style: Theme.of(context).textTheme.headlineLarge?.copyWith(
-                        fontWeight: FontWeight.bold,
-                        color: Colors.black87
-                      ), // Adjusted for visibility
-                      textAlign: TextAlign.center,
-                    ),
-                    const SizedBox(height: 8),
-                    // Rating Row
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center, // Centered rating
-                      children: [
-                        const Icon(Icons.star, color: Colors.amber, size: 20),
-                        const SizedBox(width: 4),
-                        Text(
-                          workshop.rating?.toString() ?? 'N/A',
-                          style: Theme.of(context).textTheme.bodyMedium, // Updated
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 16),
-                    // Description Section with a Title ("Description:")
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        Text(
-                          'Description:',
-                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                            fontSize: 18,
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        Container(
-                          padding: const EdgeInsets.all(16),
-                          decoration: BoxDecoration(
-                            color: Colors.grey[100],
-                            borderRadius: BorderRadius.circular(12),
-                            border: Border.all(color: Colors.grey[300]!, width: 1),
-                          ),
-                          child: Text(
-                            workshop.description ?? 'No description available.',
-                            style: Theme.of(context).textTheme.bodyMedium, // Updated
-                            textAlign: TextAlign.justify,
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 16),
-                    const SizedBox(height: 80), // Add some space at the bottom for the button
-                  ],
+            // Workshop Image
+            Expanded(
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(16),
+                child: (workshop.imageUrl != null && workshop.imageUrl!.isNotEmpty)
+                    ? Image.network(
+                  workshop.imageUrl!,
+                  fit: BoxFit.cover,
+                )
+                    : Container(
+                  color: Colors.grey[200],
+                  child: const Icon(
+                    Icons.image_not_supported,
+                    size: 60,
+                    color: Colors.grey,
+                  ),
                 ),
               ),
             ),
-            // The "Add Request" button at the bottom
-            Align(
-              alignment: Alignment.bottomCenter,
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 6.0, vertical: 6.0), // Padding to ensure button has margins
-                child: Container(
-                  width: double.infinity, // Makes the button span the full width
-                  child: ElevatedButton(
-                    onPressed: () {
-                      // Button functionality can be added here
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.blue.withOpacity(0.6), // Translucent blue background
-                      padding: const EdgeInsets.symmetric(vertical: 14),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      shadowColor: Colors.black.withOpacity(0.3),
-                    ),
-                    child: FloatingActionButton(
-                      onPressed: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => AddRequestPage(preselectedWorkshop: workshop.name),
-                          ),
-                        );
-                      },
-                      tooltip: "Add Request",
-                      child: const Icon(Icons.add),
-                    ),
 
+            // Workshop Details
+            Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    workshop.name,
+                    style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Row(
+                    children: [
+                      const Icon(Icons.star, color: Colors.amber, size: 20),
+                      const SizedBox(width: 4),
+                      Text(
+                        workshop.rating?.toString() ?? 'N/A',
+                        style: Theme.of(context).textTheme.titleMedium,
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+                  Text(
+                    'Description:',
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Container(
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: Colors.grey[100],
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(color: Colors.grey[300]!, width: 1),
+                    ),
+                    child: Text(
+                      workshop.description ?? 'No description available.',
+                      style: Theme.of(context).textTheme.bodyLarge,
+                      textAlign: TextAlign.justify,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+
+            // Add Request Button
+            Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: ElevatedButton(
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => AddRequestPage(preselectedWorkshop: workshop.name),
+                    ),
+                  );
+                },
+                style: ElevatedButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(vertical: 14),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+                child: const Text(
+                  'Add Request',
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
                   ),
                 ),
               ),
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  // Show confirmation dialog before deleting
+  void _showDeleteConfirmationDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Delete Workshop'),
+        content: const Text('Are you sure you want to delete this workshop?'),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.pop(context); // Close the dialog
+            },
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.pop(context); // Close the dialog
+              _deleteWorkshop(context); // Call delete functionality
+            },
+            child: const Text('Delete', style: TextStyle(color: Colors.red)),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _deleteWorkshop(BuildContext context) async {
+    try {
+      await _workshopRepository.deleteWorkshopByName(workshop.name);
+
+      // Show a snackbar for feedback
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Workshop deleted successfully')),
+      );
+
+      // Navigate back to the previous page after deletion
+      Navigator.pop(context);
+    } catch (e) {
+      // Handle errors
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Failed to delete workshop: $e')),
+      );
+    }
+  }
+}
+
+class EditWorkshopPage extends StatelessWidget {
+  final Workshop workshop;
+
+  const EditWorkshopPage({Key? key, required this.workshop}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Edit Workshop'),
+      ),
+      body: Center(
+        child: Text('Edit workshop functionality goes here'),
       ),
     );
   }
