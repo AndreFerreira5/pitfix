@@ -72,7 +72,7 @@ async def delete_all_requests_from_workshop_by_workshop_id(workshop_id: str):
             "status": "success",
             "message": f"{result.deleted_count} assistance requests deleted successfully.",
             "deleted_count": result.deleted_count,
-            "deleted_ids": deleted_ids,
+            "deleted_ids": [] if deleted_ids is None else deleted_ids,
         }
     except Exception as e:
         logger.error(f"Error deleting assistance request: {str(e)}")
