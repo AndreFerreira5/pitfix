@@ -101,27 +101,6 @@ class _EditRequestScreenState extends State<EditRequestScreen> {
               style: Theme.of(context).textTheme.titleLarge,
             ),
           ),
-          // Section to display assigned workers
-          if (_assignedWorkers.isNotEmpty) ...[
-            Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Text(
-                'Currently Assigned Workers:',
-                style: Theme.of(context).textTheme.titleLarge,
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16.0),
-              child: Column(
-                children: _assignedWorkers.map((worker) {
-                  return ListTile(
-                    title: Text(worker.username),
-                    subtitle: Text(worker.role ?? 'No role'),
-                  );
-                }).toList(),
-              ),
-            ),
-          ],
           // List of available workers
           Expanded(
             child: ListView.builder(
