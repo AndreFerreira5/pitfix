@@ -129,11 +129,11 @@ class UserRepository {
       if (address != null && address.isNotEmpty) requestBody['address'] = address;
 
       if (role == 'client' && billing_address != null && billing_address.isNotEmpty) {
-        requestBody['billingAddress'] = billing_address;
+        requestBody['billing_address'] = billing_address;
       }
 
       if ((role == 'worker' || role == 'manager') && workshop_id != null && workshop_id.isNotEmpty) {
-        requestBody['workshopId'] = workshop_id;
+        requestBody['workshop_id'] = workshop_id;
       }
 
       // Make the POST request to the backend

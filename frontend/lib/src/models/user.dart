@@ -50,7 +50,7 @@ class User {
 
 
 class Client extends User {
-  final String? billingAddress;
+  final String? billing_address;
 
   Client({
     super.id,
@@ -61,7 +61,7 @@ class Client extends User {
     super.phone,
     super.address,
     super.requests,
-    this.billingAddress,
+    this.billing_address,
   });
 
   factory Client.fromJson(Map<String, dynamic> json) {
@@ -74,21 +74,21 @@ class Client extends User {
       phone: json['phone'],
       address: json['address'],
       requests: List<String>.from(json['requests'] ?? []),
-      billingAddress: json['billingAddress'],
+      billing_address: json['billing_address'],
     );
   }
 
   @override
   Map<String, dynamic> toJson() {
     final data = super.toJson();
-    if (billingAddress != null) data['billingAddress'] = billingAddress;
+    if (billing_address != null) data['billing_address'] = billing_address;
     return data;
   }
 }
 
 
 class Worker extends User {
-  String? workshopId;
+  String? workshop_id;
 
   Worker({
     super.id,
@@ -98,8 +98,7 @@ class Worker extends User {
     required String super.phone,
     required String super.address,
     super.name,
-    String? billingAddress,
-    this.workshopId,
+    this.workshop_id,
     super.requests,
   });
 
@@ -113,8 +112,7 @@ class Worker extends User {
       phone: json['phone'] ?? '',  // Default to empty string if phone is not provided
       address: json['address'] ?? '',  // Default to empty string if address is not provided
       name: json['name'],  // Name can be null
-      billingAddress: json['billingAddress'],  // Optional billingAddress
-      workshopId: json['workshop_id'],  // Note the use of 'workshop_id' from the JSON
+      workshop_id: json['workshop_id'],  // Note the use of 'workshop_id' from the JSON
       requests: List<String>.from(json['requests'] ?? []),  // Ensure that 'requests' is safely handled
     );
   }
@@ -123,14 +121,14 @@ class Worker extends User {
   @override
   Map<String, dynamic> toJson() {
     final data = super.toJson();
-    if (workshopId != null) data['workshop_id'] = workshopId;  // Use 'workshop_id' as per the received JSON
+    if (workshop_id != null) data['workshop_id'] = workshop_id;  // Use 'workshop_id' as per the received JSON
     return data;
   }
 }
 
 
 class Manager extends User {
-  String? workshopId;  // The ID of the workshop managed by this manager
+  String? workshop_id;  // The ID of the workshop managed by this manager
 
   Manager({
     super.id,
@@ -140,8 +138,7 @@ class Manager extends User {
     required String super.phone,
     required String super.address,
     super.name,
-    String? billingAddress,
-    required this.workshopId,
+    required this.workshop_id,
     super.requests,
   });
 
@@ -153,8 +150,7 @@ class Manager extends User {
       phone: json['phone'],
       address: json['address'],
       name: json['name'],
-      billingAddress: json['billingAddress'],
-      workshopId: json['workshopId'],
+      workshop_id: json['workshop_id'],
       requests: List<String>.from(json['requests'] ?? []),
     );
   }
@@ -162,7 +158,7 @@ class Manager extends User {
   @override
   Map<String, dynamic> toJson() {
     final data = super.toJson();
-    if (workshopId != null) data['workshopId'] = workshopId;
+    if (workshop_id != null) data['workshop_id'] = workshop_id;
     return data;
   }
 }
