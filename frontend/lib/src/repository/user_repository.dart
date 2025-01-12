@@ -291,14 +291,17 @@ class UserRepository {
       throw Exception("User is not logged in");
     }
 
-      final response = await apiClient.get(
-          '/user/$username/favorites'); // Replace {username} dynamically
-      if (response.statusCode == 200) {
-        return List<String>.from(json.decode(response.body));
-      } else {
-        throw Exception('Failed to fetch favorite workshops');
-      }
+    final response = await apiClient.get(
+      '/user/$username/favorites',
+      headers: {'Authorization': 'Bearer $accessToken'}, // Add token if required
+    );
+    if (response.statusCode == 200) {
+      return List<String>.from(json.decode(response.body));
+    } else {
+      throw Exception('Failed to fetch favorite workshops');
+    }
   }
+
 
   Future<void> addFavoriteWorkshop(String workshopId) async {
     print(username);

@@ -17,6 +17,7 @@ class _ProfilePageState extends State<ProfilePage> {
   String _email = "";
   String _phone = "";
   String _address = "";
+  String _role = ""; // Store user role
 
   bool _isEditing = false;
   bool _isLoading = true;
@@ -37,7 +38,6 @@ class _ProfilePageState extends State<ProfilePage> {
     _userRepository = Get.find<UserRepository>();
     _workshopRepository = Get.find<WorkshopRepository>();
     _fetchUserProfile();
-    _fetchFavoriteWorkshops();
   }
 
   @override
@@ -52,12 +52,14 @@ class _ProfilePageState extends State<ProfilePage> {
   Future<void> _fetchUserProfile() async {
     try {
       final userProfile = await _userRepository.get_user_profile();
+      final userRole = await _userRepository.getUserRole(userProfile?.username ?? "");
       const String placeholderText = '--';
       setState(() {
         _name = userProfile?.name ?? placeholderText;
         _email = userProfile?.email ?? placeholderText;
         _phone = userProfile?.phone ?? placeholderText;
         _address = userProfile?.address ?? placeholderText;
+        _role = userRole ?? placeholderText; // Set the user role
         _isLoading = false;
 
         _nameController.text = _name;
@@ -65,6 +67,10 @@ class _ProfilePageState extends State<ProfilePage> {
         _phoneController.text = _phone;
         _addressController.text = _address;
       });
+
+      if (_role == "client") {
+        _fetchFavoriteWorkshops(); // Only fetch favorites for client role
+      }
     } catch (e) {
       setState(() {
         _isLoading = false;
@@ -76,10 +82,7 @@ class _ProfilePageState extends State<ProfilePage> {
 
   Future<void> _fetchFavoriteWorkshops() async {
     try {
-      // Get the list of favorite workshop IDs
       final favoriteIds = await _userRepository.getFavoriteWorkshops();
-
-      // Fetch workshop details for each ID
       final workshops = await Future.wait(
         favoriteIds.map((id) => _workshopRepository.getWorkshopById(id)),
       );
@@ -125,7 +128,7 @@ class _ProfilePageState extends State<ProfilePage> {
             children: [
               _buildProfileCard(),
               const SizedBox(height: 24),
-              _buildFavoritesSection(),
+              if (_role == "client") _buildFavoritesSection(), // Show only for client
             ],
           ),
         ),

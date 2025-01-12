@@ -213,3 +213,5 @@ async def update_user_by_id(user_id: str, update_data: dict):
         # Log and raise internal server errors
         logger.error(f"Error updating user: {e}")
         raise HTTPException(status_code=500, detail="Internal Server Error")
+
+
