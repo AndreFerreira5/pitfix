@@ -24,7 +24,15 @@ async def get_user_by_email(email: str):
     return await db.user.find_one({"email": email})
 
 
-async def insert_user(username: str, password: str, email: str, role: str):
+async def insert_user(name: str,
+                      username: str,
+                      password: str,
+                      email: str,
+                      role: str,
+                      address: str,
+                      billing_address: str,
+                      phone: str = None
+                      ):
     db = await get_db()
 
     existing_user = await get_user_by_username(username)
@@ -38,10 +46,14 @@ async def insert_user(username: str, password: str, email: str, role: str):
     try:
         hashed_password = password_hasher.hash(password)
         await db.user.insert_one({
+            "name": name,
             "username": username,
             "password": hashed_password,
             "email": email,
             "role": role,
+            "address": address,
+            "billing_address": billing_address,
+            "phone": phone,
             "createdAt": datetime.now()
         })
         return {"status": "success", "message": "User created successfully."}
