@@ -74,6 +74,7 @@ async def get_manager_workshop_by_username_route(username: str):
 
 @router.post("/{username}/favorites")
 async def add_favorite_workshop(username: str, workshop_id: str):
+    print(f"Received Payload: username={username}, workshop_id={workshop_id}")
     user = await get_user_by_username(username)
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
