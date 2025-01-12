@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:pitfix_frontend/src/ui/workshop.dart';
 import '../repository/workshop_repository.dart';
+import '../repository/user_repository.dart';
 import 'add_workshop.dart';
 import '../models/workshop.dart';
 
@@ -16,6 +17,7 @@ class Workshops extends StatefulWidget {
 
 class _WorkshopsState extends State<Workshops> {
   late WorkshopRepository _workshopRepository;
+  late UserRepository _userRepository;
   late Future<List<Workshop>> _workshopsFuture;
   late bool isAdmin;
 
@@ -24,6 +26,7 @@ class _WorkshopsState extends State<Workshops> {
     super.initState();
 
     _workshopRepository = Get.find<WorkshopRepository>();
+    _userRepository = Get.find<UserRepository>();
     _refreshWorkshops();
     isAdmin = widget.userRole == 'admin';
   }
@@ -56,8 +59,9 @@ class _WorkshopsState extends State<Workshops> {
             itemBuilder: (context, index) {
               final workshop = workshops[index];
               return WorkshopCard(
-                  workshop: workshop,
-                  onRefresh: _refreshWorkshops,
+                workshop: workshop,
+                onRefresh: _refreshWorkshops,
+                userRepository: _userRepository,
               );
             },
           );
@@ -90,8 +94,14 @@ class _WorkshopsState extends State<Workshops> {
 class WorkshopCard extends StatefulWidget {
   final Workshop workshop;
   final VoidCallback onRefresh;
+  final UserRepository userRepository;
 
-  const WorkshopCard({required this.workshop, required this.onRefresh, super.key});
+  const WorkshopCard({
+    required this.workshop,
+    required this.onRefresh,
+    required this.userRepository,
+    super.key,
+  });
 
   @override
   _WorkshopCardState createState() => _WorkshopCardState();
@@ -99,6 +109,41 @@ class WorkshopCard extends StatefulWidget {
 
 class _WorkshopCardState extends State<WorkshopCard> {
   bool _isHovered = false;
+  bool _isFavorite = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _checkIfFavorite();
+  }
+
+  void _checkIfFavorite() async {
+    try {
+      final favorites = await widget.userRepository.getFavoriteWorkshops();
+      setState(() {
+        _isFavorite = favorites.contains(widget.workshop.id);
+      });
+    } catch (e) {
+      print("Failed to check if workshop is favorite: $e");
+    }
+  }
+
+  void _toggleFavorite() async {
+    try {
+      if (_isFavorite) {
+        await widget.userRepository.removeFavoriteWorkshop(widget.workshop.id!);
+        Get.snackbar('Success', 'Removed from favorites');
+      } else {
+        await widget.userRepository.addFavoriteWorkshop(widget.workshop.id!);
+        Get.snackbar('Success', 'Added to favorites');
+      }
+      setState(() {
+        _isFavorite = !_isFavorite;
+      });
+    } catch (e) {
+      Get.snackbar('Error', 'Failed to update favorites: $e');
+    }
+  }
 
   bool isValidUrl(String url) {
     const regex = r'^(https?|ftp)://([a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}(/.*)?$';
@@ -121,17 +166,19 @@ class _WorkshopCardState extends State<WorkshopCard> {
       },
       cursor: SystemMouseCursors.click,
       child: GestureDetector(
-        onTap: () async {
-          final result = await Navigator.push(
+        onTap: () {
+          Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (context) => WorkshopDetailPage(workshop: widget.workshop),
+              builder: (context) => WorkshopDetailPage(
+                workshop: widget.workshop,
+              ),
             ),
-          );
-
-          //if (result != null && result == true) {
-            widget.onRefresh(); // Refresh the workshops list if the result is true
-          //}
+          ).then((value) {
+            if (value == true) {
+              widget.onRefresh();
+            }
+          });
         },
         child: Card(
           shape: RoundedRectangleBorder(
@@ -152,8 +199,9 @@ class _WorkshopCardState extends State<WorkshopCard> {
                 children: [
                   ClipRRect(
                     borderRadius: BorderRadius.circular(32),
-                    child: (widget.workshop.imageUrl != null && widget.workshop.imageUrl!.isNotEmpty
-                        && isValidUrl(widget.workshop.imageUrl!))
+                    child: (widget.workshop.imageUrl != null &&
+                        widget.workshop.imageUrl!.isNotEmpty &&
+                        isValidUrl(widget.workshop.imageUrl!))
                         ? Image.network(
                       widget.workshop.imageUrl!,
                       width: 80,
@@ -202,7 +250,13 @@ class _WorkshopCardState extends State<WorkshopCard> {
                       ],
                     ),
                   ),
-                  const Icon(Icons.arrow_forward_ios, size: 16),
+                  IconButton(
+                    icon: Icon(
+                      _isFavorite ? Icons.favorite : Icons.favorite_border,
+                      color: _isFavorite ? Colors.red : Colors.grey,
+                    ),
+                    onPressed: _toggleFavorite,
+                  ),
                 ],
               ),
             ),

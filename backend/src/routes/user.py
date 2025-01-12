@@ -72,6 +72,50 @@ async def get_manager_workshop_by_username_route(username: str):
     return {"workshop_id": convert_objectid(user["workshop_id"])}, 200
 
 
+@router.post("/{username}/favorites")
+async def add_favorite_workshop(username: str, workshop_id: str):
+    user = await get_user_by_username(username)
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    if "favorites" not in user:
+        user["favorites"] = []
+
+    if workshop_id in user["favorites"]:
+        return {"message": "Workshop is already in favorites"}
+
+    user["favorites"].append(workshop_id)
+    await update_user_by_username(username, {"favorites": user["favorites"]})
+    return {"message": "Workshop added to favorites"}
+
+@router.delete("/{username}/favorites")
+async def remove_favorite_workshop(username: str, workshop_id: str):
+    user = await get_user_by_username(username)
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    if "favorites" not in user or workshop_id not in user["favorites"]:
+        raise HTTPException(status_code=404, detail="Workshop not in favorites")
+
+    user["favorites"].remove(workshop_id)
+    await update_user_by_username(username, {"favorites": user["favorites"]})
+    return {"message": "Workshop removed from favorites"}
+
+
+@router.get("/{username}/favorites")
+async def get_favorite_workshops(username: str):
+    user = await get_user_by_username(username)
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    if "favorites" not in user:
+        return []
+
+    return user["favorites"]
+
+
+
+
 @router.put("/update/{username}")
 async def update_user_by_username_route(username: str, request: UserUpdate):
     """

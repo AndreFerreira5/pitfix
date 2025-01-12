@@ -12,6 +12,7 @@ class User(BaseModel):
     phone: Optional[str] = None
     address: Optional[str] = None
     requests: Optional[List[str]] = []
+    favorites: Optional[List[str]] = []  # List of favorite workshop IDs
 
     class Config:
         allow_population_by_field_name = True

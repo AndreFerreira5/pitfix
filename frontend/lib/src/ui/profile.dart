@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../models/user_update.dart';
 import '../repository/user_repository.dart';
+import '../repository/workshop_repository.dart';
+import '../models/workshop.dart';
 
 class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
@@ -19,18 +21,23 @@ class _ProfilePageState extends State<ProfilePage> {
   bool _isEditing = false;
   bool _isLoading = true;
 
+  List<Workshop> _favorites = [];
+
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _phoneController = TextEditingController();
   final TextEditingController _addressController = TextEditingController();
 
   late UserRepository _userRepository;
+  late WorkshopRepository _workshopRepository;
 
   @override
   void initState() {
     super.initState();
-    _userRepository = Get.find<UserRepository>(); // Get the repository instance
+    _userRepository = Get.find<UserRepository>();
+    _workshopRepository = Get.find<WorkshopRepository>();
     _fetchUserProfile();
+    _fetchFavoriteWorkshops();
   }
 
   @override
@@ -53,7 +60,6 @@ class _ProfilePageState extends State<ProfilePage> {
         _address = userProfile?.address ?? placeholderText;
         _isLoading = false;
 
-        // Initialize controllers with the fetched data
         _nameController.text = _name;
         _emailController.text = _email;
         _phoneController.text = _phone;
@@ -68,58 +74,36 @@ class _ProfilePageState extends State<ProfilePage> {
     }
   }
 
-  void _saveChanges() async {
-    if (!_validateInputs()) return;
-
-    setState(() {
-      _isLoading = true;
-    });
-
+  Future<void> _fetchFavoriteWorkshops() async {
     try {
-      final userUpdate = UserUpdate(
-        name: _nameController.text,
-        email: _emailController.text,
-        phone: _phoneController.text,
-        address: _addressController.text,
+      // Get the list of favorite workshop IDs
+      final favoriteIds = await _userRepository.getFavoriteWorkshops();
+
+      // Fetch workshop details for each ID
+      final workshops = await Future.wait(
+        favoriteIds.map((id) => _workshopRepository.getWorkshopById(id)),
       );
 
-      final result = await _userRepository.updateUserProfile(userUpdate);
-
-      // Fetch the updated profile to refresh the page
-      await _fetchUserProfile();
-
       setState(() {
-        _isEditing = false;
-        _isLoading = false;
+        _favorites = workshops;
       });
-
-      Get.snackbar('Success', result, snackPosition: SnackPosition.BOTTOM);
-      print("Profile updated successfully: $result");
     } catch (e) {
-      setState(() {
-        _isLoading = false;
-      });
-
-      Get.snackbar('Error', 'Failed to update profile: $e',
+      Get.snackbar('Error', 'Failed to load favorite workshops: $e',
           snackPosition: SnackPosition.BOTTOM);
     }
   }
 
-  bool _validateInputs() {
-    if (_nameController.text.isEmpty ||
-        _emailController.text.isEmpty ||
-        !_emailController.text.contains('@') ||
-        _phoneController.text.isEmpty) {
-      Get.snackbar(
-        'Invalid Input',
-        'Please fill in all fields correctly',
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.redAccent,
-        colorText: Colors.white,
-      );
-      return false;
+  Future<void> _removeFavoriteWorkshop(String workshopId) async {
+    try {
+      await _userRepository.removeFavoriteWorkshop(workshopId);
+      setState(() {
+        _favorites.removeWhere((workshop) => workshop.id == workshopId);
+      });
+      Get.snackbar('Success', 'Workshop removed from favorites');
+    } catch (e) {
+      Get.snackbar('Error', 'Failed to remove favorite workshop: $e',
+          snackPosition: SnackPosition.BOTTOM);
     }
-    return true;
   }
 
   void _toggleEditMode() {
@@ -131,91 +115,113 @@ class _ProfilePageState extends State<ProfilePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.grey[100], // Subtle background color
+      backgroundColor: Colors.grey[100],
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
           : Center(
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Card(
-            elevation: 4,
-            shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(16)),
-            child: Padding(
-              padding: const EdgeInsets.all(20.0),
-              child: SingleChildScrollView(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    const Text(
-                      'Profile Information',
-                      style: TextStyle(
-                        fontSize: 24,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.blue,
-                      ),
-                    ),
-                    const SizedBox(height: 20),
-                    _buildTextField(
-                      label: 'Name',
-                      controller: _nameController,
-                      isEditable: _isEditing,
-                    ),
-                    const SizedBox(height: 16),
-                    _buildTextField(
-                      label: 'Email',
-                      controller: _emailController,
-                      isEditable: _isEditing,
-                    ),
-                    const SizedBox(height: 16),
-                    _buildTextField(
-                      label: 'Phone',
-                      controller: _phoneController,
-                      isEditable: _isEditing,
-                    ),
-                    const SizedBox(height: 16),
-                    _buildTextField(
-                      label: 'Address',
-                      controller: _addressController,
-                      isEditable: _isEditing,
-                    ),
-                    const SizedBox(height: 24),
-                    SizedBox(
-                      width: double.infinity,
-                      child: ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.blue, // Button color
-                          padding: const EdgeInsets.symmetric(
-                              vertical: 14), // Padding
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                        ),
-                        onPressed: _isEditing
-                            ? _saveChanges
-                            : _toggleEditMode,
-                        child: Text(
-                          _isEditing ? 'Save Changes' : 'Edit Profile',
-                          style: const TextStyle(fontSize: 16),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
+        child: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              _buildProfileCard(),
+              const SizedBox(height: 24),
+              _buildFavoritesSection(),
+            ],
           ),
         ),
       ),
     );
   }
 
-  Widget _buildTextField({
-    required String label,
-    required TextEditingController controller,
-    required bool isEditable,
-  }) {
+  Widget _buildProfileCard() {
+    return Card(
+      elevation: 4,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(20.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            const Text(
+              'Profile Information',
+              style: TextStyle(
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+                color: Colors.blue,
+              ),
+            ),
+            const SizedBox(height: 20),
+            _buildTextField('Name', _nameController, _isEditing),
+            const SizedBox(height: 16),
+            _buildTextField('Email', _emailController, _isEditing),
+            const SizedBox(height: 16),
+            _buildTextField('Phone', _phoneController, _isEditing),
+            const SizedBox(height: 16),
+            _buildTextField('Address', _addressController, _isEditing),
+            const SizedBox(height: 24),
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.blue,
+                  padding: const EdgeInsets.symmetric(vertical: 14),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                ),
+                onPressed: _isEditing ? _fetchUserProfile : _toggleEditMode,
+                child: Text(
+                  _isEditing ? 'Save Changes' : 'Edit Profile',
+                  style: const TextStyle(fontSize: 16),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildFavoritesSection() {
+    return Card(
+      elevation: 4,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(20.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              'Favorite Workshops',
+              style: TextStyle(
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+                color: Colors.blue,
+              ),
+            ),
+            const SizedBox(height: 16),
+            if (_favorites.isEmpty)
+              const Text('No favorite workshops added.')
+            else
+              ..._favorites.map((workshop) => ListTile(
+                title: Text(workshop.name),
+                trailing: IconButton(
+                  icon: const Icon(Icons.delete, color: Colors.red),
+                  onPressed: () => _removeFavoriteWorkshop(workshop.id!),
+                ),
+              )),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildTextField(
+      String label, TextEditingController controller, bool isEditable) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [

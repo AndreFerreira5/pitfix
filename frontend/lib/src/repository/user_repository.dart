@@ -286,6 +286,46 @@ class UserRepository {
     }
   }
 
+  Future<List<String>> getFavoriteWorkshops() async {
+    if (username == null || accessToken == null) {
+      throw Exception("User is not logged in");
+    }
+
+      final response = await apiClient.get(
+          '/user/$username/favorites'); // Replace {username} dynamically
+      if (response.statusCode == 200) {
+        return List<String>.from(json.decode(response.body));
+      } else {
+        throw Exception('Failed to fetch favorite workshops');
+      }
+  }
+
+  Future<void> addFavoriteWorkshop(String workshopId) async {
+    if (username == null || accessToken == null) {
+      throw Exception("User is not logged in");
+    }
+
+    final response = await apiClient.post(
+      '/user/$username/favorites',
+      body: json.encode({'workshop_id': workshopId}),
+      headers: {'Content-Type': 'application/json'}, // Add headers if needed
+    );
+    if (response.statusCode != 200) {
+      throw Exception('Failed to add favorite workshop');
+    }
+  }
+
+  Future<void> removeFavoriteWorkshop(String workshopId) async {
+    if (username == null || accessToken == null) {
+      throw Exception("User is not logged in");
+    }
+
+    final response = await apiClient.delete('/user/$username/favorites?workshop_id=$workshopId');
+    if (response.statusCode != 200) {
+      throw Exception('Failed to remove favorite workshop');
+    }
+  }
+
   // Logout method to clear credentials and reset the session
   Future<void> logout() async {
     await secureStorage.delete(key: 'username');
