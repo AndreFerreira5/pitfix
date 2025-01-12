@@ -30,9 +30,9 @@ async def insert_user(name: str,
                       email: str,
                       role: str,
                       address: str,
-                      billing_address: str = None,
-                      phone: str = None,
-                      workshop_id: str = None
+                      billing_address: str,
+                      phone: str,
+                      workshop_id: str
                       ):
     db = await get_db()
 
@@ -55,7 +55,7 @@ async def insert_user(name: str,
             "address": address,
             "billing_address": billing_address,
             "phone": phone,
-            "workshopId" : workshop_id,
+            "workshop_id": ObjectId(workshop_id),
             "createdAt": datetime.now()
         })
         return {"status": "success", "message": "User created successfully."}

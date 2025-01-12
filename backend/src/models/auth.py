@@ -1,4 +1,5 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
+from typing import Optional
 
 
 class LoginRequest(BaseModel):
@@ -7,15 +8,18 @@ class LoginRequest(BaseModel):
 
 
 class RegisterRequest(BaseModel):
-    name: str
+    name: Optional[str] = None
     username: str
     password: str
     email: str
     role: str
-    address: str
-    billing_address: str
-    phone: str
-    workshop_id: str
+    address: Optional[str] = None
+    billing_address: Optional[str] = Field(None, alias='billing_address')
+    phone: Optional[str] = None
+    workshop_id: Optional[str] = Field(None, alias='workshop_id')
+
+    class Config:
+        allow_population_by_field_name = True
 
 
 class RefreshRequest(BaseModel):
