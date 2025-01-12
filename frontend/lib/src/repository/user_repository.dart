@@ -110,7 +110,7 @@ class UserRepository {
     required String password,
     required String role,
     String? phone,
-    required String? address,
+    String? address,
     String? billing_address,
     String? workshop_id,
     String? name,
@@ -129,25 +129,29 @@ class UserRepository {
       if (address != null && address.isNotEmpty) requestBody['address'] = address;
 
       if (role == 'client' && billing_address != null && billing_address.isNotEmpty) {
-        requestBody['billing_address'] = billing_address;
+        requestBody['billing_address'] = billing_address; // Changed from 'billingAddress'
       }
 
       if ((role == 'worker' || role == 'manager') && workshop_id != null && workshop_id.isNotEmpty) {
-        requestBody['workshop_id'] = workshop_id;
+        requestBody['workshop_id'] = workshop_id; // Changed from 'workshopId'
       }
 
-      // Make the POST request to the backend
-      final response = await apiClient.post('/auth/register', body: requestBody);
+      print('Register Request Body: $requestBody');
+
+      // Make the POST request to the backend with JSON encoding and appropriate headers
+      final response = await apiClient.post(
+        '/auth/register',
+        headers: {'Content-Type': 'application/json'}, // Ensure JSON content type
+        body: json.encode(requestBody), // Encode body as JSON
+      );
 
       if (response.statusCode == 201 || response.statusCode == 200) {
-        final responseData = json.decode(response.body);
+        final responseData = json.decode(response.body)[0];
 
         // Check if the response contains a success message
-        if (responseData is List && responseData.isNotEmpty) {
-          var firstItem = responseData[0];
-
-          if (firstItem is Map<String, dynamic> && firstItem.containsKey('message')) {
-            String message = firstItem['message'];
+        if (responseData is Map<String, dynamic>) {
+          if (responseData.containsKey('message')) {
+            String message = responseData['message'];
 
             // If user creation was successful
             if (message == 'User created successfully.') {
@@ -158,6 +162,10 @@ class UserRepository {
             }
           }
         }
+      } else {
+        // Log the full response for debugging
+        print('Failed to register. Status Code: ${response.statusCode}');
+        print('Response Body: ${response.body}');
       }
 
       return null; // Handle unexpected response format
@@ -166,6 +174,7 @@ class UserRepository {
       throw Exception('Failed to register: $e');
     }
   }
+
 
 
   // Fetch user profile by the logged-in user's username
