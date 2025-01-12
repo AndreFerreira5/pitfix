@@ -34,7 +34,15 @@ class _NavigationMenuState extends State<NavigationMenu> {
     String? role = await _storage.read(key: 'user_role');
     setState(() {
       userRole = role;
+      _validateSelectedIndex();
     });
+  }
+
+  void _validateSelectedIndex() {
+    final destinations = userRole != null ? _getDestinations(userRole!) : [];
+    if (navController.selectedIndex.value >= destinations.length) {
+      navController.selectedIndex.value = destinations.isNotEmpty ? destinations.length - 1 : 0;
+    }
   }
 
   // Define pages based on user role

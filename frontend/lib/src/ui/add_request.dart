@@ -172,7 +172,7 @@ class _AddRequestPageState extends State<AddRequestPage> {
           ),
           items: workshops.map((workshop) {
             return DropdownMenuItem<String>(
-              value: workshop.name,  // Use the workshop's 'id'
+              value: workshop.id,
               child: Text(workshop.name), // Display the workshop's name
             );
           }).toList(),

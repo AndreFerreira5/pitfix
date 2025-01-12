@@ -38,7 +38,7 @@ async def delete_request_from_user(username: str, request_id: str):
     try:
         update_result = await db.user.update_one(
             {"username": username},
-            {"$pull": {"requests": request_id}}
+            {"$pull": {"requests": ObjectId(request_id)}}
         )
 
         if update_result.modified_count == 1:
@@ -49,6 +49,51 @@ async def delete_request_from_user(username: str, request_id: str):
     except Exception as e:
         logger.error(str(e))
         return {"status": "error", "message": str(e)}
+
+
+async def delete_requests_from_users(request_ids):
+    db = await get_db()
+
+    try:
+        # Ensure all request_ids are converted to ObjectId
+        request_ids_obj = [ObjectId(request_id) for request_id in request_ids]
+
+        # Update all users, removing any of the request IDs from their 'requests' array
+        update_result = await db.user.update_many(
+            {"requests": {"$in": request_ids_obj}},  # Match users with any of the request IDs
+            {"$pull": {"requests": {"$in": request_ids_obj}}}  # Remove the request IDs
+        )
+
+        return {
+            "status": "success",
+            "message": f"Requests removed from {update_result.modified_count} user(s).",
+            "modified_count": update_result.modified_count
+        }
+    except Exception as e:
+        logger.error(f"Error removing requests from users: {str(e)}")
+        return {"status": "error", "message": str(e)}
+
+
+async def delete_workshop_from_users(workshop_id):
+    db = await get_db()
+
+    try:
+        # Update all users who have the specified workshop_id
+        update_result = await db.user.update_many(
+            {"workshop_id": ObjectId(workshop_id)},  # Match users with this workshop_id
+            {"$set": {"workshop_id": None}}  # Set workshop_id to None
+        )
+
+        return {
+            "status": "success",
+            "message": f"Workshop ID removed from {update_result.modified_count} user(s).",
+            "modified_count": update_result.modified_count
+        }
+
+    except Exception as e:
+        logger.error(f"Error removing workshop ID from users: {str(e)}")
+        return {"status": "error", "message": str(e)}
+
 
 
 async def get_all_workers_with_workshop_id(workshop_id: str):

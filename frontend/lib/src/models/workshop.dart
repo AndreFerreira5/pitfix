@@ -1,4 +1,5 @@
 class Workshop {
+  final String? id;
   final String name;
   final String? description;
   final double? rating;
@@ -6,6 +7,7 @@ class Workshop {
   final DateTime? creationDate;
 
   Workshop({
+    this.id,
     required this.name,
     this.description,
     this.rating,
@@ -15,6 +17,7 @@ class Workshop {
 
   factory Workshop.fromJson(Map<String, dynamic> json) {
     return Workshop(
+      id: json['_id'] as String,
       name: json['name'] as String,
       description: json['description'] as String?,
       rating: (json['rating'] as num?)?.toDouble(),
