@@ -60,7 +60,7 @@ class AssistanceRequestRepository {
 
   Future<String> createAssistanceRequest(AssistanceRequest assistanceRequest, String username) async {
     var requestJson = assistanceRequest.toJson();
-
+    print(requestJson);
     final uri = Uri.parse('/assistance_request/add?username=$username');
 
     final response = await apiClient.post(uri.toString(), body: requestJson);
@@ -100,7 +100,7 @@ class AssistanceRequestRepository {
     print("boas");
 
     if (response.statusCode == 200) {
-      final Map<String, dynamic> decoded = json.decode(response.body);
+      final Map<String, dynamic> decoded = json.decode(response.body)[0];
       return decoded['message'];
     } else if (response.statusCode == 404) {
       throw Exception('Assistance request not found');
