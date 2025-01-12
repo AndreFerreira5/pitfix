@@ -45,11 +45,35 @@ async def delete_assistance_request(request_id: str):
     db = await get_db()
     try:
         result = await db.assistance_request.delete_one({"_id": ObjectId(request_id)})
-        if result.deleted_count == 1:
-            return {"status": "success", "message": "Assistance request deleted successfully."}
-        else:
+        if result.deleted_count == 0:
             return {"status": "error", "message": "Assistance request not found."}
 
+        return {"status": "success", "message": "Assistance request deleted successfully."}
+    except Exception as e:
+        logger.error(f"Error deleting assistance request: {str(e)}")
+        return {"status": "error", "message": str(e)}
+
+
+async def delete_all_requests_from_workshop_by_workshop_id(workshop_id: str):
+    db = await get_db()
+    try:
+        # Fetch all assistance requests associated with the workshop
+        assistance_requests = await db.assistance_request.find(
+            {"workshop_id": ObjectId(workshop_id)},
+            {"_id": 1}  # Only fetch the IDs
+        ).to_list(length=None)  # Retrieve all matching documents
+
+        # Extract the list of IDs
+        deleted_ids = [request["_id"] for request in assistance_requests]
+
+        result = await db.assistance_request.delete_many({"workshop_id": ObjectId(workshop_id)})
+        logger.info(f"Deleted {result.deleted_count} requests related to workshop with id {workshop_id}")
+        return {
+            "status": "success",
+            "message": f"{result.deleted_count} assistance requests deleted successfully.",
+            "deleted_count": result.deleted_count,
+            "deleted_ids": deleted_ids,
+        }
     except Exception as e:
         logger.error(f"Error deleting assistance request: {str(e)}")
         return {"status": "error", "message": str(e)}
