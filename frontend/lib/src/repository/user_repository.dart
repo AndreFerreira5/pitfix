@@ -301,15 +301,21 @@ class UserRepository {
   }
 
   Future<void> addFavoriteWorkshop(String workshopId) async {
+    print(username);
+    print(workshopId);
     if (username == null || accessToken == null) {
       throw Exception("User is not logged in");
     }
 
     final response = await apiClient.post(
       '/user/$username/favorites',
-      body: json.encode({'workshop_id': workshopId}),
-      headers: {'Content-Type': 'application/json'}, // Add headers if needed
+      body: {
+        'username': username,
+        'workshop_id': workshopId
+      },
     );
+
+    print(response.body);
     if (response.statusCode != 200) {
       throw Exception('Failed to add favorite workshop');
     }

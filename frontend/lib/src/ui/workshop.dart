@@ -139,7 +139,7 @@ class _WorkshopDetailPageState extends State<WorkshopDetailPage> {
                     context,
                     MaterialPageRoute(
                       builder: (context) =>
-                          AddRequestPage(preselectedWorkshop: workshop.name),
+                          AddRequestPage(preselectedWorkshop: workshop.id),
                     ),
                   );
                 },
