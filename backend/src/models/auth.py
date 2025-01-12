@@ -15,6 +15,7 @@ class RegisterRequest(BaseModel):
     address: str
     billingAddress: str
     phone: str
+    workshop_id: str
 
 
 class RefreshRequest(BaseModel):

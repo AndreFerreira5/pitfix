@@ -25,17 +25,42 @@ class _RegisterPageState extends State<RegisterPage> {
   String? _phone = '';
   String? _address = '';
   String? _billingAddress = '';
-  String? _workshopId = '';
+  String? _workshop_id = '';
   String? _name = '';
   String _selectedRole = 'client';
   bool _isPasswordVisible = false;
   bool _isLoading = false;
   String _selectedCountryCode = '+1'; // Default country code
-  List<Map<String, String>> _workshops = [];
+  List<Map<String, dynamic>> _workshops = [];
   bool _isWorkshopsLoading = true;
 
   final List<String> _roles = ['client', 'manager', 'worker', 'admin'];
   final Map<String, String> _countryCodes = countryCodes;
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchWorkshops();
+  }
+
+  Future<void> _fetchWorkshops() async {
+    try {
+      final workshops = await userRepository.getAllWorkshops();
+      if (workshops != null) {
+        setState(() {
+          _workshops = workshops;
+          _isWorkshopsLoading = false;
+        });
+      }
+    } catch (e) {
+      Get.snackbar('Error', 'Failed to load workshops: $e');
+      print(e);
+      setState(() {
+        _isWorkshopsLoading = false;
+      });
+    }
+  }
+
 
   Future<void> _register() async {
     if (_formKey.currentState?.validate() ?? false) {
@@ -53,7 +78,7 @@ class _RegisterPageState extends State<RegisterPage> {
           phone: '$_selectedCountryCode $_phone',
           address: _address,
           billingAddress: _selectedRole == 'client' ? _billingAddress : null,
-          workshopId: _selectedRole == 'worker' || _selectedRole == 'manager' ? _workshopId : null,
+          workshop_id: _selectedRole == 'worker' || _selectedRole == 'manager' ? _workshop_id : null,
           name: _name,
         ).timeout(Duration(seconds: 5), onTimeout: () {
           throw TimeoutException("Connection timed out. Please try again.");
@@ -333,8 +358,8 @@ class _RegisterPageState extends State<RegisterPage> {
                       labelText: 'Associated Workshop',
                       border: OutlineInputBorder(),
                     ),
-                    value: _workshopId,
                     items: _workshops.map((workshop) {
+                      print(workshop);
                       return DropdownMenuItem<String>(
                         value: workshop['id'],
                         child: Text(workshop['name']!),
@@ -342,7 +367,7 @@ class _RegisterPageState extends State<RegisterPage> {
                     }).toList(),
                     onChanged: (value) {
                       setState(() {
-                        _workshopId = value;
+                        _workshop_id = value;
                       });
                     },
                     validator: (value) {

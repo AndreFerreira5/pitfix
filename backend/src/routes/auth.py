@@ -64,7 +64,8 @@ async def register(request: RegisterRequest):
     # TODO user and password should never be the same
     # TODO password should be secure and longer than 8 characters
     user_insertion_result = await insert_user(request.name, request.username, request.password, request.email,
-                                              request.role, request.address, request.billingAddress, request.phone)
+                                              request.role, request.address, request.billingAddress, request.phone,
+                                              request.workshop_id)
 
     # if there was no user with the same username, return 201 code
     if user_insertion_result["status"] == "success":

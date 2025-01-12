@@ -112,7 +112,7 @@ class UserRepository {
     String? phone,
     required String? address,
     String? billingAddress,
-    String? workshopId,
+    String? workshop_id,
     String? name,
   }) async {
     try {
@@ -132,8 +132,8 @@ class UserRepository {
         requestBody['billingAddress'] = billingAddress;
       }
 
-      if ((role == 'worker' || role == 'manager') && workshopId != null && workshopId.isNotEmpty) {
-        requestBody['workshopId'] = workshopId;
+      if ((role == 'worker' || role == 'manager') && workshop_id != null && workshop_id.isNotEmpty) {
+        requestBody['workshopId'] = workshop_id;
       }
 
       // Make the POST request to the backend
@@ -308,16 +308,51 @@ class UserRepository {
 
   Future<List<Map<String, dynamic>>?> getAllWorkshops() async {
     try {
-      final response = await apiClient.get('/workshops/all');
-      if (response.statusCode == 200) {
-        final List<dynamic> data = json.decode(response.body);
-        return data.map((workshop) => {
-          'id': workshop['id'],
-          'name': workshop['name']
-        }).toList();
+      // Make the API call
+      final response = await apiClient.get('/workshop/all');
+
+      // Debugging: Print the raw response
+      print("Raw response body: ${response.body}");
+
+      // Decode the JSON response body
+      final dynamic decodedResponse = json.decode(response.body);
+
+      // Ensure the response is a list
+      if (decodedResponse is List && decodedResponse.isNotEmpty) {
+        final dynamic firstElement = decodedResponse.first;
+
+        // Debugging: Print the first element
+        print("First element of response: $firstElement");
+
+        // Check for a "body" key and decode it
+        if (firstElement is Map<String, dynamic> && firstElement.containsKey('body')) {
+          final dynamic rawBody = firstElement['body'];
+
+          // Debugging: Print raw body
+          print("Raw body: $rawBody");
+
+          // Decode the body if it's a JSON-encoded string
+          final List<dynamic> body = json.decode(rawBody);
+
+          // Ensure the body is a list
+          if (body is List) {
+            return body.map((workshop) {
+              return {
+                'id': workshop['_id'],
+                'name': workshop['name'],
+              };
+            }).toList();
+          } else {
+            throw Exception('The "body" key does not contain a valid list of workshops.');
+          }
+        } else {
+          throw Exception('The response does not contain a valid "body" key.');
+        }
+      } else {
+        throw Exception('The response is not a valid list.');
       }
-      return null;
     } catch (e) {
+      print("Error during workshop fetch: $e");
       throw Exception("Failed to fetch workshops: $e");
     }
   }
