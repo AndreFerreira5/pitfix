@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:get/get.dart';
 import 'package:pitfix_frontend/src/repository/user_repository.dart';
-import 'package:pitfix_frontend/src/ui/add_request.dart';
 import 'package:provider/provider.dart';
 import '../models/assistance_request.dart';
 import '../repository/assistance_request_repository.dart';
@@ -129,7 +128,7 @@ class RequestCard extends StatelessWidget {
         trailing: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            IconButton( // TODO: editar todas os campos
+            IconButton( //
               icon: const Icon(Icons.edit),
               onPressed: onEdit,
             ),

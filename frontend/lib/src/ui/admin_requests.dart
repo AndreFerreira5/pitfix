@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import 'package:pitfix_frontend/src/ui/add_request.dart'; // Assuming you have this page
 import '../models/assistance_request.dart';
 import '../repository/assistance_request_repository.dart'; // Assuming this repository exists
+import '../ui/edit_requests_admin.dart';
 
 class AdminRequests extends StatefulWidget {
   const AdminRequests({super.key});
@@ -81,6 +82,17 @@ class _AdminRequestsState extends State<AdminRequests> {
                 final request = requests[index];
                 return RequestCard(request: request,
                 onDelete: _deleteRequest,
+                  onEdit: ()async{
+                    // Navigate to the edit screen with the selected request
+                    await Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => EditRequestsAdmin(request: request),
+                      ),
+                    );
+                    // After editing, reload the requests (you might want to optimize this)
+                    //initAsync();
+                  },
                 );
               },
             );
@@ -107,8 +119,13 @@ class _AdminRequestsState extends State<AdminRequests> {
 class RequestCard extends StatelessWidget {
   final AssistanceRequest request;
   final Function(String) onDelete;
+  final VoidCallback onEdit;  // Added onEdit callback
 
-  const RequestCard({required this.request, required this.onDelete, super.key});
+  const RequestCard({
+    required this.request,
+    required this.onDelete,
+    required this.onEdit,
+    super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -130,9 +147,7 @@ class RequestCard extends StatelessWidget {
           children: [
             IconButton(
               icon: const Icon(Icons.edit),
-              onPressed: () {
-                // Add code to navigate to edit request page if necessary
-              },
+              onPressed: onEdit,
             ),
             IconButton(
               icon: const Icon(Icons.delete),
