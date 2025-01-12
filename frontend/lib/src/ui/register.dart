@@ -24,7 +24,7 @@ class _RegisterPageState extends State<RegisterPage> {
   String _password = '';
   String? _phone = '';
   String? _address = '';
-  String? _billingAddress = '';
+  String? _billing_address = '';
   String? _workshop_id = '';
   String? _name = '';
   String _selectedRole = 'client';
@@ -77,7 +77,7 @@ class _RegisterPageState extends State<RegisterPage> {
           role: _selectedRole,
           phone: '$_selectedCountryCode $_phone',
           address: _address,
-          billingAddress: _selectedRole == 'client' ? _billingAddress : null,
+          billing_address: _selectedRole == 'client' ? _billing_address : null,
           workshop_id: _selectedRole == 'worker' || _selectedRole == 'manager' ? _workshop_id : null,
           name: _name,
         ).timeout(Duration(seconds: 5), onTimeout: () {
@@ -341,7 +341,7 @@ class _RegisterPageState extends State<RegisterPage> {
                       border: OutlineInputBorder(),
                     ),
                     onSaved: (value) {
-                      _billingAddress = value;
+                      _billing_address = value;
                     },
                     validator: (value) {
                       if (value == null || value.isEmpty) {

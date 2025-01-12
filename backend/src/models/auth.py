@@ -13,7 +13,7 @@ class RegisterRequest(BaseModel):
     email: str
     role: str
     address: str
-    billingAddress: str
+    billing_address: str
     phone: str
     workshop_id: str
 

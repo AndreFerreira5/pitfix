@@ -111,7 +111,7 @@ class UserRepository {
     required String role,
     String? phone,
     required String? address,
-    String? billingAddress,
+    String? billing_address,
     String? workshop_id,
     String? name,
   }) async {
@@ -128,8 +128,8 @@ class UserRepository {
       if (phone != null && phone.isNotEmpty) requestBody['phone'] = phone;
       if (address != null && address.isNotEmpty) requestBody['address'] = address;
 
-      if (role == 'client' && billingAddress != null && billingAddress.isNotEmpty) {
-        requestBody['billingAddress'] = billingAddress;
+      if (role == 'client' && billing_address != null && billing_address.isNotEmpty) {
+        requestBody['billingAddress'] = billing_address;
       }
 
       if ((role == 'worker' || role == 'manager') && workshop_id != null && workshop_id.isNotEmpty) {

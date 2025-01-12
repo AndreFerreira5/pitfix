@@ -30,7 +30,7 @@ async def insert_user(name: str,
                       email: str,
                       role: str,
                       address: str,
-                      billing_address: str,
+                      billing_address: str = None,
                       phone: str = None,
                       workshop_id: str = None
                       ):
