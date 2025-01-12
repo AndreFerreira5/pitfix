@@ -94,7 +94,7 @@ class WorkshopRepository {
     );
 
     if (response.statusCode == 200) {
-      final Map<String, dynamic> decoded = json.decode(response.body);
+      final Map<String, dynamic> decoded = json.decode(response.body)[0];
       return decoded['message'];
     } else if (response.statusCode == 404) {
       throw Exception('Workshop not found');

@@ -60,15 +60,12 @@ class AssistanceRequestRepository {
 
   Future<String> createAssistanceRequest(AssistanceRequest assistanceRequest, String username) async {
     var requestJson = assistanceRequest.toJson();
-    print(requestJson);
     final uri = Uri.parse('/assistance_request/add?username=$username');
 
     final response = await apiClient.post(uri.toString(), body: requestJson);
-    print('Response body: ${response.body}');
 
     if (response.statusCode == 200) {
       final List<dynamic> decoded = json.decode(response.body);
-      print("Decoded: $decoded");
       return decoded[0];
     } else {
       throw Exception('Failed to create assistance request');
@@ -92,12 +89,9 @@ class AssistanceRequestRepository {
   }
 
   Future<String> deleteAssistanceRequest(String requestId, String username) async {
-    print("boas1");
     final uri = Uri.parse('/assistance_request/delete/$requestId?username=$username');
-    print(uri.toString());
 
     final response = await apiClient.delete(uri.toString());
-    print("boas");
 
     if (response.statusCode == 200) {
       final Map<String, dynamic> decoded = json.decode(response.body)[0];

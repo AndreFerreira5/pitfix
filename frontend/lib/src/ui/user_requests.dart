@@ -21,7 +21,13 @@ class _UserRequestsState extends State<UserRequests> {
   void initState() { // TODO Get the right requests of the user
     super.initState();
     _assistanceRequestRepository = Get.find<AssistanceRequestRepository>();
-    _assistanceRequestsFuture = _assistanceRequestRepository.getAllAssistanceRequests();
+    _refreshRequests();
+  }
+
+  void _refreshRequests() {
+    setState(() {
+      _assistanceRequestsFuture = _assistanceRequestRepository.getAllAssistanceRequests();
+    });
   }
 
   @override
@@ -57,7 +63,11 @@ class _UserRequestsState extends State<UserRequests> {
             Navigator.push(
               context,
               MaterialPageRoute(builder: (context) => const AddRequestPage()),
-            );
+            ).then((value) {
+              if (value == true) {
+                _refreshRequests();
+              }
+            });
           },
           tooltip: "Add Request",
           child: const Icon(Icons.add),

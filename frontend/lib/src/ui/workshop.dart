@@ -4,12 +4,25 @@ import '../models/workshop.dart';
 import '../repository/workshop_repository.dart';
 import 'add_request.dart';
 
-class WorkshopDetailPage extends StatelessWidget {
+class WorkshopDetailPage extends StatefulWidget {
   final Workshop workshop;
 
   WorkshopDetailPage({Key? key, required this.workshop}) : super(key: key);
 
+  @override
+  State<WorkshopDetailPage> createState() => _WorkshopDetailPageState();
+}
+
+class _WorkshopDetailPageState extends State<WorkshopDetailPage> {
+  late Workshop workshop;
+
   final WorkshopRepository _workshopRepository = Get.find<WorkshopRepository>();
+
+  @override
+  void initState() {
+    super.initState();
+    workshop = widget.workshop; // Initialize the workshop instance
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -19,14 +32,21 @@ class WorkshopDetailPage extends StatelessWidget {
         actions: [
           IconButton(
             icon: const Icon(Icons.edit),
-            onPressed: () {
-              // Navigate to edit workshop page or handle edit functionality
-              Navigator.push(
+            onPressed: () async {
+              // Navigate to the edit workshop page and wait for the result
+              final updatedWorkshop = await Navigator.push(
                 context,
                 MaterialPageRoute(
                   builder: (context) => EditWorkshopPage(workshop: workshop),
                 ),
               );
+
+              if (updatedWorkshop != null) {
+                // Update the workshop details with the edited data
+                setState(() {
+                  workshop = updatedWorkshop; // Refresh the UI
+                });
+              }
             },
           ),
           IconButton(
@@ -118,7 +138,8 @@ class WorkshopDetailPage extends StatelessWidget {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => AddRequestPage(preselectedWorkshop: workshop.name),
+                      builder: (context) =>
+                          AddRequestPage(preselectedWorkshop: workshop.name),
                     ),
                   );
                 },
@@ -189,10 +210,41 @@ class WorkshopDetailPage extends StatelessWidget {
   }
 }
 
-class EditWorkshopPage extends StatelessWidget {
+
+class EditWorkshopPage extends StatefulWidget {
   final Workshop workshop;
 
   const EditWorkshopPage({Key? key, required this.workshop}) : super(key: key);
+
+  @override
+  State<EditWorkshopPage> createState() => _EditWorkshopPageState();
+}
+
+class _EditWorkshopPageState extends State<EditWorkshopPage> {
+  final _formKey = GlobalKey<FormState>();
+  final TextEditingController _nameController = TextEditingController();
+  final TextEditingController _descriptionController = TextEditingController();
+  final TextEditingController _imageUrlController = TextEditingController();
+
+  final WorkshopRepository _workshopRepository = Get.find<WorkshopRepository>();
+
+  @override
+  void initState() {
+    super.initState();
+    // Pre-fill the form fields with the existing workshop data
+    _nameController.text = widget.workshop.name;
+    _descriptionController.text = widget.workshop.description ?? '';
+    _imageUrlController.text = widget.workshop.imageUrl ?? '';
+  }
+
+  @override
+  void dispose() {
+    // Dispose controllers to free resources
+    _nameController.dispose();
+    _descriptionController.dispose();
+    _imageUrlController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -200,9 +252,117 @@ class EditWorkshopPage extends StatelessWidget {
       appBar: AppBar(
         title: const Text('Edit Workshop'),
       ),
-      body: Center(
-        child: Text('Edit workshop functionality goes here'),
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Form(
+          key: _formKey,
+          child: ListView(
+            children: [
+              // Name Field
+              TextFormField(
+                controller: _nameController,
+                decoration: const InputDecoration(
+                  labelText: 'Workshop Name',
+                  border: OutlineInputBorder(),
+                ),
+                validator: (value) {
+                  if (value == null || value.trim().isEmpty) {
+                    return 'Name is required';
+                  }
+                  return null;
+                },
+              ),
+              const SizedBox(height: 16),
+
+              // Description Field
+              TextFormField(
+                controller: _descriptionController,
+                maxLines: 5,
+                decoration: const InputDecoration(
+                  labelText: 'Description',
+                  border: OutlineInputBorder(),
+                ),
+                validator: (value) {
+                  if (value == null || value.trim().isEmpty) {
+                    return 'Description is required';
+                  }
+                  return null;
+                },
+              ),
+              const SizedBox(height: 16),
+
+              // Image URL Field
+              TextFormField(
+                controller: _imageUrlController,
+                decoration: const InputDecoration(
+                  labelText: 'Image URL',
+                  border: OutlineInputBorder(),
+                ),
+                validator: (value) {
+                  if (value != null && value.isNotEmpty) {
+                    final uri = Uri.tryParse(value);
+                    if (uri == null || !uri.isAbsolute) {
+                      return 'Enter a valid URL';
+                    }
+                  }
+                  return null;
+                },
+              ),
+              const SizedBox(height: 24),
+
+              // Save Button
+              ElevatedButton(
+                onPressed: _saveWorkshop,
+                style: ElevatedButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(vertical: 14),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+                child: const Text(
+                  'Save Changes',
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                ),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }
+
+  void _saveWorkshop() async {
+    if (!_formKey.currentState!.validate()) {
+      // If the form is invalid, stop the save process
+      return;
+    }
+
+    try {
+      // Create an updated workshop object
+      final updatedWorkshop = Workshop(
+        id: widget.workshop.id,
+        name: _nameController.text.trim(),
+        description: _descriptionController.text.trim(),
+        imageUrl: _imageUrlController.text.trim(),
+        rating: widget.workshop.rating,
+      );
+
+      // Update the workshop in the backend
+      await _workshopRepository.editWorkshop(widget.workshop.id!, updatedWorkshop);
+
+      // Show success message
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Workshop updated successfully')),
+      );
+
+      // Navigate back to the previous screen with updated workshop
+      Navigator.pop(context, updatedWorkshop);
+    } catch (e) {
+      // Handle errors
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Failed to update workshop: $e')),
+      );
+    }
+  }
 }
+
