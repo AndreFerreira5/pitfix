@@ -87,8 +87,8 @@ async def delete_workshop_route(workshop_id: str):
     if workshop_requests_deletion_result["status"] == "error":
         raise HTTPException(status_code=500, detail=result["message"])
 
-    if not workshop_requests_deletion_result["deleted_ids"]:
-        raise HTTPException(status_code=500, detail="Error deleting assistance requests with workshop id")
+    #if not workshop_requests_deletion_result["deleted_ids"]:
+    #    raise HTTPException(status_code=500, detail="Error deleting assistance requests with workshop id")
 
     deleted_request_ids = workshop_requests_deletion_result["deleted_ids"]
 
@@ -130,13 +130,13 @@ async def delete_workshop_by_name_route(workshop_name: str):
     if workshop_requests_deletion_result["status"] == "error":
         raise HTTPException(status_code=500, detail=result["message"])
 
-    if not workshop_requests_deletion_result["deleted_ids"]:
-        raise HTTPException(status_code=500, detail="Error deleting assistance requests with workshop id")
+    #if not workshop_requests_deletion_result["deleted_ids"]:
+    #    raise HTTPException(status_code=500, detail="Error deleting assistance requests with workshop id")
 
     deleted_request_ids = workshop_requests_deletion_result["deleted_ids"]
 
     # delete the requests associated with the provided workshop id from users documents
-    if len(deleted_request_ids) > 0:
+    if deleted_request_ids and len(deleted_request_ids) > 0:
         requests_deletion_from_users_result = await delete_requests_from_users(deleted_request_ids)
         if requests_deletion_from_users_result["status"] == "error":
             raise HTTPException(status_code=500, detail=result["message"])

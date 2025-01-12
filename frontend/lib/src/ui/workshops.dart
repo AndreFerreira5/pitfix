@@ -121,19 +121,17 @@ class _WorkshopCardState extends State<WorkshopCard> {
       },
       cursor: SystemMouseCursors.click,
       child: GestureDetector(
-        onTap: () {
-          Navigator.push(
+        onTap: () async {
+          final result = await Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (context) => WorkshopDetailPage(
-                  workshop: widget.workshop
-              ),
+              builder: (context) => WorkshopDetailPage(workshop: widget.workshop),
             ),
-          ).then((value) {
-            if (value == true) {
-              widget.onRefresh();
-            }
-          });
+          );
+
+          //if (result != null && result == true) {
+            widget.onRefresh(); // Refresh the workshops list if the result is true
+          //}
         },
         child: Card(
           shape: RoundedRectangleBorder(
