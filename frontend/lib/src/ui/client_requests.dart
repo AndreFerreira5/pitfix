@@ -2,10 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:get/get.dart';
 import 'package:pitfix_frontend/src/repository/user_repository.dart';
+import 'package:pitfix_frontend/src/repository/workshop_repository.dart';
 import 'package:pitfix_frontend/src/ui/add_request.dart';
 import 'package:provider/provider.dart';
 import '../models/assistance_request.dart';
 import '../repository/assistance_request_repository.dart';
+import '../ui/request_details.dart';
 
 class ClientRequests extends StatefulWidget {
   const ClientRequests({super.key});
@@ -18,8 +20,10 @@ class _ClientRequestsState extends State<ClientRequests> {
   final FlutterSecureStorage _storage = Get.find<FlutterSecureStorage>();
   late AssistanceRequestRepository _assistanceRequestRepository;
   late UserRepository _userRepository;
-  late Future<List<String>?> userRequestsIds;
+  late WorkshopRepository _workshopRepository;
+
   late List<AssistanceRequest> _assistanceRequests = [];
+  late Map<String, String> _workshopNames = {}; // Map for workshop ID to name
 
   String? username;
 
@@ -28,6 +32,7 @@ class _ClientRequestsState extends State<ClientRequests> {
     super.initState();
     _assistanceRequestRepository = Get.find<AssistanceRequestRepository>();
     _userRepository = Get.find<UserRepository>();
+    _workshopRepository = Get.find<WorkshopRepository>();
     initAsync();
   }
 
@@ -35,117 +40,105 @@ class _ClientRequestsState extends State<ClientRequests> {
   Future<void> initAsync() async {
     username = await _storage.read(key: "username");
 
-    // Check if username is null or empty
     if (username == null || username!.isEmpty) {
       print("Error: Username is null or empty");
-      return; // Handle error appropriately, maybe show an error message
+      return;
     }
 
-    // Get the user request IDs and handle the result asynchronously
     try {
       final userRequestIds = await _userRepository.getUserRequestsIds(username!);
 
       if (userRequestIds != null && userRequestIds.isNotEmpty) {
-        // Now fetch the corresponding assistance requests for each ID
-        List<Future<AssistanceRequest>> futures = [
-          for (var requestId in userRequestIds)
-            _assistanceRequestRepository.getAssistanceRequestById(requestId),
-        ];
+        // Fetch requests for each ID
+        List<Future<AssistanceRequest>> requestFutures = userRequestIds.map((id) {
+          return _assistanceRequestRepository.getAssistanceRequestById(id);
+        }).toList();
 
-        // Wait for all requests to be fetched
-        List<AssistanceRequest> results = await Future.wait(futures);
-
+        final requests = await Future.wait(requestFutures);
         setState(() {
-          _assistanceRequests = results; // Update the state with the fetched requests
+          _assistanceRequests = requests;
         });
+
+        // Fetch workshop names
+        await fetchWorkshopNames(requests);
       } else {
         setState(() {
-          _assistanceRequests = []; // If no requests, set it to empty
+          _assistanceRequests = [];
         });
       }
     } catch (e) {
-      print("Error fetching user request IDs: $e");
+      print("Error fetching client requests: $e");
     }
   }
 
-  // Function to delete a request
-  Future<void> _deleteRequest(String requestId) async {
-    username = await _storage.read(key: "username");
-
-    // Check if username is null or empty
-    if (username == null || username!.isEmpty) {
-      print("Error: Username is null or empty");
-      return; // Handle error appropriately, maybe show an error message
-    }
+  Future<void> fetchWorkshopNames(List<AssistanceRequest> requests) async {
+    Map<String, String> workshopNames = {};
 
     try {
-      // Delete the request from the backend
-      await _assistanceRequestRepository.deleteAssistanceRequest(requestId, username!);
+      // Collect unique workshop IDs
+      final workshopIds = requests
+          .map((req) => req.workshopId)
+          .where((id) => id != null)
+          .toSet();
 
-      // After deletion, remove the request from the local list and update UI
-      setState(() {
-        _assistanceRequests.removeWhere((request) => request.id == requestId);
-      });
-
-      // Show success message
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Request deleted successfully')),
-      );
+      // Fetch workshop details for each ID
+      for (var id in workshopIds) {
+        if (id != null) {
+          try {
+            final workshop = await _workshopRepository.getWorkshopById(id);
+            workshopNames[id] = workshop.name;
+          } catch (e) {
+            workshopNames[id] = "Unknown Workshop"; // Handle missing workshops
+          }
+        }
+      }
     } catch (e) {
-      print("Error: $e");
-      // Show error message if deletion fails
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to delete request: $e')),
-      );
+      print("Error fetching workshop names: $e");
     }
+
+    setState(() {
+      _workshopNames = workshopNames;
+    });
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        body: _assistanceRequests.isEmpty
-            ? const Center(
-              child: Text(
-              "You have no assistance requests.",
-              style: TextStyle(fontSize: 18),
-              textAlign: TextAlign.center,
-              ),
-            )
-            : ListView.builder(
-          itemCount: _assistanceRequests.length,
-          padding: const EdgeInsets.all(16),
-          itemBuilder: (context, index) {
-            final request = _assistanceRequests[index];
-            return RequestCard(
-              request: request,
-              onDelete: _deleteRequest,
-            );
-          },
+      body: _assistanceRequests.isEmpty
+          ? const Center(
+        child: Text(
+          "You have no assistance requests.",
+          style: TextStyle(fontSize: 18),
+          textAlign: TextAlign.center,
         ),
+      )
+          : ListView.builder(
+        itemCount: _assistanceRequests.length,
+        padding: const EdgeInsets.all(16),
+        itemBuilder: (context, index) {
+          final request = _assistanceRequests[index];
+          final workshopName = _workshopNames[request.workshopId] ?? 'Loading...';
 
-        floatingActionButton: Padding(
-          padding: const EdgeInsets.only(bottom: 80.0),
-          child: FloatingActionButton(
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => const AddRequestPage()),
-              );
-            },
-            tooltip: "Add Request",
-            child: const Icon(Icons.add),
-          ),
-        )
+          return RequestCard(
+            request: request,
+            workshopName: workshopName,
+          );
+        },
+      ),
     );
   }
 }
 
-// Card widget to display individual requests
+// Updated RequestCard to display workshop name
 class RequestCard extends StatelessWidget {
   final AssistanceRequest request;
-  final Function(String) onDelete;
+  final String workshopName;
 
-  const RequestCard({required this.request, required this.onDelete, super.key});
+  const RequestCard({
+    required this.request,
+    required this.workshopName,
+    super.key,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -153,59 +146,21 @@ class RequestCard extends StatelessWidget {
         ? 'Unknown'
         : (request.isCompleted! ? 'Completed' : 'Waiting');
 
-    // Use a fallback string if workshopId is null
-    String workshopIdDisplay = request.workshopId ?? 'Unknown Workshop';
-
-
     return Card(
       margin: const EdgeInsets.symmetric(vertical: 8),
       child: ListTile(
         title: Text(request.title),
-        subtitle: Text("Status: $status\nWorkshop: $workshopIdDisplay"),
-        trailing: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            IconButton(
-              icon: const Icon(Icons.edit),
-              onPressed: () {
-                // Add code to navigate to edit request page if necessary
-              },
-            ),
-            IconButton(
-              icon: const Icon(Icons.delete),
-              onPressed: () async {
-                // Confirm deletion with a dialog
-                bool? confirmDelete = await showDialog(
-                  context: context,
-                  builder: (context) => AlertDialog(
-                    title: const Text('Delete Request'),
-                    content: const Text('Are you sure you want to delete this request?'),
-                    actions: [
-                      TextButton(
-                        onPressed: () {
-                          Navigator.of(context).pop(false);
-                        },
-                        child: const Text('Cancel'),
-                      ),
-                      TextButton(
-                        onPressed: () {
-                          Navigator.of(context).pop(true);
-                        },
-                        child: const Text('Delete'),
-                      ),
-                    ],
-                  ),
-                );
-
-                if (confirmDelete == true) {
-                  onDelete(request.id!); // Call the onDelete callback
-                }
-              },
-            ),
-          ],
-        ),
+        subtitle: Text("Status: $status\nWorkshop: $workshopName"),
         onTap: () {
-          // Add navigation to Request details page if needed
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => RequestDetails(
+                request: request,
+                workshopName: workshopName,
+              ),
+            ),
+          );
         },
       ),
     );
