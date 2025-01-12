@@ -1,6 +1,7 @@
 from fastapi import APIRouter, HTTPException
 from db.auth import get_user_by_username, get_user_by_id, update_user_by_username
 from models.user import User, UserUpdate
+from models.workshop import FavoriteRequest
 from fastapi.encoders import jsonable_encoder
 from fastapi.responses import JSONResponse
 from utils.conversions import convert_objectid
@@ -73,7 +74,7 @@ async def get_manager_workshop_by_username_route(username: str):
 
 
 @router.post("/{username}/favorites")
-async def add_favorite_workshop(username: str, workshop_id: str):
+async def add_favorite_workshop(username: str, request: FavoriteRequest):
     user = await get_user_by_username(username)
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
@@ -81,10 +82,10 @@ async def add_favorite_workshop(username: str, workshop_id: str):
     if "favorites" not in user:
         user["favorites"] = []
 
-    if workshop_id in user["favorites"]:
+    if request.workshop_id in user["favorites"]:
         return {"message": "Workshop is already in favorites"}
 
-    user["favorites"].append(workshop_id)
+    user["favorites"].append(request.workshop_id)
     await update_user_by_username(username, {"favorites": user["favorites"]})
     return {"message": "Workshop added to favorites"}
 

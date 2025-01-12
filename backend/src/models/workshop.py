@@ -24,3 +24,7 @@ class WorkshopCreate(BaseModel):
     rating: Optional[float] = None
     image_url: Optional[str] = None
     creation_date: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
+
+class FavoriteRequest(BaseModel):
+    workshop_id: str
