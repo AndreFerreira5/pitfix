@@ -125,6 +125,19 @@ class _ClientRequestsState extends State<ClientRequests> {
           );
         },
       ),
+        floatingActionButton: Padding(
+        padding: const EdgeInsets.only(bottom: 80.0),
+        child: FloatingActionButton(
+          onPressed: () {
+            Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => const AddRequestPage()),
+        );
+      },
+      tooltip: "Add Request",
+      child: const Icon(Icons.add),
+    ),
+        ),
     );
   }
 }
