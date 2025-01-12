@@ -31,6 +31,8 @@ class _RegisterPageState extends State<RegisterPage> {
   bool _isPasswordVisible = false;
   bool _isLoading = false;
   String _selectedCountryCode = '+1'; // Default country code
+  List<Map<String, String>> _workshops = [];
+  bool _isWorkshopsLoading = true;
 
   final List<String> _roles = ['client', 'manager', 'worker', 'admin'];
   final Map<String, String> _countryCodes = countryCodes;
@@ -99,38 +101,53 @@ class _RegisterPageState extends State<RegisterPage> {
               children: [
                 SizedBox(height: 20,),
                 // NavigationBar at the top
-                NavigationBarTheme(
-                  data: NavigationBarThemeData(
-                    indicatorShape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10), // Rounded edges
-                    ),
-                    labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
-                  ),
-                  child: NavigationBar(
-                    selectedIndex: _roles.indexOf(_selectedRole),
-                    onDestinationSelected: (index) {
-                      setState(() {
-                        _selectedRole = _roles[index];
-                      });
-                    },
-                    destinations: [
-                      NavigationDestination(
-                        icon: Icon(Icons.person_outline),
-                        label: 'Client',
-                      ),
-                      NavigationDestination(
-                        icon: Icon(Icons.business_center),
-                        label: 'Manager',
-                      ),
-                      NavigationDestination(
-                        icon: Icon(Icons.construction),
-                        label: 'Worker',
-                      ),
-                      NavigationDestination(
-                        icon: Icon(Icons.admin_panel_settings),
-                        label: 'Admin',
+                Container(
+                  padding: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                  decoration: BoxDecoration(
+                    color: Color(0xFFD0D0D0),
+                    borderRadius: BorderRadius.circular(20), // Rounded edges
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.1), // Optional shadow for effect
+                        blurRadius: 10,
+                        offset: Offset(0, 4),
                       ),
                     ],
+                  ),
+                  child: NavigationBarTheme(
+                    data: NavigationBarThemeData(
+                      backgroundColor: Colors.transparent,
+                      indicatorShape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(30), // Rounded edges for selection
+                      ),
+                      labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
+                    ),
+                    child: NavigationBar(
+                      selectedIndex: _roles.indexOf(_selectedRole),
+                      onDestinationSelected: (index) {
+                        setState(() {
+                          _selectedRole = _roles[index];
+                        });
+                      },
+                      destinations: [
+                        NavigationDestination(
+                          icon: Icon(Icons.person_outline),
+                          label: 'Client',
+                        ),
+                        NavigationDestination(
+                          icon: Icon(Icons.business_center),
+                          label: 'Manager',
+                        ),
+                        NavigationDestination(
+                          icon: Icon(Icons.construction),
+                          label: 'Worker',
+                        ),
+                        NavigationDestination(
+                          icon: Icon(Icons.admin_panel_settings),
+                          label: 'Admin',
+                        ),
+                      ],
+                    ),
                   ),
                 ),
                 SizedBox(height: 20),
@@ -245,7 +262,12 @@ class _RegisterPageState extends State<RegisterPage> {
                         items: _countryCodes.entries.map((entry) {
                           return DropdownMenuItem<String>(
                             value: entry.value,
-                            child: Text('${entry.key} (${entry.value})'),
+                            child: Text(
+                              '${entry.key} (${entry.value})',
+                              overflow: TextOverflow.ellipsis,
+                              maxLines: 1,
+                              softWrap: false, // Prevents wrapping to new lines
+                            ),
                           );
                         }).toList(),
                         onChanged: (value) {
@@ -304,13 +326,31 @@ class _RegisterPageState extends State<RegisterPage> {
                     },
                   ),
                 if (_selectedRole == 'worker' || _selectedRole == 'manager')
-                  TextFormField(
+                  _isWorkshopsLoading
+                      ? CircularProgressIndicator()
+                      : DropdownButtonFormField<String>(
                     decoration: InputDecoration(
-                      labelText: 'Workshop ID',
+                      labelText: 'Associated Workshop',
                       border: OutlineInputBorder(),
                     ),
-                    onSaved: (value) {
-                      _workshopId = value;
+                    value: _workshopId,
+                    items: _workshops.map((workshop) {
+                      return DropdownMenuItem<String>(
+                        value: workshop['id'],
+                        child: Text(workshop['name']!),
+                      );
+                    }).toList(),
+                    onChanged: (value) {
+                      setState(() {
+                        _workshopId = value;
+                      });
+                    },
+                    validator: (value) {
+                      if (_selectedRole != 'client' &&
+                          (value == null || value.isEmpty)) {
+                        return 'Please select a workshop';
+                      }
+                      return null;
                     },
                   ),
                 SizedBox(height: 20),
@@ -329,15 +369,17 @@ class _RegisterPageState extends State<RegisterPage> {
                   ),
                 ),
                 SizedBox(height: 20),
-                TextButton(
-                  onPressed: () {
-                    Get.back();
-                  },
-                  child: Text(
-                    'Already have an account? Login',
-                    style: TextStyle(fontSize: 16),
+                Center(
+                  child: TextButton(
+                    onPressed: () {
+                      Get.back();
+                    },
+                    child: Text(
+                      'Already have an account? Login',
+                      style: TextStyle(fontSize: 16),
+                    ),
                   ),
-                ),
+                )
               ],
             ),
           ),

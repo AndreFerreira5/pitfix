@@ -7,10 +7,14 @@ class LoginRequest(BaseModel):
 
 
 class RegisterRequest(BaseModel):
+    name: str
     username: str
     password: str
     email: str
     role: str
+    address: str
+    billingAddress: str
+    phone: str
 
 
 class RefreshRequest(BaseModel):

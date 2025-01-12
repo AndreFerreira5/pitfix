@@ -306,6 +306,20 @@ class UserRepository {
     }
   }
 
-
+  Future<List<Map<String, dynamic>>?> getAllWorkshops() async {
+    try {
+      final response = await apiClient.get('/workshops/all');
+      if (response.statusCode == 200) {
+        final List<dynamic> data = json.decode(response.body);
+        return data.map((workshop) => {
+          'id': workshop['id'],
+          'name': workshop['name']
+        }).toList();
+      }
+      return null;
+    } catch (e) {
+      throw Exception("Failed to fetch workshops: $e");
+    }
+  }
 
 }
