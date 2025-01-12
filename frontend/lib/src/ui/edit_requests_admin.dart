@@ -1,26 +1,22 @@
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
 import '../models/assistance_request.dart';
 import '../repository/assistance_request_repository.dart';
+import 'package:get/get.dart';
 
 class EditRequestsAdmin extends StatefulWidget {
   final AssistanceRequest request;
 
-  const EditRequestsAdmin({Key? key, required this.request}) : super(key: key);
+  const EditRequestsAdmin({super.key, required this.request});
 
   @override
-  _EditRequestsAdmin createState() => _EditRequestsAdmin();
+  _EditRequestsAdminState createState() => _EditRequestsAdminState();
 }
 
-class _EditRequestsAdmin extends State<EditRequestsAdmin> {
-  final _formKey = GlobalKey<FormState>();
+class _EditRequestsAdminState extends State<EditRequestsAdmin> {
+  late AssistanceRequestRepository _assistanceRequestRepository;
   late TextEditingController _titleController;
   late TextEditingController _descriptionController;
-  late TextEditingController _workshopIdController;
-  late TextEditingController _workersIdsController;
   bool? _isCompleted;
-
-  late AssistanceRequestRepository _assistanceRequestRepository;
 
   @override
   void initState() {
@@ -29,36 +25,28 @@ class _EditRequestsAdmin extends State<EditRequestsAdmin> {
 
     _titleController = TextEditingController(text: widget.request.title);
     _descriptionController = TextEditingController(text: widget.request.description);
-    _workshopIdController = TextEditingController(text: widget.request.workshopId);
-    _workersIdsController = TextEditingController(text: widget.request.workersIds.join(", "));
     _isCompleted = widget.request.isCompleted;
   }
 
-  Future<void> _saveChanges() async {
-    if (_formKey.currentState!.validate()) {
-      try {
-        final updatedRequest = AssistanceRequest(
-          id: widget.request.id,
-          title: _titleController.text,
-          description: _descriptionController.text,
-          workshopId: _workshopIdController.text,
-          workersIds: _workersIdsController.text.split(", ").map((id) => id.trim()).toList(),
-          isCompleted: _isCompleted,
-          creationDate: widget.request.creationDate,
-        );
+  Future<void> _updateRequest() async {
+    try {
+      widget.request.title = _titleController.text;
+      widget.request.description = _descriptionController.text;
+      widget.request.isCompleted = _isCompleted;
 
-        await _assistanceRequestRepository.editAssistanceRequest(widget.request.id!, updatedRequest);
+      await _assistanceRequestRepository.editAssistanceRequest(
+        widget.request.id!,
+        widget.request,
+      );
 
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Request updated successfully')),
-        );
-
-        Navigator.pop(context, updatedRequest);
-      } catch (e) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to update request: $e')),
-        );
-      }
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Request updated successfully.')),
+      );
+      Navigator.pop(context, true);
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Failed to update request: $e')),
+      );
     }
   }
 
@@ -66,72 +54,57 @@ class _EditRequestsAdmin extends State<EditRequestsAdmin> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Edit Request'),
+        title: Text('Edit Request: ${widget.request.title}'),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
-        child: Form(
-          key: _formKey,
-          child: ListView(
-            children: [
-              TextFormField(
-                controller: _titleController,
-                decoration: const InputDecoration(labelText: 'Title'),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Please enter a title';
-                  }
-                  return null;
-                },
-              ),
-              const SizedBox(height: 16),
-              TextFormField(
-                controller: _descriptionController,
-                decoration: const InputDecoration(labelText: 'Description'),
-                maxLines: 3,
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Please enter a description';
-                  }
-                  return null;
-                },
-              ),
-              const SizedBox(height: 16),
-              TextFormField(
-                controller: _workshopIdController,
-                decoration: const InputDecoration(labelText: 'Workshop ID'),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Please enter a workshop ID';
-                  }
-                  return null;
-                },
-              ),
-              const SizedBox(height: 16),
-              TextFormField(
-                controller: _workersIdsController,
-                decoration: const InputDecoration(
-                  labelText: 'Worker IDs',
-                  hintText: 'Separate IDs with commas',
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            TextField(
+              controller: _titleController,
+              decoration: const InputDecoration(labelText: 'Title'),
+            ),
+            const SizedBox(height: 16),
+            TextField(
+              controller: _descriptionController,
+              decoration: const InputDecoration(labelText: 'Description'),
+              maxLines: 3,
+            ),
+            const SizedBox(height: 16),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const Text('Status:'),
+                DropdownButton<bool>(
+                  value: _isCompleted,
+                  items: const [
+                    DropdownMenuItem(
+                      value: false,
+                      child: Text('Waiting'),
+                    ),
+                    DropdownMenuItem(
+                      value: true,
+                      child: Text('Completed'),
+                    ),
+                  ],
+                  onChanged: (value) {
+                    setState(() {
+                      _isCompleted = value;
+                    });
+                  },
                 ),
-              ),
-              const SizedBox(height: 16),
-              SwitchListTile(
-                title: const Text('Completed'),
-                value: _isCompleted ?? false,
-                onChanged: (value) {
-                  setState(() {
-                    _isCompleted = value;
-                  });
-                },
-              ),
-              const SizedBox(height: 32),
-              ElevatedButton(
-                onPressed: _saveChanges,
+              ],
+            ),
+            const Spacer(),
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                onPressed: _updateRequest,
                 child: const Text('Save Changes'),
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );

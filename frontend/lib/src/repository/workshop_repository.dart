@@ -22,10 +22,16 @@ class WorkshopRepository {
 
   Future<Workshop> getWorkshopById(String workshopId) async {
     final response = await apiClient.get('/workshop/id/$workshopId');
+    print(response.body);
 
     if (response.statusCode == 200) {
-      final Map<String, dynamic> decoded = json.decode(response.body);
-      return Workshop.fromJson(json.decode(decoded[0]['body']));
+      final List<dynamic> decodedList = json.decode(response.body); // Parse the JSON response as a list
+      if (decodedList.isNotEmpty) {
+        final Map<String, dynamic> workshopData = decodedList[0]; // Get the first element of the list
+        return Workshop.fromJson(workshopData); // Use the first element to create a Workshop object
+      } else {
+        throw Exception('Workshop not found');
+      }
     } else if (response.statusCode == 404) {
       throw Exception('Workshop not found');
     } else {

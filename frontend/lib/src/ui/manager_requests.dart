@@ -3,6 +3,7 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:get/get.dart';
 import 'package:pitfix_frontend/src/repository/user_repository.dart';
 import 'package:pitfix_frontend/src/repository/assistance_request_repository.dart';
+import 'package:pitfix_frontend/src/repository/workshop_repository.dart';
 import 'package:pitfix_frontend/src/models/assistance_request.dart';
 import 'package:provider/provider.dart';
 import '../ui/edit_request.dart';
@@ -19,9 +20,11 @@ class _ManagerRequestsState extends State<ManagerRequests> {
   late AssistanceRequestRepository _assistanceRequestRepository;
   late UserRepository _userRepository;
   late List<AssistanceRequest> _assistanceRequests = [];
+  late WorkshopRepository _workshopRepository;
 
   String? username;
   String? workshopId;
+  String? workshopName;
 
   // State variables for loading and error handling
   bool _isLoading = true;
@@ -32,6 +35,7 @@ class _ManagerRequestsState extends State<ManagerRequests> {
     super.initState();
     _assistanceRequestRepository = Get.find<AssistanceRequestRepository>();
     _userRepository = Get.find<UserRepository>();
+    _workshopRepository = Get.find<WorkshopRepository>();
     initAsync();
   }
 
@@ -57,7 +61,6 @@ class _ManagerRequestsState extends State<ManagerRequests> {
     try {
       // First, fetch the manager's workshop ID
       final fetchedWorkshopId = await _userRepository.getManagerWorkshopId(username!);
-      print("manager workshopID: $fetchedWorkshopId");
 
       if (fetchedWorkshopId == null || fetchedWorkshopId.isEmpty) {
         print("Error: Manager does not have an associated workshop.");
@@ -74,13 +77,15 @@ class _ManagerRequestsState extends State<ManagerRequests> {
 
       // Once we have the workshop ID, fetch the requests for that workshop
       if (workshopId != null) {
-        print("workshopId: $workshopId");
         final requests = await _assistanceRequestRepository.getRequestsByWorkshop(workshopId!);
+
+        final workshop = await _workshopRepository.getWorkshopById(workshopId!);
 
 
         setState(() {
           _assistanceRequests = requests; // Update the UI with the fetched requests
           _isLoading = false; // Data is loaded, stop the loading indicator
+          workshopName = workshop.name;
         });
       } else {
         setState(() {
@@ -118,6 +123,20 @@ class _ManagerRequestsState extends State<ManagerRequests> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        title: Center(
+          child: Text(
+            workshopId != null && workshopId!.isNotEmpty
+                ? '$workshopName'
+                : 'No Workshop Assigned',
+            textAlign: TextAlign.center,
+            style: const TextStyle(
+              fontSize: 24, // Larger font size for the workshop name
+              fontWeight: FontWeight.bold, // Bold text for better emphasis
+            ),
+          ),
+        ),
+      ),
       body: _isLoading
           ? const Center(child: CircularProgressIndicator()) // Loading indicator
           : _errorMessage != null

@@ -1,7 +1,7 @@
 class AssistanceRequest {
   final String? id;
-  final String title;
-  final String description;
+   String title;
+   String description;
   final String workshopId;
   late final List<String> workersIds;
   bool? isCompleted;

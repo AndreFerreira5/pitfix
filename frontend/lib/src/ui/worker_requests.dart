@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:get/get.dart';
 import 'package:pitfix_frontend/src/repository/user_repository.dart';
+import 'package:pitfix_frontend/src/repository/workshop_repository.dart';
 import 'package:provider/provider.dart';
 import '../models/assistance_request.dart';
 import '../repository/assistance_request_repository.dart';
@@ -20,14 +21,18 @@ class _WorkerRequestsState extends State<WorkerRequests> {
   late UserRepository _userRepository;
   late Future<List<String>?> userRequestsIds;
   late List<AssistanceRequest> _assistanceRequests = [];
+  late WorkshopRepository _workshopRepository;
 
   String? username;
+  String? workshopId;
+  String? workshopName;
 
   @override
   void initState() {
     super.initState();
     _assistanceRequestRepository = Get.find<AssistanceRequestRepository>();
     _userRepository = Get.find<UserRepository>();
+    _workshopRepository = Get.find<WorkshopRepository>();
     initAsync();
   }
 
@@ -39,6 +44,31 @@ class _WorkerRequestsState extends State<WorkerRequests> {
     if (username == null || username!.isEmpty) {
       print("Error: Username is null or empty");
       return; // Handle error appropriately, maybe show an error message
+    }
+
+    try {
+      // First, fetch the worker's workshop ID
+      final fetchedWorkshopId = await _userRepository.getManagerWorkshopId(username!);
+
+      if (fetchedWorkshopId == null || fetchedWorkshopId.isEmpty) {
+        print("Error: Worker does not have an associated workshop.");
+        return;
+      }
+
+      setState(() {
+        workshopId = fetchedWorkshopId;
+      });
+
+      // Once we have the workshop ID, fetch the requests for that workshop
+      if (workshopId != null) {
+        final workshop = await _workshopRepository.getWorkshopById(workshopId!);
+
+        setState(() {
+          workshopName = workshop.name;
+        });
+      }
+    } catch (e) {
+      print("Error fetching worker workshop ID: $e");
     }
 
     // Get the user request IDs and handle the result asynchronously
@@ -54,7 +84,6 @@ class _WorkerRequestsState extends State<WorkerRequests> {
 
         // Wait for all requests to be fetched
         List<AssistanceRequest> results = await Future.wait(futures);
-
         setState(() {
           _assistanceRequests = results; // Update the state with the fetched requests
         });
@@ -71,6 +100,20 @@ class _WorkerRequestsState extends State<WorkerRequests> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        title: Center(
+          child: Text(
+            workshopId != null && workshopId!.isNotEmpty
+                ? '$workshopName'
+                : 'No Workshop Assigned',
+            textAlign: TextAlign.center,
+            style: const TextStyle(
+              fontSize: 24, // Larger font size for the workshop name
+              fontWeight: FontWeight.bold, // Bold text for better emphasis
+            ),
+          ),
+        ),
+      ),
         body: _assistanceRequests.isEmpty
             ? const Center(
               child: Text(
