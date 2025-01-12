@@ -49,6 +49,8 @@ class AuthController extends GetxController {
 
   void _startPeriodicTokenCheck() {
     _timer = Timer.periodic(const Duration(minutes: 1), (timer) {
+      if(isLoggedIn.value == false) return;
+
       checkAccessTokenExpiration();
     });
   }
