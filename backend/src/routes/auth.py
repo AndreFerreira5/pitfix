@@ -177,7 +177,6 @@ async def get_user_profile(username: str):
         phone=user_data['phone'],
         address=user_data['address'],
         billingAddress=user_data.get('billingAddress', ''),
-        password=user_data['password'],
     )
 
 
